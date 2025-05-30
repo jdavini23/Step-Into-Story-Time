@@ -56,12 +56,63 @@ export default function Landing() {
           </div>
           
           <div className="relative">
-            <img 
-              src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=800&h=600" 
-              alt="Parent reading bedtime story to child" 
-              className="rounded-2xl shadow-2xl w-full h-auto animate-pulse" 
-            />
+            {/* Story Preview Card */}
+            <div className="bg-white rounded-2xl shadow-2xl p-8 border border-purple-100">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center">
+                    <span className="text-white text-lg">📖</span>
+                  </div>
+                  <div>
+                    <h4 className="font-semibold text-gray-700">Emma's Magical Garden Adventure</h4>
+                    <p className="text-sm text-gray-500">Created just now • 3 min read</p>
+                  </div>
+                </div>
+                <div className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                  Adventurous
+                </div>
+              </div>
+              
+              <div className="prose prose-sm text-gray-600 leading-relaxed">
+                <p className="mb-4">
+                  Once upon a time, in a cozy little house on Maple Street, lived a brave and curious girl named <span className="font-semibold text-purple-600">Emma</span>. Emma had always wondered what lay beyond the old wooden gate at the end of her grandmother's garden.
+                </p>
+                <p className="mb-4">
+                  One sunny morning, Emma discovered something extraordinary - the gate was glowing with a soft, golden light! As she pushed it open, she gasped in wonder. Before her stretched the most beautiful garden she had ever seen, filled with flowers that sparkled like jewels and trees that hummed gentle melodies.
+                </p>
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border-l-4 border-purple-400">
+                  <p className="text-purple-700 italic">
+                    "What an amazing adventure awaits you, Emma! Remember, the bravest hearts discover the most magical places. Sweet dreams, little explorer." 🌙✨
+                  </p>
+                </div>
+              </div>
+              
+              <div className="mt-6 flex items-center justify-between">
+                <div className="flex items-center space-x-4 text-xs text-gray-500">
+                  <span className="flex items-center space-x-1">
+                    <span>👶</span>
+                    <span>Age 6</span>
+                  </span>
+                  <span className="flex items-center space-x-1">
+                    <span>🎭</span>
+                    <span>Adventure</span>
+                  </span>
+                  <span className="flex items-center space-x-1">
+                    <span>⏱️</span>
+                    <span>3 min</span>
+                  </span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white"
+                >
+                  Read Full Story
+                </Button>
+              </div>
+            </div>
             
+            {/* Floating Elements */}
             <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce">
               <span className="text-2xl">📚</span>
             </div>
@@ -71,6 +122,9 @@ export default function Landing() {
             <div className="absolute top-1/2 -right-6 bg-white p-3 rounded-xl shadow-lg animate-bounce" style={{animationDelay: '1.5s'}}>
               <span className="text-2xl">🌙</span>
             </div>
+            
+            {/* Subtle Background Pattern */}
+            <div className="absolute inset-0 -z-10 bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 rounded-2xl"></div>
           </div>
         </div>
       </div>
