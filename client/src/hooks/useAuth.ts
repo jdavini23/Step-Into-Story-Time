@@ -1,19 +1,23 @@
 import { useQuery } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 
 export function useAuth() {
   const { data: user, isLoading, error, isError } = useQuery({
     queryKey: ["/api/auth/user"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
     retry: false,
     refetchOnWindowFocus: false,
-    refetchOnMount: true,
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    refetchOnMount: false, // Only fetch once per app load
+    staleTime: Infinity, // Never consider stale
     refetchInterval: false,
+    refetchOnReconnect: false,
   });
 
-  // If we get a 401 error or any error, consider user not authenticated
-  // isLoading should only be true during the initial request
+  // User is authenticated if we have user data and no error
   const isAuthenticated = !!user && !isError;
-  const authLoading = isLoading && !isError;
+  
+  // Only show loading on the very first request
+  const authLoading = isLoading;
 
   return {
     user,
