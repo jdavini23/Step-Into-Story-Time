@@ -64,8 +64,10 @@ export default function Dashboard() {
         
         {/* Dashboard header */}
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-700 mb-2">Your Story Library</h2>
-          <p className="text-gray-600">All your magical bedtime adventures in one place</p>
+          <h2 className="text-3xl font-bold text-gray-700 mb-2">
+            Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! ✨
+          </h2>
+          <p className="text-gray-600">Ready to create another magical bedtime adventure?</p>
         </div>
         
         {/* Quick actions */}

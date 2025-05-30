@@ -32,8 +32,7 @@ export default function Header() {
   };
 
   const navigation = [
-    { name: "Home", href: "/", icon: Home },
-    { name: "My Stories", href: "/dashboard", icon: BookOpen },
+    { name: "My Stories", href: "/", icon: BookOpen },
     { name: "Create Story", href: "/story-wizard", icon: Plus },
   ];
 
