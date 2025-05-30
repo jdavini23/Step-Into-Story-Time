@@ -1,0 +1,151 @@
+import type { Express } from "express";
+import { createServer, type Server } from "http";
+import { storage } from "./storage";
+import { setupAuth, isAuthenticated } from "./replitAuth";
+import { insertStorySchema } from "@shared/schema";
+import { generateBedtimeStory } from "./openai";
+import { z } from "zod";
+
+export async function registerRoutes(app: Express): Promise<Server> {
+  // Auth middleware
+  await setupAuth(app);
+
+  // Auth routes
+  app.get('/api/auth/user', isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+      res.json(user);
+    } catch (error) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Failed to fetch user" });
+    }
+  });
+
+  // Story generation endpoint
+  app.post("/api/stories/generate", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      
+      // Validate request body
+      const storyData = insertStorySchema.parse(req.body);
+      
+      // Generate story using OpenAI
+      const generatedStory = await generateBedtimeStory({
+        childName: storyData.childName,
+        childAge: storyData.childAge,
+        favoriteThemes: storyData.favoriteThemes || undefined,
+        tone: storyData.tone,
+        length: storyData.length,
+        bedtimeMessage: storyData.bedtimeMessage || undefined,
+      });
+      
+      // Save story to database
+      const story = await storage.createStory(userId, {
+        ...storyData,
+        title: generatedStory.title,
+        content: generatedStory.content,
+      });
+      
+      res.json(story);
+    } catch (error) {
+      console.error("Error generating story:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid story parameters", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to generate story" });
+      }
+    }
+  });
+
+  // Get user's stories
+  app.get("/api/stories", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const stories = await storage.getUserStories(userId);
+      res.json(stories);
+    } catch (error) {
+      console.error("Error fetching stories:", error);
+      res.status(500).json({ message: "Failed to fetch stories" });
+    }
+  });
+
+  // Get specific story
+  app.get("/api/stories/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const storyId = parseInt(req.params.id);
+      
+      if (isNaN(storyId)) {
+        return res.status(400).json({ message: "Invalid story ID" });
+      }
+      
+      const story = await storage.getStory(storyId, userId);
+      
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      res.json(story);
+    } catch (error) {
+      console.error("Error fetching story:", error);
+      res.status(500).json({ message: "Failed to fetch story" });
+    }
+  });
+
+  // Update story
+  app.patch("/api/stories/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const storyId = parseInt(req.params.id);
+      
+      if (isNaN(storyId)) {
+        return res.status(400).json({ message: "Invalid story ID" });
+      }
+      
+      // Validate partial update data
+      const updateData = insertStorySchema.partial().parse(req.body);
+      
+      const story = await storage.updateStory(storyId, userId, updateData);
+      
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      res.json(story);
+    } catch (error) {
+      console.error("Error updating story:", error);
+      if (error instanceof z.ZodError) {
+        res.status(400).json({ message: "Invalid update data", errors: error.errors });
+      } else {
+        res.status(500).json({ message: "Failed to update story" });
+      }
+    }
+  });
+
+  // Delete story
+  app.delete("/api/stories/:id", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const storyId = parseInt(req.params.id);
+      
+      if (isNaN(storyId)) {
+        return res.status(400).json({ message: "Invalid story ID" });
+      }
+      
+      const deleted = await storage.deleteStory(storyId, userId);
+      
+      if (!deleted) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+      
+      res.json({ message: "Story deleted successfully" });
+    } catch (error) {
+      console.error("Error deleting story:", error);
+      res.status(500).json({ message: "Failed to delete story" });
+    }
+  });
+
+  const httpServer = createServer(app);
+  return httpServer;
+}
