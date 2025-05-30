@@ -427,7 +427,7 @@ export default function Landing() {
             onClick={() => window.location.href = "/api/login"}
             className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 group relative overflow-hidden"
           >
-            <span className="relative z-10 flex items-center">
+            <span className="relative z-10 flex items-center group-hover:opacity-0 transition-opacity duration-300">
               <span className="group-hover:animate-spin mr-2">✨</span>
               Start Creating Stories Now
             </span>
