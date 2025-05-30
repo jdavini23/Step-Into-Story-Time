@@ -38,7 +38,7 @@ export default function StoryWizard() {
 
   const generateStoryMutation = useMutation({
     mutationFn: async (data: InsertStory) => {
-      const response = await apiRequest("POST", "/api/stories", data);
+      const response = await apiRequest("POST", "/api/stories/generate", data);
       return await response.json();
     },
     onSuccess: (story) => {
