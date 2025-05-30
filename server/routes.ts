@@ -27,8 +27,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       
-      // Validate request body
-      const storyData = insertStorySchema.parse(req.body);
+      // Validate request body (excluding title and content which are generated)
+      const storyData = insertStorySchema.omit({ title: true, content: true }).parse(req.body);
       
       // Generate story using OpenAI
       const generatedStory = await generateBedtimeStory({
