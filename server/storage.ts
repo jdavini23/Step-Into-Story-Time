@@ -7,7 +7,7 @@ import {
   type InsertStory,
 } from "@shared/schema";
 import { db } from "./db";
-import { eq, desc } from "drizzle-orm";
+import { eq, desc, and } from "drizzle-orm";
 
 // Interface for storage operations
 export interface IStorage {
@@ -72,8 +72,7 @@ export class DatabaseStorage implements IStorage {
     const [story] = await db
       .select()
       .from(stories)
-      .where(eq(stories.id, id))
-      .where(eq(stories.userId, userId));
+      .where(and(eq(stories.id, id), eq(stories.userId, userId)));
     return story;
   }
 
@@ -84,8 +83,7 @@ export class DatabaseStorage implements IStorage {
         ...updates,
         updatedAt: new Date(),
       })
-      .where(eq(stories.id, id))
-      .where(eq(stories.userId, userId))
+      .where(and(eq(stories.id, id), eq(stories.userId, userId)))
       .returning();
     return updatedStory;
   }
@@ -93,8 +91,7 @@ export class DatabaseStorage implements IStorage {
   async deleteStory(id: number, userId: string): Promise<boolean> {
     const result = await db
       .delete(stories)
-      .where(eq(stories.id, id))
-      .where(eq(stories.userId, userId));
+      .where(and(eq(stories.id, id), eq(stories.userId, userId)));
     return result.rowCount > 0;
   }
 }
