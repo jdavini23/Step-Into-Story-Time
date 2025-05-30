@@ -1,0 +1,157 @@
+Product Requirements Document (PRD)
+Product Name: Step Into Storytime
+Owner: Joe
+Date: May 30, 2025
+Version: 1.0 (MVP)
+
+1. Overview
+Step Into Storytime is an AI-powered web app that helps parents generate personalized bedtime stories for their children. It offers an immersive, step-by-step story creation wizard, saves previous stories, and adapts to each family's preferences over time. The MVP focuses on fast, delightful story creation with light customization.
+
+2. Goals & Objectives
+Primary Goals (MVP)
+Enable parents to generate bedtime stories in under 2 minutes.
+
+Offer a simple, guided creation flow with customization options.
+
+Let users save, view, and re-read previous stories.
+
+Provide a magical, calming experience through UI/UX.
+
+Validate demand and core user behavior.
+
+Success Metrics
+Story completions per user/session
+
+Returning user % (engagement)
+
+User feedback/NPS on story quality
+
+Time-to-story completion
+
+Email signups (if gated)
+
+3. Target Audience
+Parents of kids aged 2–8
+
+Busy caregivers looking to bond with kids through storytelling
+
+Users seeking a screen-light, meaningful bedtime ritual
+
+4. Features & Requirements
+Core Features (MVP)
+1. Story Wizard (Step-by-Step Flow)
+Input child’s name, age, favorite themes, animals, or characters
+
+Choose tone (adventurous, silly, calming, educational)
+
+Choose length (short / medium)
+
+AI generates a story based on selections
+
+Optional: Add bedtime message (e.g. “Goodnight from Dad”)
+
+2. Story Output
+Display story in a reader-friendly format
+
+Include simple illustrations or icons per paragraph (optional for MVP)
+
+Allow story download or print as PDF
+
+Shareable link (optional for MVP)
+
+3. Save & Library
+Save past stories to user dashboard
+
+View list of generated stories
+
+Click to re-read, re-generate, or edit inputs
+
+4. Auth & Onboarding
+Supabase Auth integration
+
+Magic link or email/password login
+
+First-time user onboarding (simple 1-screen intro)
+
+Save user preferences (child’s name, age, favorites)
+
+5. AI Integration
+OpenAI API (GPT-4) integration for story generation
+
+Prompt templates tailored for story style, tone, and personalization
+
+Prompt fallback logic (if input is incomplete)
+
+5. Non-Functional Requirements
+Tech Stack
+
+Frontend: Next.js (with Tailwind CSS for styling)
+
+Backend/Auth: Supabase
+
+AI: OpenAI API (GPT-4)
+
+Performance: Sub-2s story generation
+
+Security: Secure user auth and data storage
+
+Mobile-First: Responsive layout, touch-optimized
+
+6. User Flows
+First-Time User Flow
+Land on homepage → Click "Start Your Story"
+
+Create account or login (optional after 1 story)
+
+Enter child info and preferences
+
+Click “Generate Story”
+
+View story → Option to save or start another
+
+Returning User Flow
+Login → Land on dashboard
+
+Click saved story or “Create New Story”
+
+Follow simplified wizard → Generate → Save
+
+7. Future Features (Post-MVP)
+Story narration (text-to-speech)
+
+Child profile management (multiple children)
+
+Illustration gallery per story
+
+Night mode / bedtime screen settings
+
+Story categories and collections
+
+Community story sharing
+
+Personalized email digests with story suggestions
+
+8. Project Milestones (Suggested Timeline)
+Milestone	Target Date
+Wireframes & User Flows	June 1, 2025
+UI Design & Prototyping	June 5, 2025
+Frontend Dev Start	June 7, 2025
+Supabase Auth + DB Setup	June 10, 2025
+OpenAI Prompt Integration	June 12, 2025
+MVP Internal Testing	June 15, 2025
+Soft Launch + Feedback	June 18, 2025
+Public MVP Launch	June 21, 2025
+
+9. Open Questions
+Should story generation be gated behind sign-up?
+
+How personalized should the first version get (e.g., recurring characters)?
+
+Add light illustrations now or post-MVP?
+
+Include calming music or narration in MVP?
+
+10. Appendix: AI Prompt Logic (v1)
+Template Prompt Example:
+
+"Create a 3-5 minute bedtime story for a [4]-year-old child named [Lily]. Include a [friendly dragon] and a lesson about [being kind]. Make the story [calming and magical], suitable for bedtime."
