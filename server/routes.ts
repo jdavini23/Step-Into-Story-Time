@@ -3,6 +3,12 @@ import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertStorySchema } from "@shared/schema";
+
+// Create a schema for story generation requests (without title and content)
+const storyGenerationRequestSchema = insertStorySchema.omit({ 
+  title: true, 
+  content: true 
+});
 import { generateBedtimeStory } from "./openai";
 import { z } from "zod";
 
@@ -28,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       
       // Validate request body (excluding title and content which are generated)
-      const storyData = insertStorySchema.omit({ title: true, content: true }).parse(req.body);
+      const storyData = storyGenerationRequestSchema.parse(req.body);
       
       // Generate story using OpenAI
       const generatedStory = await generateBedtimeStory({
