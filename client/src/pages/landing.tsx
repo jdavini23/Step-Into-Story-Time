@@ -1,10 +1,33 @@
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
+import { useState, useEffect } from "react";
 
 export default function Landing() {
+  const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+  const [storyVisible, setStoryVisible] = useState(false);
+  const [currentStep, setCurrentStep] = useState(0);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setStoryVisible(true), 500);
+    return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const stepTimer = setInterval(() => {
+      setCurrentStep(prev => (prev + 1) % 3);
+    }, 3000);
+    return () => clearInterval(stepTimer);
+  }, []);
+
+  const steps = [
+    { icon: "👶", title: "Tell us about your child", description: "Name, age, favorite themes" },
+    { icon: "🎭", title: "Choose story style", description: "Adventure, calming, silly, or educational" },
+    { icon: "✨", title: "Get your story", description: "Ready in under 2 minutes" }
+  ];
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 overflow-hidden">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
         <div className="grid lg:grid-cols-2 gap-12 items-center">
@@ -57,33 +80,37 @@ export default function Landing() {
           
           <div className="relative">
             {/* Story Preview Card */}
-            <div className="bg-white rounded-2xl shadow-2xl p-8 border border-purple-100">
+            <div className={`bg-white rounded-2xl shadow-2xl p-8 border border-purple-100 transform transition-all duration-1000 ${storyVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'} hover:scale-105 hover:shadow-3xl cursor-pointer group`}>
               <div className="flex items-center justify-between mb-6">
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center">
+                  <div className="w-10 h-10 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center group-hover:animate-spin">
                     <span className="text-white text-lg">📖</span>
                   </div>
                   <div>
-                    <h4 className="font-semibold text-gray-700">Emma's Magical Garden Adventure</h4>
+                    <h4 className="font-semibold text-gray-700 group-hover:text-purple-600 transition-colors">Emma's Magical Garden Adventure</h4>
                     <p className="text-sm text-gray-500">Created just now • 3 min read</p>
                   </div>
                 </div>
-                <div className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium">
+                <div className="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium group-hover:bg-purple-600 group-hover:text-white transition-all">
                   Adventurous
                 </div>
               </div>
               
               <div className="prose prose-sm text-gray-600 leading-relaxed">
-                <p className="mb-4">
-                  Once upon a time, in a cozy little house on Maple Street, lived a brave and curious girl named <span className="font-semibold text-purple-600">Emma</span>. Emma had always wondered what lay beyond the old wooden gate at the end of her grandmother's garden.
+                <p className="mb-4 group-hover:text-gray-700 transition-colors">
+                  Once upon a time, in a cozy little house on Maple Street, lived a brave and curious girl named <span className="font-semibold text-purple-600 group-hover:text-purple-700 transition-colors">Emma</span>. Emma had always wondered what lay beyond the old wooden gate at the end of her grandmother's garden.
                 </p>
-                <p className="mb-4">
+                <p className="mb-4 group-hover:text-gray-700 transition-colors">
                   One sunny morning, Emma discovered something extraordinary - the gate was glowing with a soft, golden light! As she pushed it open, she gasped in wonder. Before her stretched the most beautiful garden she had ever seen, filled with flowers that sparkled like jewels and trees that hummed gentle melodies.
                 </p>
-                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border-l-4 border-purple-400">
-                  <p className="text-purple-700 italic">
+                <div className="bg-gradient-to-r from-purple-50 to-blue-50 p-4 rounded-lg border-l-4 border-purple-400 group-hover:border-purple-500 group-hover:shadow-lg transition-all">
+                  <p className="text-purple-700 italic group-hover:text-purple-800 transition-colors">
                     "What an amazing adventure awaits you, Emma! Remember, the bravest hearts discover the most magical places. Sweet dreams, little explorer." 🌙✨
                   </p>
+                </div>
+                {/* Reading Progress Bar */}
+                <div className="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden">
+                  <div className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full transform transition-all duration-3000 group-hover:w-full w-2/3"></div>
                 </div>
               </div>
               
@@ -112,15 +139,22 @@ export default function Landing() {
               </div>
             </div>
             
-            {/* Floating Elements */}
-            <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce">
+            {/* Interactive Floating Elements */}
+            <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl">
               <span className="text-2xl">📚</span>
             </div>
-            <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-xl shadow-lg animate-bounce" style={{animationDelay: '1s'}}>
+            <div className="absolute -bottom-4 -right-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl" style={{animationDelay: '1s'}}>
               <span className="text-2xl">✨</span>
             </div>
-            <div className="absolute top-1/2 -right-6 bg-white p-3 rounded-xl shadow-lg animate-bounce" style={{animationDelay: '1.5s'}}>
+            <div className="absolute top-1/2 -right-6 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl" style={{animationDelay: '1.5s'}}>
               <span className="text-2xl">🌙</span>
+            </div>
+            
+            {/* Sparkle Animation */}
+            <div className="absolute inset-0 pointer-events-none">
+              <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-yellow-400 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
+              <div className="absolute top-3/4 left-3/4 w-1 h-1 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '3s'}}></div>
+              <div className="absolute top-1/2 left-1/3 w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{animationDelay: '4s'}}></div>
             </div>
             
             {/* Subtle Background Pattern */}
@@ -142,73 +176,97 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(0)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 0 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">🎨</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">Fully Personalized</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-purple-600 transition-colors">Fully Personalized</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Every story features your child as the main character, with their name, age, and favorite themes woven throughout.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(1)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 1 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">⚡</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">Lightning Fast</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-blue-600 transition-colors">Lightning Fast</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Generate a complete, engaging bedtime story in under 2 minutes. Perfect for busy parents and eager kids.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(2)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-yellow-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 2 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">📖</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">Save & Share</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-yellow-600 transition-colors">Save & Share</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Build a personal library of stories. Download as PDF, share with family, and reread favorites anytime.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(3)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 3 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">🌙</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">Multiple Tones</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-purple-600 transition-colors">Multiple Tones</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Choose from adventurous, calming, silly, or educational tones to match your child's mood and bedtime needs.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(4)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 4 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">🧠</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">AI-Powered</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-blue-600 transition-colors">AI-Powered</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Advanced AI creates unique, high-quality stories that are age-appropriate and engaging for your child.
                 </p>
               </CardContent>
             </Card>
             
-            <Card className="shadow-lg hover:shadow-xl transition-shadow duration-300">
+            <Card 
+              className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
+              onMouseEnter={() => setHoveredFeature(5)}
+              onMouseLeave={() => setHoveredFeature(null)}
+            >
               <CardContent className="p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-yellow-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
+                <div className={`w-16 h-16 bg-gradient-to-r from-yellow-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-300 ${hoveredFeature === 5 ? 'animate-pulse scale-110' : ''}`}>
                   <span className="text-2xl">❤️</span>
                 </div>
-                <h4 className="text-xl font-semibold text-gray-700 mb-4">Bonding Time</h4>
-                <p className="text-gray-600">
+                <h4 className="text-xl font-semibold text-gray-700 mb-4 group-hover:text-yellow-600 transition-colors">Bonding Time</h4>
+                <p className="text-gray-600 group-hover:text-gray-700 transition-colors">
                   Create special moments and strengthen your bond through personalized storytelling experiences.
                 </p>
               </CardContent>
@@ -230,35 +288,40 @@ export default function Landing() {
           </div>
           
           <div className="grid md:grid-cols-3 gap-12">
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-purple-600 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-white">1</span>
+            {steps.map((step, index) => (
+              <div key={index} className="text-center group cursor-pointer">
+                <div className={`w-20 h-20 bg-gradient-to-r ${
+                  index === 0 ? 'from-purple-600 to-blue-500' : 
+                  index === 1 ? 'from-blue-500 to-yellow-500' : 
+                  'from-yellow-500 to-purple-600'
+                } rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl ${
+                  currentStep === index ? 'animate-pulse scale-110 shadow-xl' : ''
+                }`}>
+                  <span className="text-3xl font-bold text-white">{index + 1}</span>
+                </div>
+                <h4 className={`text-xl font-semibold text-gray-700 mb-4 group-hover:text-purple-600 transition-colors ${
+                  currentStep === index ? 'text-purple-600' : ''
+                }`}>
+                  {step.title}
+                </h4>
+                <p className={`text-gray-600 group-hover:text-gray-700 transition-colors ${
+                  currentStep === index ? 'text-gray-700' : ''
+                }`}>
+                  {step.description}
+                </p>
+                
+                {/* Progress indicator */}
+                <div className="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden mx-auto max-w-32">
+                  <div className={`h-full bg-gradient-to-r ${
+                    index === 0 ? 'from-purple-600 to-blue-500' : 
+                    index === 1 ? 'from-blue-500 to-yellow-500' : 
+                    'from-yellow-500 to-purple-600'
+                  } rounded-full transition-all duration-1000 ${
+                    currentStep === index ? 'w-full' : 'w-0'
+                  }`}></div>
+                </div>
               </div>
-              <h4 className="text-xl font-semibold text-gray-700 mb-4">Tell Us About Your Child</h4>
-              <p className="text-gray-600">
-                Share your child's name, age, and favorite themes. The more we know, the more personalized the story becomes.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-white">2</span>
-              </div>
-              <h4 className="text-xl font-semibold text-gray-700 mb-4">Choose Your Story Style</h4>
-              <p className="text-gray-600">
-                Pick the perfect tone - adventurous for excitement, calming for bedtime, silly for giggles, or educational for learning.
-              </p>
-            </div>
-            
-            <div className="text-center">
-              <div className="w-20 h-20 bg-gradient-to-r from-yellow-500 to-purple-600 rounded-full flex items-center justify-center mx-auto mb-6">
-                <span className="text-3xl font-bold text-white">3</span>
-              </div>
-              <h4 className="text-xl font-semibold text-gray-700 mb-4">Enjoy Your Story</h4>
-              <p className="text-gray-600">
-                In under 2 minutes, receive a unique, personalized story ready to read, save, and share with your little one.
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </div>
@@ -362,9 +425,17 @@ export default function Landing() {
           </p>
           <Button 
             onClick={() => window.location.href = "/api/login"}
-            className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+            className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 group relative overflow-hidden"
           >
-            ✨ Start Creating Stories Now
+            <span className="relative z-10 flex items-center">
+              <span className="group-hover:animate-spin mr-2">✨</span>
+              Start Creating Stories Now
+            </span>
+            <div className="absolute inset-0 bg-gradient-to-r from-purple-600 to-blue-500 transform scale-0 group-hover:scale-100 transition-transform duration-300 rounded-xl"></div>
+            <span className="absolute inset-0 flex items-center justify-center text-white font-semibold opacity-0 group-hover:opacity-100 transition-opacity duration-300 z-20">
+              <span className="animate-spin mr-2">✨</span>
+              Let's Create Magic!
+            </span>
           </Button>
           <p className="text-white/80 text-sm mt-4">
             Free to start • No credit card required • Create your first story in under 2 minutes
