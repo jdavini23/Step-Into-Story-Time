@@ -30,6 +30,7 @@ export default function StoryWizard() {
   const [formData, setFormData] = useState<Partial<InsertStory>>({
     childName: "",
     childAge: 4,
+    childGender: "",
     favoriteThemes: "",
     tone: "",
     length: "",
@@ -96,7 +97,7 @@ export default function StoryWizard() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.childName && formData.childAge;
+        return formData.childName && formData.childAge && formData.childGender;
       case 2:
         return formData.tone && formData.length;
       case 3:
@@ -107,7 +108,7 @@ export default function StoryWizard() {
   };
 
   const handleGenerate = () => {
-    if (!formData.childName || !formData.childAge || !formData.tone || !formData.length) {
+    if (!formData.childName || !formData.childAge || !formData.childGender || !formData.tone || !formData.length) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -190,6 +191,32 @@ export default function StoryWizard() {
                         <SelectItem value="8">8 years old</SelectItem>
                       </SelectContent>
                     </Select>
+                  </div>
+                  
+                  <div>
+                    <Label className="block text-sm font-medium text-gray-700 mb-4">Gender *</Label>
+                    <RadioGroup value={formData.childGender} onValueChange={(value) => updateFormData("childGender", value)}>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="boy" id="boy" />
+                          <div>
+                            <Label htmlFor="boy" className="font-medium cursor-pointer">👦 Boy</Label>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="girl" id="girl" />
+                          <div>
+                            <Label htmlFor="girl" className="font-medium cursor-pointer">👧 Girl</Label>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="other" id="other" />
+                          <div>
+                            <Label htmlFor="other" className="font-medium cursor-pointer">🌟 Other</Label>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
                   </div>
                   
                   <div>

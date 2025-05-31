@@ -8,6 +8,7 @@ const openai = new OpenAI({
 export interface StoryGenerationParams {
   childName: string;
   childAge: number;
+  childGender: string; // 'boy', 'girl', 'other'
   favoriteThemes?: string;
   tone: string; // 'adventurous', 'silly', 'calming', 'educational'
   length: string; // 'short', 'medium'
@@ -18,7 +19,7 @@ export async function generateBedtimeStory(params: StoryGenerationParams): Promi
   title: string;
   content: string;
 }> {
-  const { childName, childAge, favoriteThemes, tone, length, bedtimeMessage } = params;
+  const { childName, childAge, childGender, favoriteThemes, tone, length, bedtimeMessage } = params;
   
   // Create dynamic length specification
   const lengthSpec = length === 'short' ? '2-3 minutes' : '4-5 minutes';
@@ -32,14 +33,19 @@ export async function generateBedtimeStory(params: StoryGenerationParams): Promi
     `\n\nEnd the story with this personalized bedtime message in a special highlighted box: "${bedtimeMessage}"` : 
     `\n\nEnd with a gentle goodnight message encouraging sweet dreams.`;
 
-  const prompt = `Create a magical ${tone} bedtime story for a ${childAge}-year-old child named ${childName}${themeSpec}. 
+  // Create appropriate pronouns based on gender
+  const pronouns = childGender === 'boy' ? { they: 'he', them: 'him', their: 'his' } :
+                   childGender === 'girl' ? { they: 'she', them: 'her', their: 'her' } :
+                   { they: 'they', them: 'them', their: 'their' };
+
+  const prompt = `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender === 'other' ? 'child' : childGender} named ${childName}${themeSpec}. 
 
 The story should be:
 - Perfect for bedtime reading (${lengthSpec} long)
 - ${paragraphCount} with engaging but calming content
 - Age-appropriate for ${childAge}-year-olds
 - ${tone} in tone while still being suitable for bedtime
-- Include ${childName} as the main character
+- Include ${childName} as the main character (use pronouns: ${pronouns.they}/${pronouns.them}/${pronouns.their})
 - Have a clear beginning, middle, and satisfying end
 - End on a peaceful, sleepy note perfect for bedtime
 

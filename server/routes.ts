@@ -43,6 +43,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const generatedStory = await generateBedtimeStory({
         childName: storyData.childName,
         childAge: storyData.childAge,
+        childGender: storyData.childGender,
         favoriteThemes: storyData.favoriteThemes || undefined,
         tone: storyData.tone,
         length: storyData.length,
