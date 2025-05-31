@@ -1,10 +1,13 @@
 import {
   users,
   stories,
+  favorites,
   type User,
   type UpsertUser,
   type Story,
   type InsertStory,
+  type Favorite,
+  type InsertFavorite,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -22,6 +25,12 @@ export interface IStorage {
   getStory(id: number, userId: string): Promise<Story | undefined>;
   updateStory(id: number, userId: string, updates: Partial<InsertStory>): Promise<Story | undefined>;
   deleteStory(id: number, userId: string): Promise<boolean>;
+  
+  // Favorite operations
+  addFavorite(userId: string, storyId: number): Promise<Favorite>;
+  removeFavorite(userId: string, storyId: number): Promise<boolean>;
+  getUserFavorites(userId: string): Promise<Story[]>;
+  isStoryFavorited(userId: string, storyId: number): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -93,6 +102,58 @@ export class DatabaseStorage implements IStorage {
       .delete(stories)
       .where(and(eq(stories.id, id), eq(stories.userId, userId)));
     return result.rowCount > 0;
+  }
+
+  // Favorite operations
+  async addFavorite(userId: string, storyId: number): Promise<Favorite> {
+    const [favorite] = await db
+      .insert(favorites)
+      .values({
+        userId,
+        storyId,
+      })
+      .onConflictDoNothing()
+      .returning();
+    return favorite;
+  }
+
+  async removeFavorite(userId: string, storyId: number): Promise<boolean> {
+    const result = await db
+      .delete(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.storyId, storyId)));
+    return result.rowCount > 0;
+  }
+
+  async getUserFavorites(userId: string): Promise<Story[]> {
+    const result = await db
+      .select({
+        id: stories.id,
+        userId: stories.userId,
+        title: stories.title,
+        content: stories.content,
+        childName: stories.childName,
+        childAge: stories.childAge,
+        childGender: stories.childGender,
+        favoriteThemes: stories.favoriteThemes,
+        tone: stories.tone,
+        length: stories.length,
+        bedtimeMessage: stories.bedtimeMessage,
+        createdAt: stories.createdAt,
+        updatedAt: stories.updatedAt,
+      })
+      .from(stories)
+      .innerJoin(favorites, eq(stories.id, favorites.storyId))
+      .where(eq(favorites.userId, userId))
+      .orderBy(desc(favorites.createdAt));
+    return result;
+  }
+
+  async isStoryFavorited(userId: string, storyId: number): Promise<boolean> {
+    const [favorite] = await db
+      .select()
+      .from(favorites)
+      .where(and(eq(favorites.userId, userId), eq(favorites.storyId, storyId)));
+    return !!favorite;
   }
 }
 

@@ -64,3 +64,22 @@ export const insertStorySchema = createInsertSchema(stories).omit({
 
 export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
+
+// Favorites table
+export const favorites = pgTable("favorites", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id").notNull().references(() => users.id),
+  storyId: integer("story_id").notNull().references(() => stories.id),
+  createdAt: timestamp("created_at").defaultNow(),
+}, (table) => [
+  // Ensure a user can only favorite a story once
+  index("unique_user_story_favorite").on(table.userId, table.storyId),
+]);
+
+export const insertFavoriteSchema = createInsertSchema(favorites).omit({
+  id: true,
+  createdAt: true,
+});
+
+export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
+export type Favorite = typeof favorites.$inferSelect;

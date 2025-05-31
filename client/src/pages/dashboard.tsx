@@ -1,12 +1,12 @@
 import { useAuth } from "@/hooks/useAuth";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { useEffect } from "react";
-import { Plus, BookOpen, Heart } from "lucide-react";
+import { useEffect, useState } from "react";
+import { Plus, BookOpen, Heart, HeartOff } from "lucide-react";
 import type { Story } from "@shared/schema";
 
 export default function Dashboard() {
@@ -17,6 +17,42 @@ export default function Dashboard() {
   const { data: stories = [], isLoading: storiesLoading, error } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
     enabled: !!user,
+  });
+
+  const { data: favoriteStories = [] } = useQuery<Story[]>({
+    queryKey: ["/api/favorites"],
+    enabled: !!user,
+  });
+
+  const [showFavorites, setShowFavorites] = useState(false);
+  const queryClient = useQueryClient();
+
+  const toggleFavoriteMutation = useMutation({
+    mutationFn: async ({ storyId, isFavorited }: { storyId: number; isFavorited: boolean }) => {
+      const method = isFavorited ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/favorites/${storyId}`, {
+        method,
+        credentials: 'include',
+      });
+      if (!response.ok) {
+        throw new Error('Failed to toggle favorite');
+      }
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
+      toast({
+        title: "Success",
+        description: "Favorite updated successfully",
+      });
+    },
+    onError: () => {
+      toast({
+        title: "Error",
+        description: "Failed to update favorite",
+        variant: "destructive",
+      });
+    },
   });
 
   useEffect(() => {
@@ -92,65 +128,125 @@ export default function Dashboard() {
             </CardContent>
           </Card>
           
-          <Card className="p-6 shadow-lg">
+          <Card 
+            className="p-6 shadow-lg cursor-pointer hover:scale-105 transition-transform"
+            onClick={() => setShowFavorites(!showFavorites)}
+          >
             <CardContent className="p-0">
               <div className="text-3xl mb-2">💝</div>
               <h3 className="font-semibold text-lg mb-1 text-gray-700">
-                {stories.filter(s => s.tone === 'calming').length} Calming
+                {favoriteStories.length} Favorites
               </h3>
-              <p className="text-gray-600 text-sm">Perfect for bedtime</p>
+              <p className="text-gray-600 text-sm">Your beloved stories</p>
             </CardContent>
           </Card>
         </div>
         
+        {/* Filter toggle */}
+        {stories.length > 0 && (
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center space-x-4">
+              <Button
+                variant={!showFavorites ? "default" : "outline"}
+                onClick={() => setShowFavorites(false)}
+                className="transition-all"
+              >
+                <BookOpen className="w-4 h-4 mr-2" />
+                All Stories ({stories.length})
+              </Button>
+              <Button
+                variant={showFavorites ? "default" : "outline"}
+                onClick={() => setShowFavorites(true)}
+                className="transition-all"
+              >
+                <Heart className="w-4 h-4 mr-2" />
+                Favorites ({favoriteStories.length})
+              </Button>
+            </div>
+          </div>
+        )}
+        
         {/* Story grid */}
-        {stories.length > 0 ? (
+        {(showFavorites ? favoriteStories : stories).length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {stories.map((story) => (
-              <Link key={story.id} href={`/story/${story.id}`}>
-                <Card className="shadow-lg hover:scale-105 transition-transform cursor-pointer overflow-hidden">
-                  <div className="h-48 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 flex items-center justify-center">
-                    <div className="text-center">
-                      <span className="text-4xl mb-2 block">
-                        {story.tone === 'adventurous' && '🗺️'}
-                        {story.tone === 'silly' && '😄'}
-                        {story.tone === 'calming' && '🌙'}
-                        {story.tone === 'educational' && '📚'}
-                      </span>
-                      <p className="text-sm text-gray-600 capitalize">{story.tone} Adventure</p>
-                    </div>
+            {(showFavorites ? favoriteStories : stories).map((story) => {
+              const isFavorited = favoriteStories.some(fav => fav.id === story.id);
+              return (
+                <Card key={story.id} className="shadow-lg hover:scale-105 transition-transform overflow-hidden group">
+                  <div className="relative">
+                    <Link href={`/story/${story.id}`}>
+                      <div className="h-48 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 flex items-center justify-center cursor-pointer">
+                        <div className="text-center">
+                          <span className="text-4xl mb-2 block">
+                            {story.tone === 'adventurous' && '🗺️'}
+                            {story.tone === 'silly' && '😄'}
+                            {story.tone === 'calming' && '🌙'}
+                            {story.tone === 'educational' && '📚'}
+                          </span>
+                          <p className="text-sm text-gray-600 capitalize">{story.tone} Adventure</p>
+                        </div>
+                      </div>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute top-2 right-2 p-2 bg-white/80 hover:bg-white opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        toggleFavoriteMutation.mutate({ storyId: story.id, isFavorited });
+                      }}
+                      disabled={toggleFavoriteMutation.isPending}
+                    >
+                      {isFavorited ? (
+                        <Heart className="w-4 h-4 text-red-500 fill-red-500" />
+                      ) : (
+                        <HeartOff className="w-4 h-4 text-gray-500" />
+                      )}
+                    </Button>
                   </div>
-                  <CardContent className="p-6">
-                    <h3 className="font-semibold text-lg text-gray-700 mb-2 line-clamp-1">
-                      {story.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm mb-3 line-clamp-2">
-                      A {story.tone} story featuring {story.childName}
-                      {story.favoriteThemes && ` with ${story.favoriteThemes}`}...
-                    </p>
-                    <div className="flex items-center justify-between text-xs text-gray-500">
-                      <span>{new Date(story.createdAt || '').toLocaleDateString()}</span>
-                      <span>{story.length === 'short' ? '2-3' : '4-5'} min read</span>
-                    </div>
-                  </CardContent>
+                  <Link href={`/story/${story.id}`}>
+                    <CardContent className="p-6 cursor-pointer">
+                      <h3 className="font-semibold text-lg text-gray-700 mb-2 line-clamp-1">
+                        {story.title}
+                      </h3>
+                      <p className="text-gray-600 text-sm mb-3 line-clamp-2">
+                        A {story.tone} story featuring {story.childName}
+                        {story.favoriteThemes && ` with ${story.favoriteThemes}`}...
+                      </p>
+                      <div className="flex items-center justify-between text-xs text-gray-500">
+                        <span>{new Date(story.createdAt || '').toLocaleDateString()}</span>
+                        <span>{story.length === 'short' ? '2-3' : '4-5'} min read</span>
+                      </div>
+                    </CardContent>
+                  </Link>
                 </Card>
-              </Link>
-            ))}
+              );
+            })}
           </div>
         ) : (
           /* Empty state */
           <div className="text-center py-12">
             <div className="w-24 h-24 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-4xl">📚</span>
+              <span className="text-4xl">{showFavorites ? '💝' : '📚'}</span>
             </div>
-            <h3 className="text-2xl font-bold text-gray-700 mb-2">Your story library is waiting!</h3>
-            <p className="text-gray-600 mb-6">Create your first magical bedtime story and start building memories.</p>
-            <Link href="/story-wizard">
-              <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold text-lg">
-                <Plus className="w-5 h-5 mr-2" />
-                Create Your First Story
-              </Button>
-            </Link>
+            <h3 className="text-2xl font-bold text-gray-700 mb-2">
+              {showFavorites ? "No favorite stories yet!" : "Your story library is waiting!"}
+            </h3>
+            <p className="text-gray-600 mb-6">
+              {showFavorites 
+                ? "Start favoriting stories by clicking the heart icon on any story."
+                : "Create your first magical bedtime story and start building memories."
+              }
+            </p>
+            {!showFavorites && (
+              <Link href="/story-wizard">
+                <Button className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold text-lg">
+                  <Plus className="w-5 h-5 mr-2" />
+                  Create Your First Story
+                </Button>
+              </Link>
+            )}
           </div>
         )}
       </div>
