@@ -39,22 +39,22 @@ export default function Header() {
   const MobileMenu = () => (
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <SheetTrigger asChild>
-        <Button variant="ghost" size="icon" className="md:hidden">
-          <Menu className="h-6 w-6" />
+        <Button variant="ghost" size="icon" className="md:hidden h-10 w-10">
+          <Menu className="h-5 w-5" />
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-[300px] sm:w-[400px]">
-        <div className="flex flex-col space-y-4 mt-8">
+      <SheetContent side="right" className="w-[280px] sm:w-[320px]">
+        <div className="flex flex-col space-y-3 mt-6">
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
               <Link key={item.name} href={item.href}>
                 <Button
                   variant={location === item.href ? "default" : "ghost"}
-                  className="w-full justify-start"
+                  className="w-full justify-start h-12 text-base"
                   onClick={() => setMobileMenuOpen(false)}
                 >
-                  <Icon className="mr-2 h-4 w-4" />
+                  <Icon className="mr-3 h-5 w-5" />
                   {item.name}
                 </Button>
               </Link>
@@ -102,15 +102,18 @@ export default function Header() {
   return (
     <header className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex justify-between items-center py-4">
+        <div className="flex justify-between items-center py-3 sm:py-4">
           <Link href="/">
-            <div className="flex items-center space-x-3 cursor-pointer">
-              <div className="w-10 h-10 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-xl flex items-center justify-center">
-                <BookOpen className="w-6 h-6 text-white" />
+            <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-xl flex items-center justify-center">
+                <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
-              <div>
-                <h1 className="text-xl font-bold text-gray-700">Step Into Storytime</h1>
-                <p className="text-sm text-gray-500">Magical bedtime stories</p>
+              <div className="hidden sm:block">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-700">Step Into Storytime</h1>
+                <p className="text-xs sm:text-sm text-gray-500">Magical bedtime stories</p>
+              </div>
+              <div className="block sm:hidden">
+                <h1 className="text-base font-bold text-gray-700">Storytime</h1>
               </div>
             </div>
           </Link>

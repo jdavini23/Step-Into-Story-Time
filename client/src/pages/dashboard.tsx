@@ -59,19 +59,19 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Dashboard header */}
-        <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-700 mb-2">
+        <div className="mb-6 sm:mb-8">
+          <h2 className="text-2xl sm:text-3xl font-bold text-gray-700 mb-2">
             Welcome back{user?.firstName ? `, ${user.firstName}` : ''}! ✨
           </h2>
-          <p className="text-gray-600">Ready to create another magical bedtime adventure?</p>
+          <p className="text-sm sm:text-base text-gray-600">Ready to create another magical bedtime adventure?</p>
         </div>
         
         {/* Quick actions */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+        <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
           <Link href="/story-wizard">
             <Card className="bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 text-white p-6 hover:scale-105 transition-transform cursor-pointer">
               <CardContent className="p-0">

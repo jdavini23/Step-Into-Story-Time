@@ -249,18 +249,18 @@ export default function StoryWizard() {
                             <p className="text-sm text-gray-500">Fun and giggly adventures</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="calming" id="calming" />
-                          <div>
-                            <Label htmlFor="calming" className="font-medium cursor-pointer">🌙 Calming</Label>
-                            <p className="text-sm text-gray-500">Peaceful and soothing tales</p>
+                        <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
+                          <RadioGroupItem value="calming" id="calming" className="h-5 w-5" />
+                          <div className="flex-1">
+                            <Label htmlFor="calming" className="font-medium cursor-pointer text-sm sm:text-base">🌙 Calming</Label>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Peaceful and soothing tales</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="educational" id="educational" />
-                          <div>
-                            <Label htmlFor="educational" className="font-medium cursor-pointer">📚 Educational</Label>
-                            <p className="text-sm text-gray-500">Learning through storytelling</p>
+                        <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
+                          <RadioGroupItem value="educational" id="educational" className="h-5 w-5" />
+                          <div className="flex-1">
+                            <Label htmlFor="educational" className="font-medium cursor-pointer text-sm sm:text-base">📚 Educational</Label>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Learning through storytelling</p>
                           </div>
                         </div>
                       </div>
