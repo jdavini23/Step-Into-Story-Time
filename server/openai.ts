@@ -35,10 +35,9 @@ export async function generateBedtimeStory(params: StoryGenerationParams): Promi
 
   // Create appropriate pronouns based on gender
   const pronouns = childGender === 'boy' ? { they: 'he', them: 'him', their: 'his' } :
-                   childGender === 'girl' ? { they: 'she', them: 'her', their: 'her' } :
-                   { they: 'they', them: 'them', their: 'their' };
+                   { they: 'she', them: 'her', their: 'her' };
 
-  const prompt = `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender === 'other' ? 'child' : childGender} named ${childName}${themeSpec}. 
+  const prompt = `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
 
 The story should be:
 - Perfect for bedtime reading (${lengthSpec} long)

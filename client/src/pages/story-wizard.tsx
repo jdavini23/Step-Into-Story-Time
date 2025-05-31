@@ -196,7 +196,7 @@ export default function StoryWizard() {
                   <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-4">Gender *</Label>
                     <RadioGroup value={formData.childGender} onValueChange={(value) => updateFormData("childGender", value)}>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
                           <RadioGroupItem value="boy" id="boy" />
                           <div>
@@ -207,12 +207,6 @@ export default function StoryWizard() {
                           <RadioGroupItem value="girl" id="girl" />
                           <div>
                             <Label htmlFor="girl" className="font-medium cursor-pointer">👧 Girl</Label>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="other" id="other" />
-                          <div>
-                            <Label htmlFor="other" className="font-medium cursor-pointer">🌟 Other</Label>
                           </div>
                         </div>
                       </div>

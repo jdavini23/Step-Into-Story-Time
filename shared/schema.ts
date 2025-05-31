@@ -43,7 +43,7 @@ export const stories = pgTable("stories", {
   content: text("content").notNull(),
   childName: varchar("child_name").notNull(),
   childAge: integer("child_age").notNull(),
-  childGender: varchar("child_gender").notNull(), // 'boy', 'girl', 'other'
+  childGender: varchar("child_gender").notNull(), // 'boy', 'girl'
   favoriteThemes: varchar("favorite_themes"),
   tone: varchar("tone").notNull(), // 'adventurous', 'silly', 'calming', 'educational'
   length: varchar("length").notNull(), // 'short', 'medium'
