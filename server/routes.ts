@@ -172,6 +172,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Story not found" });
       }
       
+      // Check if already favorited
+      const isAlreadyFavorited = await storage.isStoryFavorited(userId, storyId);
+      if (isAlreadyFavorited) {
+        return res.status(200).json({ message: "Story is already favorited" });
+      }
+      
       const favorite = await storage.addFavorite(userId, storyId);
       res.json(favorite);
     } catch (error) {

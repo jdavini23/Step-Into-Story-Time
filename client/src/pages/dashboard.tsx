@@ -35,7 +35,8 @@ export default function Dashboard() {
         credentials: 'include',
       });
       if (!response.ok) {
-        throw new Error('Failed to toggle favorite');
+        const errorText = await response.text();
+        throw new Error(`Failed to toggle favorite: ${errorText}`);
       }
       return response.json();
     },
@@ -46,7 +47,8 @@ export default function Dashboard() {
         description: "Favorite updated successfully",
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error("Favorite toggle error:", error);
       toast({
         title: "Error",
         description: "Failed to update favorite",
