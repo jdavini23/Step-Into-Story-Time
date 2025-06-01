@@ -34,6 +34,7 @@ function Router() {
       <Header />
       <Switch>
         <Route path="/pricing" component={Pricing} />
+        <Route path="/subscribe" component={Subscribe} />
         {!isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
@@ -41,7 +42,6 @@ function Router() {
             <Route path="/" component={Dashboard} />
             <Route path="/story-wizard" component={StoryWizard} />
             <Route path="/story/:id" component={StoryReader} />
-            <Route path="/subscribe" component={Subscribe} />
           </>
         )}
         <Route component={NotFound} />

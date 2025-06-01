@@ -3,6 +3,7 @@ import { loadStripe } from '@stripe/stripe-js';
 import { useEffect, useState } from 'react';
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { CheckCircle } from 'lucide-react';
@@ -90,6 +91,7 @@ const SubscribeForm = () => {
 };
 
 export default function Subscribe() {
+  const { user, isLoading: authLoading } = useAuth();
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
@@ -97,32 +99,49 @@ export default function Subscribe() {
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTier = urlParams.get('tier') || 'premium';
 
+  // Redirect to login if not authenticated
   useEffect(() => {
-    // Create subscription as soon as the page loads
-    apiRequest("POST", "/api/get-or-create-subscription")
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Subscription response:", data);
-        console.log("Client secret:", data.clientSecret);
-        if (data.clientSecret) {
-          setClientSecret(data.clientSecret);
-        } else {
-          console.error("No client secret in response");
-        }
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        console.error("Error creating subscription:", error);
-        setIsLoading(false);
-      });
-  }, []);
+    if (!authLoading && !user) {
+      // Store the current URL to redirect back after login
+      const currentUrl = window.location.pathname + window.location.search;
+      window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
+      return;
+    }
+  }, [user, authLoading]);
 
-  if (isLoading) {
+  useEffect(() => {
+    // Only create subscription if user is authenticated
+    if (user) {
+      apiRequest("POST", "/api/get-or-create-subscription")
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Subscription response:", data);
+          console.log("Client secret:", data.clientSecret);
+          if (data.clientSecret) {
+            setClientSecret(data.clientSecret);
+          } else {
+            console.error("No client secret in response");
+          }
+          setIsLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error creating subscription:", error);
+          setIsLoading(false);
+        });
+    }
+  }, [user]);
+
+  if (authLoading || isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
         <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
       </div>
     );
+  }
+
+  // Don't render anything if user is not authenticated (redirect will happen)
+  if (!user) {
+    return null;
   }
 
   const features = [

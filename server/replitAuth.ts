@@ -102,9 +102,12 @@ export async function setupAuth(app: Express) {
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
 
   app.get("/api/login", (req, res, next) => {
-    // Store signup intent in session if present
+    // Store signup intent and return URL in session if present
     if (req.query.signup === 'true') {
       req.session.isSignup = true;
+    }
+    if (req.query.returnTo) {
+      req.session.returnTo = req.query.returnTo;
     }
     
     passport.authenticate(`replitauth:${req.hostname}`, {
@@ -114,9 +117,26 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, {
-      successRedirect: "/",
-      failureRedirect: "/api/login",
+    passport.authenticate(`replitauth:${req.hostname}`, (err, user) => {
+      if (err) {
+        return next(err);
+      }
+      if (!user) {
+        return res.redirect("/api/login");
+      }
+      
+      req.logIn(user, (err) => {
+        if (err) {
+          return next(err);
+        }
+        
+        // Redirect to stored returnTo URL or default to dashboard
+        const returnTo = req.session.returnTo || "/";
+        delete req.session.returnTo; // Clean up
+        delete req.session.isSignup; // Clean up
+        
+        return res.redirect(returnTo);
+      });
     })(req, res, next);
   });
 
