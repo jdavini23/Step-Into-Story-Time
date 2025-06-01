@@ -313,7 +313,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         recurring: { interval: 'month' },
         product_data: {
           name: 'Premium Bedtime Stories',
-          description: 'Unlimited AI-generated personalized bedtime stories',
         },
       });
 
