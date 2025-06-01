@@ -1,3 +1,4 @@
+
 import OpenAI from "openai";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
@@ -15,31 +16,26 @@ export interface StoryGenerationParams {
   bedtimeMessage?: string;
 }
 
-export async function generateBedtimeStory(params: StoryGenerationParams): Promise<{
-  title: string;
-  content: string;
-}> {
-  // Define size limits based on story length
-  const MAX_CONTENT_SIZE = params.length === 'short' ? 2000 : 4000; // characters
+const MAX_CONTENT_SIZE_MAP = {
+  short: 2000,
+  medium: 4000,
+};
+
+const createPrompt = (params: StoryGenerationParams) => {
   const { childName, childAge, childGender, favoriteThemes, tone, length, bedtimeMessage } = params;
   
-  // Create dynamic length specification
   const lengthSpec = length === 'short' ? '2-3 minutes' : '4-5 minutes';
   const paragraphCount = length === 'short' ? '4-5 paragraphs' : '6-8 paragraphs';
-  
-  // Build theme specification
   const themeSpec = favoriteThemes ? ` featuring ${favoriteThemes}` : '';
-  
-  // Build bedtime message
   const messageSpec = bedtimeMessage ? 
     `\n\nEnd the story with this personalized bedtime message in a special highlighted box: "${bedtimeMessage}"` : 
     `\n\nEnd with a gentle goodnight message encouraging sweet dreams.`;
 
-  // Create appropriate pronouns based on gender
   const pronouns = childGender === 'boy' ? { they: 'he', them: 'him', their: 'his' } :
-                   { they: 'she', them: 'her', their: 'her' };
+                   childGender === 'girl' ? { they: 'she', them: 'her', their: 'her' } :
+                   { they: 'they', them: 'them', their: 'their' };
 
-  const prompt = `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
+  return `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
 
 The story should be:
 - Perfect for bedtime reading (${lengthSpec} long)
@@ -57,6 +53,15 @@ Please respond with a JSON object containing:
 - "content": The complete story text formatted with proper paragraphs
 
 Make it enchanting and memorable while being perfect for bedtime!`;
+};
+
+export async function generateBedtimeStory(params: StoryGenerationParams): Promise<{
+  title: string;
+  content: string;
+}> {
+  const MAX_CONTENT_SIZE = MAX_CONTENT_SIZE_MAP[params.length as keyof typeof MAX_CONTENT_SIZE_MAP] || MAX_CONTENT_SIZE_MAP['medium'];
+  
+  const prompt = createPrompt(params);
 
   try {
     const response = await openai.chat.completions.create({
@@ -72,16 +77,15 @@ Make it enchanting and memorable while being perfect for bedtime!`;
         },
       ],
       response_format: { type: "json_object" },
-      temperature: 0.8, // Some creativity while maintaining consistency
+      temperature: 0.8,
     });
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
     
-    if (!result.title || !result.content) {
-      throw new Error("Invalid response format from OpenAI");
+    if (!result || !result.title || !result.content) {
+      throw new Error("Invalid response: Title or content missing.");
     }
 
-    // Validate content size
     if (result.content.length > MAX_CONTENT_SIZE) {
       console.warn(`Story content too large: ${result.content.length} characters, truncating to ${MAX_CONTENT_SIZE}`);
       result.content = result.content.substring(0, MAX_CONTENT_SIZE) + "...";
@@ -92,7 +96,7 @@ Make it enchanting and memorable while being perfect for bedtime!`;
       content: result.content,
     };
   } catch (error) {
-    console.error("Failed to generate bedtime story:", error);
-    throw new Error("Failed to generate story. Please try again.");
+    console.error("Error generating bedtime story:", error);
+    throw new Error(`Failed to generate story: ${error instanceof Error ? error.message : 'Unknown error'}`);
   }
 }
