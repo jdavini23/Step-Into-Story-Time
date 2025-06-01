@@ -2,11 +2,12 @@ import { useAuth } from "@/hooks/useAuth";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect, useState } from "react";
-import { Plus, BookOpen, Heart, HeartOff } from "lucide-react";
+import { Plus, BookOpen, Heart, HeartOff, Crown, Sparkles } from "lucide-react";
 import type { Story } from "@shared/schema";
 
 export default function Dashboard() {
@@ -21,6 +22,11 @@ export default function Dashboard() {
 
   const { data: favoriteStories = [] } = useQuery<Story[]>({
     queryKey: ["/api/favorites"],
+    enabled: !!user,
+  });
+
+  const { data: subscriptionStatus } = useQuery<{ hasActiveSubscription: boolean; status?: string }>({
+    queryKey: ["/api/subscription-status"],
     enabled: !!user,
   });
 
@@ -108,6 +114,47 @@ export default function Dashboard() {
           <p className="text-sm sm:text-base text-gray-600">Ready to create another magical bedtime adventure?</p>
         </div>
         
+        {/* Premium Status */}
+        {subscriptionStatus && (
+          <div className="mb-6 sm:mb-8">
+            {subscriptionStatus.hasActiveSubscription ? (
+              <Card className="bg-gradient-to-r from-purple-100 to-pink-100 border-purple-200">
+                <CardHeader>
+                  <div className="flex items-center space-x-2">
+                    <Crown className="h-5 w-5 text-purple-600" />
+                    <CardTitle className="text-purple-800">Premium Active</CardTitle>
+                  </div>
+                  <CardDescription className="text-purple-600">
+                    You have unlimited access to personalized bedtime stories
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            ) : (
+              <Card className="bg-gradient-to-r from-yellow-50 to-orange-50 border-yellow-200">
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-orange-800 flex items-center space-x-2">
+                        <Sparkles className="h-5 w-5" />
+                        <span>Upgrade to Premium</span>
+                      </CardTitle>
+                      <CardDescription className="text-orange-600">
+                        Unlock unlimited AI-generated bedtime stories for just $9.99/month
+                      </CardDescription>
+                    </div>
+                    <Link href="/subscribe">
+                      <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white">
+                        <Crown className="h-4 w-4 mr-2" />
+                        Upgrade Now
+                      </Button>
+                    </Link>
+                  </div>
+                </CardHeader>
+              </Card>
+            )}
+          </div>
+        )}
+
         {/* Quick actions */}
         <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3 mb-6 sm:mb-8">
           <Link href="/story-wizard">

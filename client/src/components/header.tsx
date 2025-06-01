@@ -23,6 +23,7 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: "My Stories", href: "/", icon: BookOpen },
   { name: "Create Story", href: "/story-wizard", icon: Plus },
+  { name: "Go Premium", href: "/subscribe", icon: Crown },
 ];
 
 export default function Header() {
