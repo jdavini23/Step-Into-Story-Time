@@ -1,0 +1,70 @@
+⚙️ Pricing Tier Breakdown
+
+🟦 1. Free Tier – “Starter Magic”
+
+Ideal for: New users, casual storytellers
+Goal: Hook users with basic functionality and emotional connection
+
+Features:
+	•	3 stories per week
+	•	Basic personalization (child’s name, 1 trait)
+	•	3 popular themes (bedtime, fantasy, adventure)
+	•	Save last 3 stories
+	•	Read online (text-only)
+	•	Prompt to upgrade after each story
+
+Conversion lever: Free users get value but run into friction quickly (story limit, lack of illustration/voice, limited personalization).
+
+⸻
+
+🟨 2. Premium Tier – “Storytime Plus” (~$6–9/mo or $59/year)
+
+Ideal for: Parents who read stories regularly and want deeper engagement
+Goal: Monetize core power users through rich personalization and visuals
+
+Features:
+	•	Unlimited stories
+	•	Full personalization (name, traits, family members, interests)
+	•	Access to all story genres
+	•	Multiple story lengths (short, medium, long)
+	•	AI-generated illustrations (1 per story)
+	•	Save and organize full story library
+	•	Printable PDFs
+	•	Scheduled story delivery (email or app push)
+	•	Premium support
+
+Conversion lever: Unlocks the real value of the platform — highly personalized, emotionally engaging content parents can’t replicate elsewhere.
+
+⸻
+
+🟩 3. Family Tier – “Storytime Pro” (~$12–15/mo or $119/year)
+
+Ideal for: Families with multiple kids or those who want full immersion
+Goal: Capture high-value households and offer “wow” features
+
+**Includes everything in Plus, and:
+	•	Add multiple child profiles
+	•	Voice narration with character voices
+	•	Interactive endings (child chooses path)
+	•	Milestone stories (birthdays, holidays, life events)
+	•	Magic Letters (from characters or parents)
+	•	Bonus: “Design your character” for AI to use in stories (optional avatar/visual builder)
+	•	Priority feature voting or early access to new modes
+
+Conversion lever: Premium storytelling as an emotional memory tool, not just entertainment. Great for gifting too.
+
+⸻
+
+🧠 Add-on Ideas (Optional Upsells)
+
+You can test these as one-time purchases or in-app purchases:
+	•	🎁 Personalized printed storybook
+	•	🖼️ Illustration bundle pack (e.g., download 5 custom images)
+	•	📬 Story subscription gift pass (send to a friend for 1–3 months)
+
+⸻
+
+💡 Positioning Tips
+	•	Free tier = “Your child’s first magical story”
+	•	Plus = “Your child’s favorite characters, personalized”
+	•	Pro = “An immersive story world your family will treasure”
