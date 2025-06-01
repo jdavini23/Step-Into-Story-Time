@@ -37,15 +37,40 @@ export default function StoryWizard() {
     bedtimeMessage: "",
   });
 
+  const [loadingStage, setLoadingStage] = useState(0);
+  const [loadingMessage, setLoadingMessage] = useState("Creating your magical story...");
+
   const generateStoryMutation = useMutation({
     mutationFn: async (data: InsertStory) => {
+      // Start loading sequence
+      setLoadingStage(1);
+      setLoadingMessage("Crafting your story idea...");
+      
+      // Simulate stages for better UX
+      setTimeout(() => {
+        setLoadingStage(2);
+        setLoadingMessage("Writing your magical adventure...");
+      }, 2000);
+      
+      setTimeout(() => {
+        setLoadingStage(3);
+        setLoadingMessage("Adding finishing touches...");
+      }, 6000);
+      
       const response = await apiRequest("POST", "/api/stories/generate", data);
       return await response.json();
     },
     onSuccess: (story) => {
-      setLocation(`/story/${story.id}`);
+      setLoadingStage(4);
+      setLoadingMessage("Story complete! Taking you there...");
+      setTimeout(() => {
+        setLocation(`/story/${story.id}`);
+      }, 1000);
     },
     onError: (error) => {
+      setLoadingStage(0);
+      setLoadingMessage("Creating your magical story...");
+      
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -127,7 +152,7 @@ export default function StoryWizard() {
   }
 
   if (generateStoryMutation.isPending) {
-    return <LoadingOverlay message="Creating your magical story..." />;
+    return <LoadingOverlay isLoading={true} message={loadingMessage} />;
   }
 
   return (

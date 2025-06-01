@@ -13,6 +13,7 @@ import { StoryFilterButtons } from "@/components/dashboard/story-filter-buttons"
 import { StoryCard } from "@/components/dashboard/story-card";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
+import LoadingOverlay from "@/components/loading-overlay";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
@@ -63,16 +64,7 @@ export default function Dashboard() {
   }, [error, toast]);
 
   if (isLoading || storiesLoading) {
-    return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-2xl">📚</span>
-          </div>
-          <p className="text-gray-600">Loading your story library...</p>
-        </div>
-      </div>
-    );
+    return <LoadingOverlay isLoading={true} message="Loading your story library..." />;
   }
 
   const displayedStories = showFavorites ? favoriteStories : stories;
