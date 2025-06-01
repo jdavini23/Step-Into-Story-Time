@@ -24,6 +24,8 @@ import {
 } from "lucide-react";
 import type { Story } from "@shared/schema";
 import jsPDF from "jspdf";
+import { StoryReadingControls } from "@/components/story-reading-controls";
+import { StoryActions } from "@/components/story-actions";
 
 export default function StoryReader() {
   const params = useParams();
@@ -309,46 +311,16 @@ export default function StoryReader() {
 
       {/* Reading Controls - Fixed Sidebar */}
       <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-40 space-y-2">
-        <Card className={`p-2 ${cardClasses} shadow-lg`}>
-          <div className="flex flex-col space-y-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              title={isDarkMode ? "Light mode" : "Dark mode"}
-            >
-              {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={increaseFontSize}
-              title="Increase font size"
-            >
-              <ZoomIn className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={decreaseFontSize}
-              title="Decrease font size"
-            >
-              <ZoomOut className="w-4 h-4" />
-            </Button>
-            
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={toggleReadAloud}
-              title={isReading ? "Stop reading" : "Read aloud"}
-              className={isReading ? "text-green-600" : ""}
-            >
-              {isReading ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
-            </Button>
-          </div>
-        </Card>
+        <StoryReadingControls
+          isDarkMode={isDarkMode}
+          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+          fontSize={fontSize}
+          onIncreaseFontSize={increaseFontSize}
+          onDecreaseFontSize={decreaseFontSize}
+          isReading={isReading}
+          onToggleReadAloud={toggleReadAloud}
+          cardClasses={cardClasses}
+        />
       </div>
 
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -407,37 +379,13 @@ export default function StoryReader() {
         </Card>
 
         {/* Story actions */}
-        <Card className={`shadow-2xl p-6 ${cardClasses}`}>
-          <div className="flex flex-col sm:flex-row gap-4">
-            <Button
-              onClick={downloadPDF}
-              variant="outline"
-              className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all"
-            >
-              <Download className="w-5 h-5" />
-              <span>Download PDF</span>
-            </Button>
-            
-            <Button
-              onClick={shareStory}
-              variant="outline"
-              className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all"
-            >
-              <Share2 className="w-5 h-5" />
-              <span>Share</span>
-            </Button>
-          </div>
-          
-          <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <Button
-              onClick={() => setLocation("/story-wizard")}
-              className="w-full bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
-            >
-              <Plus className="w-5 h-5 mr-2" />
-              Create Another Story
-            </Button>
-          </div>
-        </Card>
+        <StoryActions
+          story={story}
+          onDownloadPDF={downloadPDF}
+          onShare={shareStory}
+          onCreateAnother={() => setLocation("/story-wizard")}
+          cardClasses={cardClasses}
+        />
       </div>
     </div>
   );

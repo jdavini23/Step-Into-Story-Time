@@ -11,6 +11,7 @@ import {
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
+import { validateContentSize, FILE_SIZE_LIMITS } from "./fileUtils";
 
 // Interface for storage operations
 export interface IStorage {
@@ -61,6 +62,14 @@ export class DatabaseStorage implements IStorage {
 
   // Story operations
   async createStory(userId: string, story: InsertStory): Promise<Story> {
+    // Validate content sizes before insertion
+    validateContentSize(story.title, FILE_SIZE_LIMITS.maxTitleSize, "Story title");
+    validateContentSize(story.content, FILE_SIZE_LIMITS.maxStoryContentSize, "Story content");
+    
+    if (story.bedtimeMessage) {
+      validateContentSize(story.bedtimeMessage, 500, "Bedtime message");
+    }
+
     const [newStory] = await db
       .insert(stories)
       .values({

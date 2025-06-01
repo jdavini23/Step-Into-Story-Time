@@ -19,6 +19,8 @@ export async function generateBedtimeStory(params: StoryGenerationParams): Promi
   title: string;
   content: string;
 }> {
+  // Define size limits based on story length
+  const MAX_CONTENT_SIZE = params.length === 'short' ? 2000 : 4000; // characters
   const { childName, childAge, childGender, favoriteThemes, tone, length, bedtimeMessage } = params;
   
   // Create dynamic length specification
@@ -77,6 +79,12 @@ Make it enchanting and memorable while being perfect for bedtime!`;
     
     if (!result.title || !result.content) {
       throw new Error("Invalid response format from OpenAI");
+    }
+
+    // Validate content size
+    if (result.content.length > MAX_CONTENT_SIZE) {
+      console.warn(`Story content too large: ${result.content.length} characters, truncating to ${MAX_CONTENT_SIZE}`);
+      result.content = result.content.substring(0, MAX_CONTENT_SIZE) + "...";
     }
 
     return {
