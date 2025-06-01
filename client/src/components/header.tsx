@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, Plus, Home, LogOut, Menu } from "lucide-react";
+import { BookOpen, Plus, Home, LogOut, Menu, Crown } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 

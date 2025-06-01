@@ -6,10 +6,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
-import Home from "@/pages/home";
 import StoryWizard from "@/pages/story-wizard";
 import StoryReader from "@/pages/story-reader";
 import Dashboard from "@/pages/dashboard";
+import Subscribe from "@/pages/subscribe";
 import Header from "@/components/header";
 
 function Router() {
@@ -39,6 +39,7 @@ function Router() {
             <Route path="/" component={Dashboard} />
             <Route path="/story-wizard" component={StoryWizard} />
             <Route path="/story/:id" component={StoryReader} />
+            <Route path="/subscribe" component={Subscribe} />
           </>
         )}
         <Route component={NotFound} />
