@@ -41,10 +41,10 @@ export function PremiumStatusCard({ subscriptionStatus }: PremiumStatusCardProps
             </CardDescription>
           </div>
           <div className="flex-shrink-0">
-            <Link href="/subscribe">
+            <Link href="/pricing">
               <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white w-full sm:w-auto text-sm sm:text-base py-2 px-4">
                 <Crown className="h-4 w-4 mr-2" />
-                Upgrade Now
+                View Plans
               </Button>
             </Link>
           </div>

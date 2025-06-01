@@ -10,6 +10,7 @@ import StoryWizard from "@/pages/story-wizard";
 import StoryReader from "@/pages/story-reader";
 import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
+import Pricing from "@/pages/pricing";
 import Header from "@/components/header";
 
 function Router() {
@@ -40,6 +41,7 @@ function Router() {
             <Route path="/story-wizard" component={StoryWizard} />
             <Route path="/story/:id" component={StoryReader} />
             <Route path="/subscribe" component={Subscribe} />
+            <Route path="/pricing" component={Pricing} />
           </>
         )}
         <Route component={NotFound} />

@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
@@ -40,7 +39,7 @@ export default function Landing() {
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
               Transform bedtime into an adventure with AI-powered personalized stories that feature your child as the hero.
             </p>
-            
+
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
               <Button 
                 onClick={() => window.location.href = "/api/login"}
@@ -49,13 +48,14 @@ export default function Landing() {
                 ✨ Start Your Story
               </Button>
               <Button 
-                variant="outline"
+                variant="outline" 
+                onClick={() => window.location.href = "/pricing"}
                 className="border-2 border-purple-600 text-purple-600 hover:bg-purple-600 hover:text-white px-8 py-4 rounded-xl font-semibold text-lg transition-all duration-200"
               >
-                View Sample Stories
+                💰 View Pricing
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-center lg:justify-start space-x-6 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
                 <svg className="w-5 h-5 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -77,7 +77,7 @@ export default function Landing() {
               </div>
             </div>
           </div>
-          
+
           <div className="relative">
             {/* Story Preview Card */}
             <div className={`bg-white rounded-2xl shadow-2xl p-8 border border-purple-100 transform transition-all duration-1000 ${storyVisible ? 'translate-y-0 opacity-100' : 'translate-y-8 opacity-0'} hover:scale-105 hover:shadow-3xl cursor-pointer group`}>
@@ -95,7 +95,7 @@ export default function Landing() {
                   Adventurous
                 </div>
               </div>
-              
+
               <div className="prose prose-sm text-gray-600 leading-relaxed">
                 <p className="mb-4 group-hover:text-gray-700 transition-colors">
                   Once upon a time, in a cozy little house on Maple Street, lived a brave and curious girl named <span className="font-semibold text-purple-600 group-hover:text-purple-700 transition-colors">Emma</span>. Emma had always wondered what lay beyond the old wooden gate at the end of her grandmother's garden.
@@ -113,7 +113,7 @@ export default function Landing() {
                   <div className="h-full bg-gradient-to-r from-purple-600 to-blue-500 rounded-full transform transition-all duration-3000 group-hover:w-full w-2/3"></div>
                 </div>
               </div>
-              
+
               <div className="mt-6 flex items-center justify-between">
                 <div className="flex items-center space-x-4 text-xs text-gray-500">
                   <span className="flex items-center space-x-1">
@@ -138,7 +138,7 @@ export default function Landing() {
                 </Button>
               </div>
             </div>
-            
+
             {/* Interactive Floating Elements */}
             <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl">
               <span className="text-2xl">📚</span>
@@ -149,14 +149,14 @@ export default function Landing() {
             <div className="absolute top-1/2 -right-6 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl" style={{animationDelay: '1.5s'}}>
               <span className="text-2xl">🌙</span>
             </div>
-            
+
             {/* Sparkle Animation */}
             <div className="absolute inset-0 pointer-events-none">
               <div className="absolute top-1/4 left-1/4 w-1 h-1 bg-yellow-400 rounded-full animate-ping" style={{animationDelay: '2s'}}></div>
               <div className="absolute top-3/4 left-3/4 w-1 h-1 bg-purple-400 rounded-full animate-ping" style={{animationDelay: '3s'}}></div>
               <div className="absolute top-1/2 left-1/3 w-1 h-1 bg-blue-400 rounded-full animate-ping" style={{animationDelay: '4s'}}></div>
             </div>
-            
+
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 -z-10 bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 rounded-2xl"></div>
           </div>
@@ -174,7 +174,7 @@ export default function Landing() {
               Create unique, personalized bedtime stories that spark imagination and create lasting memories.
             </p>
           </div>
-          
+
           <div className="grid gap-6 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
@@ -191,7 +191,7 @@ export default function Landing() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
               onMouseEnter={() => setHoveredFeature(1)}
@@ -207,7 +207,7 @@ export default function Landing() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
               onMouseEnter={() => setHoveredFeature(2)}
@@ -223,7 +223,7 @@ export default function Landing() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
               onMouseEnter={() => setHoveredFeature(3)}
@@ -239,7 +239,7 @@ export default function Landing() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
               onMouseEnter={() => setHoveredFeature(4)}
@@ -255,7 +255,7 @@ export default function Landing() {
                 </p>
               </CardContent>
             </Card>
-            
+
             <Card 
               className="shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 cursor-pointer group"
               onMouseEnter={() => setHoveredFeature(5)}
@@ -286,7 +286,7 @@ export default function Landing() {
               Creating magical bedtime stories is as easy as 1-2-3!
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-3 gap-12">
             {steps.map((step, index) => (
               <div key={index} className="text-center group cursor-pointer">
@@ -309,7 +309,7 @@ export default function Landing() {
                 }`}>
                   {step.description}
                 </p>
-                
+
                 {/* Progress indicator */}
                 <div className="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden mx-auto max-w-32">
                   <div className={`h-full bg-gradient-to-r ${
@@ -337,7 +337,7 @@ export default function Landing() {
               Join thousands of families creating magical bedtime memories.
             </p>
           </div>
-          
+
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
             <Card className="shadow-lg">
               <CardContent className="p-8">
@@ -362,7 +362,7 @@ export default function Landing() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-lg">
               <CardContent className="p-8">
                 <div className="flex items-center mb-4">
@@ -386,7 +386,7 @@ export default function Landing() {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Card className="shadow-lg">
               <CardContent className="p-8">
                 <div className="flex items-center mb-4">

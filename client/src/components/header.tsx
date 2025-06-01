@@ -1,4 +1,3 @@
-
 import { useAuth } from "@/hooks/useAuth";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
@@ -34,7 +33,7 @@ export default function Header() {
   // Memoize user initials to prevent recalculation on every render
   const userInitials = useMemo(() => {
     if (!user) return "U";
-    
+
     if (user.firstName && user.lastName) {
       return `${user.firstName[0]}${user.lastName[0]}`.toUpperCase();
     }
@@ -50,7 +49,7 @@ export default function Header() {
   // Memoize user display name
   const userDisplayName = useMemo(() => {
     if (!user) return "User";
-    
+
     if (user.firstName && user.lastName) {
       return `${user.firstName} ${user.lastName}`;
     }
@@ -94,7 +93,7 @@ export default function Header() {
               </div>
             </div>
           </Link>
-          
+
           {isAuthenticated ? (
             <>
               {/* Desktop Navigation */}
@@ -113,7 +112,7 @@ export default function Header() {
                     </Button>
                   </Link>
                 ))}
-                
+
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
@@ -237,7 +236,7 @@ function MobileMenu({
               </Link>
             );
           })}
-          
+
           <div className="pt-4 border-t border-gray-200">
             {user && (
               <div className="flex items-center space-x-3 mb-4 p-2 rounded-lg bg-gray-50">
@@ -258,7 +257,7 @@ function MobileMenu({
                 </div>
               </div>
             )}
-            
+
             <Button
               variant="ghost"
               className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50 transition-colors"

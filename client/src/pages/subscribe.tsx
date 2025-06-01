@@ -83,7 +83,7 @@ const SubscribeForm = () => {
         }}
       />
       <Button type="submit" disabled={!stripe || isLoading} className="w-full">
-        {isLoading ? "Processing..." : "Subscribe for $9.99/month"}
+        {isLoading ? "Processing..." : `Subscribe for ${selectedTier === 'family' ? '$12.99' : '$6.99'}/month`}
       </Button>
     </form>
   );
@@ -92,6 +92,10 @@ const SubscribeForm = () => {
 export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Get tier from URL parameters
+  const urlParams = new URLSearchParams(window.location.search);
+  const selectedTier = urlParams.get('tier') || 'premium';
 
   useEffect(() => {
     // Create subscription as soon as the page loads
@@ -134,10 +138,13 @@ export default function Subscribe() {
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
           <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            Upgrade to Premium Stories
+            {selectedTier === 'family' ? 'Upgrade to Storytime Pro' : 'Upgrade to Storytime Plus'}
           </h1>
           <p className="text-xl text-gray-600">
-            Unlock unlimited personalized bedtime stories for your little one
+            {selectedTier === 'family' 
+              ? 'The ultimate storytelling experience for families with multiple children'
+              : 'Unlock unlimited personalized bedtime stories for your little one'
+            }
           </p>
         </div>
 
@@ -161,7 +168,9 @@ export default function Subscribe() {
               </div>
               <div className="mt-6 p-4 bg-purple-50 rounded-lg">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">$9.99</div>
+                  <div className="text-3xl font-bold text-purple-600">
+                    {selectedTier === 'family' ? '$12.99' : '$6.99'}
+                  </div>
                   <div className="text-sm text-gray-600">per month</div>
                   <div className="text-xs text-gray-500 mt-1">Cancel anytime</div>
                 </div>
