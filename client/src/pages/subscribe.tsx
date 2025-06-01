@@ -184,23 +184,20 @@ export default function Subscribe() {
                   <p className="text-gray-600">Setting up your subscription...</p>
                 </div>
               ) : clientSecret ? (
-                <div>
-                  <p className="text-sm text-gray-500 mb-4">Client Secret: {clientSecret.substring(0, 20)}...</p>
-                  <Elements 
-                    stripe={stripePromise} 
-                    options={{ 
-                      clientSecret,
-                      appearance: {
-                        theme: 'stripe',
-                        variables: {
-                          colorPrimary: '#8b5cf6',
-                        }
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: '#8b5cf6',
                       }
-                    }}
-                  >
-                    <SubscribeForm />
-                  </Elements>
-                </div>
+                    }
+                  }}
+                >
+                  <SubscribeForm />
+                </Elements>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-600">Unable to load payment form. No client secret received.</p>
