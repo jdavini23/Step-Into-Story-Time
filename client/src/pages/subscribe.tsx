@@ -15,7 +15,7 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const SubscribeForm = () => {
+const SubscribeForm = ({ selectedTier }: { selectedTier: string }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -112,7 +112,9 @@ export default function Subscribe() {
   useEffect(() => {
     // Only create subscription if user is authenticated
     if (user) {
-      apiRequest("POST", "/api/get-or-create-subscription")
+      apiRequest("POST", "/api/get-or-create-subscription", {
+        tier: selectedTier
+      })
         .then((res) => res.json())
         .then((data) => {
           console.log("Subscription response:", data);
@@ -224,7 +226,7 @@ export default function Subscribe() {
                     }
                   }}
                 >
-                  <SubscribeForm />
+                  <SubscribeForm selectedTier={selectedTier} />
                 </Elements>
               ) : (
                 <div className="text-center py-8">

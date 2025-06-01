@@ -316,13 +316,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       user = await storage.updateStripeCustomerId(userId, customer.id);
 
+      // Determine pricing based on tier (default to premium if not specified)
+      const tier = req.body.tier || 'premium';
+      const unitAmount = tier === 'family' ? 1299 : 699; // $12.99 for family, $6.99 for premium
+      const productName = tier === 'family' ? 'Storytime Pro (Family Plan)' : 'Storytime Plus (Premium Plan)';
+
       // Create a price for the subscription
       const price = await stripe.prices.create({
         currency: 'usd',
-        unit_amount: 999, // $9.99 per month
+        unit_amount: unitAmount,
         recurring: { interval: 'month' },
         product_data: {
-          name: 'Premium Bedtime Stories',
+          name: productName,
         },
       });
 
