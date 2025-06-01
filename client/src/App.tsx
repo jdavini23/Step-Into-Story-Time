@@ -33,6 +33,7 @@ function Router() {
     <div className="min-h-screen bg-yellow-50">
       <Header />
       <Switch>
+        <Route path="/pricing" component={Pricing} />
         {!isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
@@ -41,7 +42,6 @@ function Router() {
             <Route path="/story-wizard" component={StoryWizard} />
             <Route path="/story/:id" component={StoryReader} />
             <Route path="/subscribe" component={Subscribe} />
-            <Route path="/pricing" component={Pricing} />
           </>
         )}
         <Route component={NotFound} />
