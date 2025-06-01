@@ -277,19 +277,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
       // If user already has a subscription, retrieve it
       if (user.stripeSubscriptionId) {
-        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
+          expand: ['latest_invoice.payment_intent'],
+        });
         
         let clientSecret = null;
-        if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
-          const invoice = subscription.latest_invoice;
-          if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
-            clientSecret = invoice.payment_intent.client_secret;
+        
+        // If subscription is incomplete, get the client secret
+        if (subscription.status === 'incomplete' || subscription.status === 'past_due') {
+          if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
+            const invoice = subscription.latest_invoice;
+            if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
+              clientSecret = invoice.payment_intent.client_secret;
+            }
           }
         }
+
+        console.log('Existing subscription status:', subscription.status);
+        console.log('Existing subscription client secret:', clientSecret ? 'Yes' : 'No');
 
         res.send({
           subscriptionId: subscription.id,
           clientSecret,
+          status: subscription.status,
         });
         return;
       }
@@ -321,6 +331,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
         customer: customer.id,
         items: [{ price: price.id }],
         payment_behavior: 'default_incomplete',
+        payment_settings: {
+          payment_method_types: ['card'],
+          save_default_payment_method: 'on_subscription',
+        },
         expand: ['latest_invoice.payment_intent'],
       });
 
@@ -332,6 +346,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
           clientSecret = invoice.payment_intent.client_secret;
         }
+      }
+
+      console.log('Subscription created:', subscription.id);
+      console.log('Client secret generated:', clientSecret ? 'Yes' : 'No');
+      console.log('Latest invoice payment intent:', typeof invoice?.payment_intent);
+
+      if (!clientSecret) {
+        throw new Error('Failed to create payment intent for subscription');
       }
 
       res.send({

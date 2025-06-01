@@ -98,7 +98,13 @@ export default function Subscribe() {
     apiRequest("POST", "/api/get-or-create-subscription")
       .then((res) => res.json())
       .then((data) => {
-        setClientSecret(data.clientSecret);
+        console.log("Subscription response:", data);
+        console.log("Client secret:", data.clientSecret);
+        if (data.clientSecret) {
+          setClientSecret(data.clientSecret);
+        } else {
+          console.error("No client secret in response");
+        }
         setIsLoading(false);
       })
       .catch((error) => {
@@ -172,24 +178,32 @@ export default function Subscribe() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {clientSecret ? (
-                <Elements 
-                  stripe={stripePromise} 
-                  options={{ 
-                    clientSecret,
-                    appearance: {
-                      theme: 'stripe',
-                      variables: {
-                        colorPrimary: '#8b5cf6',
+              {isLoading ? (
+                <div className="text-center py-8">
+                  <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
+                  <p className="text-gray-600">Setting up your subscription...</p>
+                </div>
+              ) : clientSecret ? (
+                <div>
+                  <p className="text-sm text-gray-500 mb-4">Client Secret: {clientSecret.substring(0, 20)}...</p>
+                  <Elements 
+                    stripe={stripePromise} 
+                    options={{ 
+                      clientSecret,
+                      appearance: {
+                        theme: 'stripe',
+                        variables: {
+                          colorPrimary: '#8b5cf6',
+                        }
                       }
-                    }
-                  }}
-                >
-                  <SubscribeForm />
-                </Elements>
+                    }}
+                  >
+                    <SubscribeForm />
+                  </Elements>
+                </div>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">Unable to load payment form. Please try again later.</p>
+                  <p className="text-gray-600">Unable to load payment form. No client secret received.</p>
                   <Button 
                     onClick={() => window.location.reload()} 
                     variant="outline" 
