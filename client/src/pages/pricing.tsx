@@ -32,7 +32,7 @@ export default function Pricing() {
       ],
       cta: "Start for Free",
       ctaVariant: "outline" as const,
-      href: "/api/login"
+      href: "/api/login?signup=true"
     },
     {
       id: "premium",
@@ -263,7 +263,7 @@ export default function Pricing() {
           <h3 className="text-2xl font-bold mb-4">Ready to Create Magic?</h3>
           <p className="text-lg mb-6 text-purple-100">Join thousands of families creating unforgettable bedtime memories</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/api/login">
+            <Link href="/api/login?signup=true">
               <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100">
                 Start Free Today
               </Button>
