@@ -355,7 +355,7 @@ export default function StoryReader() {
 
         {/* Story content */}
         <Card className={`shadow-2xl p-8 mb-8 ${cardClasses}`}>
-          <article className="prose prose-lg max-w-none leading-relaxed">
+          <article className="max-w-none leading-relaxed">
             {/* Story illustration placeholder */}
             <div className="w-full h-64 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 dark:from-purple-900 dark:via-blue-900 dark:to-yellow-900 rounded-xl mb-8 flex items-center justify-center">
               <div className="text-center">
