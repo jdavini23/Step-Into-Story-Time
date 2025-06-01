@@ -29,20 +29,43 @@ const SubscribeForm = () => {
       return;
     }
 
+    // Submit the payment element to collect payment method
+    const { error: submitError } = await elements.submit();
+    if (submitError) {
+      toast({
+        title: "Payment Failed",
+        description: submitError.message,
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Confirm the payment/setup intent
     const { error } = await stripe.confirmPayment({
       elements,
       confirmParams: {
-        return_url: `${window.location.origin}/dashboard`,
+        return_url: `${window.location.origin}/dashboard?payment=success`,
       },
     });
 
     if (error) {
-      toast({
-        title: "Payment Failed",
-        description: error.message,
-        variant: "destructive",
-      });
+      // Handle different error types
+      if (error.type === 'card_error' || error.type === 'validation_error') {
+        toast({
+          title: "Payment Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Payment Error", 
+          description: "An unexpected error occurred. Please try again.",
+          variant: "destructive",
+        });
+      }
     } else {
+      // Payment succeeded
       toast({
         title: "Payment Successful",
         description: "Welcome to Premium! You now have unlimited story generation.",
@@ -53,7 +76,12 @@ const SubscribeForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <PaymentElement />
+      <PaymentElement 
+        options={{
+          layout: 'tabs',
+          paymentMethodOrder: ['card']
+        }}
+      />
       <Button type="submit" disabled={!stripe || isLoading} className="w-full">
         {isLoading ? "Processing..." : "Subscribe for $9.99/month"}
       </Button>
@@ -145,12 +173,30 @@ export default function Subscribe() {
             </CardHeader>
             <CardContent>
               {clientSecret ? (
-                <Elements stripe={stripePromise} options={{ clientSecret }}>
+                <Elements 
+                  stripe={stripePromise} 
+                  options={{ 
+                    clientSecret,
+                    appearance: {
+                      theme: 'stripe',
+                      variables: {
+                        colorPrimary: '#8b5cf6',
+                      }
+                    }
+                  }}
+                >
                   <SubscribeForm />
                 </Elements>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-600">Unable to load payment form. Please try again later.</p>
+                  <Button 
+                    onClick={() => window.location.reload()} 
+                    variant="outline" 
+                    className="mt-4"
+                  >
+                    Retry
+                  </Button>
                 </div>
               )}
             </CardContent>
