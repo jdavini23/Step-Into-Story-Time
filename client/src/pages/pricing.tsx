@@ -4,8 +4,26 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Star, Crown, Sparkles, Heart, Users } from "lucide-react";
 import { Link } from "wouter";
+import { useAuth } from "@/hooks/useAuth";
 
 export default function Pricing() {
+  const { isAuthenticated } = useAuth();
+
+  const handlePlanClick = (tier: string) => {
+    if (!isAuthenticated) {
+      // Store the intended destination and redirect to login
+      const returnUrl = tier === 'free' ? '/' : `/subscribe?tier=${tier}`;
+      window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
+    } else {
+      // User is authenticated, proceed to subscription
+      if (tier === 'free') {
+        window.location.href = '/';
+      } else {
+        window.location.href = `/subscribe?tier=${tier}`;
+      }
+    }
+  };
+
   const tiers = [
     {
       id: "free",
@@ -31,8 +49,7 @@ export default function Pricing() {
         "Basic personalization only"
       ],
       cta: "Start for Free",
-      ctaVariant: "outline" as const,
-      href: "/api/login?signup=true"
+      ctaVariant: "outline" as const
     },
     {
       id: "premium",
@@ -59,8 +76,7 @@ export default function Pricing() {
       ],
       limitations: [],
       cta: "Upgrade to Plus",
-      ctaVariant: "default" as const,
-      href: "/subscribe?tier=premium"
+      ctaVariant: "default" as const
     },
     {
       id: "family",
@@ -89,8 +105,7 @@ export default function Pricing() {
       ],
       limitations: [],
       cta: "Go Pro",
-      ctaVariant: "default" as const,
-      href: "/subscribe?tier=family"
+      ctaVariant: "default" as const
     }
   ];
 
@@ -186,19 +201,18 @@ export default function Pricing() {
                   ))}
                 </ul>
                 
-                <Link href={tier.href}>
-                  <Button 
-                    variant={tier.ctaVariant}
-                    className={`w-full py-3 ${
-                      tier.popular 
-                        ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' 
-                        : ''
-                    }`}
-                  >
-                    {tier.id === 'family' && <Crown className="h-4 w-4 mr-2" />}
-                    {tier.cta}
-                  </Button>
-                </Link>
+                <Button 
+                  variant={tier.ctaVariant}
+                  onClick={() => handlePlanClick(tier.id)}
+                  className={`w-full py-3 ${
+                    tier.popular 
+                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' 
+                      : ''
+                  }`}
+                >
+                  {tier.id === 'family' && <Crown className="h-4 w-4 mr-2" />}
+                  {tier.cta}
+                </Button>
               </CardContent>
             </Card>
           ))}
@@ -263,16 +277,20 @@ export default function Pricing() {
           <h3 className="text-2xl font-bold mb-4">Ready to Create Magic?</h3>
           <p className="text-lg mb-6 text-purple-100">Join thousands of families creating unforgettable bedtime memories</p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link href="/api/login?signup=true">
-              <Button variant="secondary" className="bg-white text-purple-600 hover:bg-gray-100">
-                Start Free Today
-              </Button>
-            </Link>
-            <Link href="/subscribe?tier=premium">
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-purple-600">
-                Upgrade to Premium
-              </Button>
-            </Link>
+            <Button 
+              variant="secondary" 
+              onClick={() => handlePlanClick('free')}
+              className="bg-white text-purple-600 hover:bg-gray-100"
+            >
+              Start Free Today
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={() => handlePlanClick('premium')}
+              className="border-white text-white hover:bg-white hover:text-purple-600"
+            >
+              Upgrade to Premium
+            </Button>
           </div>
         </div>
       </div>
