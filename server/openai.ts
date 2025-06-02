@@ -200,7 +200,6 @@ export async function generateBedtimeStory(
         ],
         response_format: { type: "json_object" },
         temperature: 0.8,
-        timeout: 30000, // 30 second timeout
       })
     );
 
