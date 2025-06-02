@@ -2,12 +2,15 @@ import {
   users,
   stories,
   favorites,
+  usageTracking,
   type User,
   type UpsertUser,
   type Story,
   type InsertStory,
   type Favorite,
   type InsertFavorite,
+  type UsageTracking,
+  type InsertUsageTracking,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -21,6 +24,7 @@ export interface IStorage {
   upsertUser(user: UpsertUser): Promise<User>;
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
   updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string): Promise<User>;
+  updateUserSubscription(userId: string, tier: string, status: string): Promise<User>;
   
   // Story operations
   createStory(userId: string, story: InsertStory): Promise<Story>;
@@ -34,6 +38,11 @@ export interface IStorage {
   removeFavorite(userId: string, storyId: number): Promise<boolean>;
   getUserFavorites(userId: string): Promise<Story[]>;
   isStoryFavorited(userId: string, storyId: number): Promise<boolean>;
+  
+  // Usage tracking operations
+  getUserWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking | undefined>;
+  createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking>;
+  incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking>;
 }
 
 export class DatabaseStorage implements IStorage {
