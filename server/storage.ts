@@ -121,7 +121,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(stories)
       .where(and(eq(stories.id, id), eq(stories.userId, userId)));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   // Favorite operations
@@ -141,7 +141,7 @@ export class DatabaseStorage implements IStorage {
     const result = await db
       .delete(favorites)
       .where(and(eq(favorites.userId, userId), eq(favorites.storyId, storyId)));
-    return result.rowCount > 0;
+    return (result.rowCount || 0) > 0;
   }
 
   async getUserFavorites(userId: string): Promise<Story[]> {
@@ -193,6 +193,69 @@ export class DatabaseStorage implements IStorage {
       .where(eq(users.id, userId))
       .returning();
     return user;
+  }
+
+  async updateUserSubscription(userId: string, tier: string, status: string): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({ 
+        subscriptionTier: tier,
+        subscriptionStatus: status,
+        updatedAt: new Date()
+      })
+      .where(eq(users.id, userId))
+      .returning();
+    return user;
+  }
+
+  // Usage tracking operations
+  async getUserWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking | undefined> {
+    const [usage] = await db
+      .select()
+      .from(usageTracking)
+      .where(and(
+        eq(usageTracking.userId, userId),
+        eq(usageTracking.weekStart, weekStart)
+      ))
+      .limit(1);
+    return usage;
+  }
+
+  async createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking> {
+    const [usage] = await db
+      .insert(usageTracking)
+      .values({
+        userId,
+        weekStart,
+        storiesGenerated: 0
+      })
+      .returning();
+    return usage;
+  }
+
+  async incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking> {
+    // First, get current usage
+    let usage = await this.getUserWeeklyUsage(userId, weekStart);
+    
+    if (!usage) {
+      // Create new usage record if doesn't exist
+      usage = await this.createUsageTracking(userId, weekStart);
+    }
+
+    // Increment the count
+    const [updatedUsage] = await db
+      .update(usageTracking)
+      .set({ 
+        storiesGenerated: (usage.storiesGenerated || 0) + 1,
+        updatedAt: new Date()
+      })
+      .where(and(
+        eq(usageTracking.userId, userId),
+        eq(usageTracking.weekStart, weekStart)
+      ))
+      .returning();
+    
+    return updatedUsage;
   }
 }
 
