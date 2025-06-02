@@ -468,8 +468,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
             // Find user by Stripe customer ID
             const userResults = await db.select().from(users).where(eq(users.stripeCustomerId, customer.id));
             
-            if (users.length > 0) {
-              const user = users[0];
+            if (userResults.length > 0) {
+              const user = userResults[0];
               
               // Determine tier based on subscription amount
               const priceAmount = invoice.amount_paid;
