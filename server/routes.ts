@@ -6,7 +6,10 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertStorySchema } from "@shared/schema";
 import { generateBedtimeStory } from "./openai";
 import { checkStoryGenerationPermissions, validateStoryParameters, addTierInfoToResponse } from "./tierMiddleware";
-import { incrementWeeklyUsage, getCurrentWeekStart } from "./tierManager";
+import { incrementWeeklyUsage, getCurrentWeekStart, updateUserSubscription } from "./tierManager";
+import { db } from "./db";
+import { users } from "../shared/schema";
+import { eq } from "drizzle-orm";
 import { z } from "zod";
 
 if (!process.env.STRIPE_SECRET_KEY) {
@@ -38,8 +41,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  // Get user tier and usage information
+  app.get('/api/user/tier-info', isAuthenticated, addTierInfoToResponse, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const { getUserTier, canUserGenerateStory, getUserWeeklyUsage, getCurrentWeekStart } = require('./tierManager');
+      
+      const { tier, status } = await getUserTier(userId);
+      const permissionCheck = await canUserGenerateStory(userId);
+      const weeklyUsage = await getUserWeeklyUsage(userId);
+      
+      res.json({
+        tier,
+        status,
+        canGenerate: permissionCheck.canGenerate,
+        reason: permissionCheck.reason,
+        storiesRemaining: permissionCheck.storiesRemaining,
+        weeklyUsage: weeklyUsage.storiesGenerated,
+        weekStart: weeklyUsage.weekStart,
+        limits: req.tierLimits
+      });
+    } catch (error) {
+      console.error("Error fetching tier info:", error);
+      res.status(500).json({ message: "Failed to fetch tier information" });
+    }
+  });
+
   // Story generation endpoint
-  app.post("/api/stories/generate", isAuthenticated, async (req: any, res) => {
+  app.post("/api/stories/generate", 
+    isAuthenticated, 
+    checkStoryGenerationPermissions,
+    validateStoryParameters,
+    async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       
@@ -66,8 +99,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
         title: generatedStory.title,
         content: generatedStory.content,
       });
+
+      // Track usage for free users
+      if (req.userTier === 'free') {
+        await incrementWeeklyUsage(userId);
+      }
       
-      res.json(story);
+      res.json({
+        ...story,
+        userTier: req.userTier,
+        tierLimits: req.tierLimits
+      });
     } catch (error) {
       console.error("Error generating story:", error);
       if (error instanceof z.ZodError) {
@@ -394,6 +436,113 @@ export async function registerRoutes(app: Express): Promise<Server> {
       console.error("Error checking subscription status:", error);
       res.status(500).json({ message: "Failed to check subscription status" });
     }
+  });
+
+  // Stripe webhook handler
+  app.post('/api/stripe/webhook', async (req, res) => {
+    const sig = req.headers['stripe-signature'] as string;
+    let event: Stripe.Event;
+
+    try {
+      const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
+      if (!webhookSecret) {
+        console.error('Missing STRIPE_WEBHOOK_SECRET');
+        return res.status(400).send('Webhook secret not configured');
+      }
+
+      event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
+    } catch (err: any) {
+      console.error('Webhook signature verification failed:', err.message);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+
+    try {
+      switch (event.type) {
+        case 'invoice.payment_succeeded': {
+          const invoice = event.data.object as Stripe.Invoice;
+          
+          if (invoice.subscription) {
+            const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
+            const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
+            
+            // Find user by Stripe customer ID
+            const userResults = await db.select().from(users).where(eq(users.stripeCustomerId, customer.id));
+            
+            if (users.length > 0) {
+              const user = users[0];
+              
+              // Determine tier based on subscription amount
+              const priceAmount = invoice.amount_paid;
+              let tier: 'premium' | 'family' = 'premium';
+              
+              if (priceAmount >= 1299) { // $12.99 or higher = family plan
+                tier = 'family';
+              }
+              
+              // Update user subscription tier and status
+              await updateUserSubscription(user.id, tier, subscription.status);
+              
+              console.log(`Updated user ${user.id} to ${tier} tier with status ${subscription.status}`);
+            }
+          }
+          break;
+        }
+        
+        case 'customer.subscription.updated': {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
+          
+          // Find user by Stripe customer ID
+          const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
+          
+          if (users.length > 0) {
+            const user = users[0];
+            
+            // Determine tier based on subscription items
+            let tier: 'free' | 'premium' | 'family' = 'free';
+            
+            if (subscription.status === 'active' || subscription.status === 'trialing') {
+              // Check the price to determine tier
+              if (subscription.items.data.length > 0) {
+                const price = subscription.items.data[0].price;
+                if (price.unit_amount && price.unit_amount >= 1299) {
+                  tier = 'family';
+                } else if (price.unit_amount && price.unit_amount >= 699) {
+                  tier = 'premium';
+                }
+              }
+            }
+            
+            await updateUserSubscription(user.id, tier, subscription.status);
+            console.log(`Updated user ${user.id} subscription: ${tier} tier, status ${subscription.status}`);
+          }
+          break;
+        }
+        
+        case 'customer.subscription.deleted': {
+          const subscription = event.data.object as Stripe.Subscription;
+          const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
+          
+          // Find user by Stripe customer ID
+          const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
+          
+          if (users.length > 0) {
+            const user = users[0];
+            await updateUserSubscription(user.id, 'free', 'canceled');
+            console.log(`Downgraded user ${user.id} to free tier (subscription canceled)`);
+          }
+          break;
+        }
+        
+        default:
+          console.log(`Unhandled event type: ${event.type}`);
+      }
+    } catch (error) {
+      console.error('Error processing webhook:', error);
+      return res.status(500).send('Webhook processing failed');
+    }
+
+    res.json({ received: true });
   });
 
   const httpServer = createServer(app);
