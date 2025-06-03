@@ -131,7 +131,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (tier === 'free') {
         // Sort by creation date (newest first) and limit to 3 most recent
         stories = stories
-          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .sort((a, b) => {
+            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+            return dateB - dateA;
+          })
           .slice(0, 3);
       }
       

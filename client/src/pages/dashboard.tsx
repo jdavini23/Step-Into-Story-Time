@@ -14,6 +14,7 @@ import { StoryFilterButtons } from "@/components/dashboard/story-filter-buttons"
 import { StoryCard } from "@/components/dashboard/story-card";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
+import { LibraryCapacityWarning } from "@/components/dashboard/library-capacity-warning";
 import LoadingOverlay from "@/components/loading-overlay";
 
 export default function Dashboard() {
@@ -75,9 +76,16 @@ export default function Dashboard() {
     <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <DashboardHeader user={user} />
+        <DashboardHeader user={user as any} />
 
         <PremiumStatusCard subscriptionStatus={subscriptionStatus} />
+
+        {tierInfo && (
+          <LibraryCapacityWarning 
+            tierInfo={tierInfo}
+            currentStoryCount={stories.length}
+          />
+        )}
 
         <QuickActionsGrid 
           stories={stories}
