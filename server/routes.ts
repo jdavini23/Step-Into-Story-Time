@@ -396,7 +396,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         items: [{
           price_data: {
             currency: 'usd',
-            product: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
+            product_data: {
+              name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
+            },
             unit_amount: priceInCents,
             recurring: {
               interval: billing === 'yearly' ? 'year' : 'month',
