@@ -330,7 +330,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         // If subscription is expired, cancel it and create a new one
         if (subscription.status === 'incomplete_expired') {
           console.log('Subscription expired, canceling and creating new one');
-          await stripe.subscriptions.cancel(subscription.id);
+          try {
+            await stripe.subscriptions.cancel(subscription.id);
+          } catch (cancelError: any) {
+            // If subscription doesn't exist anymore, that's fine - we'll create a new one
+            if (cancelError.code === 'resource_missing') {
+              console.log('Expired subscription no longer exists in Stripe, proceeding to create new one');
+            } else {
+              throw cancelError;
+            }
+          }
           // Clear the expired subscription ID and continue to create new one
           user = await storage.updateUserStripeInfo(userId, user.stripeCustomerId!, null);
         } else {
