@@ -21,12 +21,16 @@ import { DebugPanel } from "@/components/debug-panel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Calendar, Crown, TrendingUp, Sparkles, X } from "lucide-react";
+import { SkeletonCard, SkeletonQuickActions } from "@/components/ui/skeleton-card";
+import { EnhancedErrorState } from "@/components/enhanced-error-state";
+import { useEnhancedToast } from "@/components/enhanced-toast-system";
+import { FocusManagement } from "@/components/accessibility-enhancements";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const { data: tierInfo } = useTierInfo();
   const [, setLocation] = useLocation();
-  const { toast } = useToast();
+  const { showActionToast } = useEnhancedToast();
 
   const { data: stories = [], isLoading: storiesLoading, error, refetch: refetchStories } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
@@ -57,9 +61,9 @@ export default function Dashboard() {
   useEffect(() => {
     // Handle unauthorized user
     if (!isLoading && !user) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+      showActionToast.toast({
+        title: "Session Required",
+        description: "Redirecting to login...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -70,9 +74,9 @@ export default function Dashboard() {
 
     // Handle API errors
     if (error && isUnauthorizedError(error as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
+      showActionToast.toast({
+        title: "Session Expired",
+        description: "Redirecting to login...",
         variant: "destructive",
       });
       setTimeout(() => {
@@ -81,11 +85,7 @@ export default function Dashboard() {
       return;
     } else if (error) {
       console.error('Stories loading error:', error);
-      toast({
-        title: "Error Loading Stories",
-        description: "There was a problem loading your stories. Please try refreshing the page.",
-        variant: "destructive",
-      });
+      // Error handling is now done in the UI component
     }
 
     // Debug logging - only in development
@@ -102,8 +102,34 @@ export default function Dashboard() {
     }
   }, [user, isLoading, error, toast, stories, favoriteStories, showFavorites, tierInfo]);
 
-  if (isLoading || storiesLoading) {
+  if (isLoading) {
     return <LoadingOverlay isLoading={true} message="Loading your story library..." />;
+  }
+
+  if (storiesLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <DashboardHeader user={user as any} />
+          
+          {/* Skeleton for quick actions */}
+          <SkeletonQuickActions />
+          
+          {/* Skeleton for filter buttons */}
+          <div className="flex space-x-2 mb-6">
+            <div className="h-9 w-24 bg-gray-200 rounded-md animate-pulse"></div>
+            <div className="h-9 w-32 bg-gray-200 rounded-md animate-pulse"></div>
+          </div>
+          
+          {/* Skeleton for story grid */}
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {[...Array(6)].map((_, index) => (
+              <SkeletonCard key={index} />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   const displayedStories = showFavorites ? favoriteStories : stories;
@@ -189,8 +215,9 @@ export default function Dashboard() {
   
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8 lg:py-12">
+      <FocusManagement />
+      <div id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
         <DashboardHeader user={user as any} />
 
@@ -301,6 +328,7 @@ export default function Dashboard() {
               onClick={() => {
                 refetchStories();
                 refetchFavorites();
+                showActionToast.dataRefreshed();
               }}
             >
               Refresh Stories
@@ -309,21 +337,18 @@ export default function Dashboard() {
         </div>
 
         {error && (
-          <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800 mb-6">
-            <CardContent className="px-4 py-3">
-              <div className="flex items-center space-x-3">
-                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
-                <div>
-                  <h4 className="font-semibold text-sm text-red-800 dark:text-red-200">
-                    Error Loading Stories
-                  </h4>
-                  <p className="text-xs mt-0.5 text-red-700 dark:text-red-300">
-                    There was a problem loading your stories. Please try refreshing the page.
-                  </p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          <div className="mb-6">
+            <EnhancedErrorState 
+              error={error as Error}
+              onRetry={() => {
+                refetchStories();
+                refetchFavorites();
+                showActionToast.dataRefreshed();
+              }}
+              title="Error Loading Stories"
+              description="There was a problem loading your stories. Please try again."
+            />
+          </div>
         )}
 
         {!error && displayedStories.length > 0 ? (

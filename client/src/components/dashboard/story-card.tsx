@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Heart, HeartOff } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useEnhancedToast } from "@/components/enhanced-toast-system";
 import type { Story } from "@shared/schema";
 
 interface StoryCardProps {
