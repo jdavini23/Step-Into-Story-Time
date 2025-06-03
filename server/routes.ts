@@ -6,7 +6,7 @@ import { setupAuth, isAuthenticated } from "./replitAuth";
 import { insertStorySchema } from "@shared/schema";
 import { generateBedtimeStory } from "./openai";
 import { checkStoryGenerationPermissions, validateStoryParameters, addTierInfoToResponse } from "./tierMiddleware";
-import { incrementWeeklyUsage, getCurrentWeekStart, updateUserSubscription } from "./tierManager";
+import { incrementWeeklyUsage, getCurrentWeekStart, updateUserSubscription, getUserTier, canUserGenerateStory, getUserWeeklyUsage } from "./tierManager";
 import { db } from "./db";
 import { users } from "../shared/schema";
 import { eq } from "drizzle-orm";
@@ -45,7 +45,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/tier-info', isAuthenticated, addTierInfoToResponse, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { getUserTier, canUserGenerateStory, getUserWeeklyUsage, getCurrentWeekStart } = require('./tierManager');
       
       const { tier, status } = await getUserTier(userId);
       const permissionCheck = await canUserGenerateStory(userId);
