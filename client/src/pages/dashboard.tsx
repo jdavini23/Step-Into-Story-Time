@@ -78,13 +78,13 @@ export default function Dashboard() {
   const getActiveNotification = () => {
     if (!tierInfo) return null;
 
-    const weeklyUsage = tierInfo.usage.storiesThisWeek;
-    const maxStories = tierInfo.limits.maxStoriesPerWeek;
+    const weeklyUsage = tierInfo.weeklyUsage;
+    const maxStories = tierInfo.limits.storiesPerWeek;
     const isAtWeeklyLimit = weeklyUsage >= maxStories;
     const isNearWeeklyLimit = weeklyUsage >= maxStories * 0.8;
 
     const currentStoryCount = stories.length;
-    const maxStorageStories = tierInfo.limits.maxStoredStories;
+    const maxStorageStories = tierInfo.limits.maxStoriesInLibrary;
     const isAtStorageLimit = currentStoryCount >= maxStorageStories;
     const isNearStorageLimit = currentStoryCount >= maxStorageStories * 0.9;
 
