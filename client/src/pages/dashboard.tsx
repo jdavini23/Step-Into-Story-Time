@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { useTierInfo } from "@/hooks/useTierInfo";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
@@ -17,6 +18,7 @@ import LoadingOverlay from "@/components/loading-overlay";
 
 export default function Dashboard() {
   const { user, isLoading } = useAuth();
+  const { data: tierInfo } = useTierInfo();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 

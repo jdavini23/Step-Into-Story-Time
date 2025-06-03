@@ -2,6 +2,7 @@
 import { useParams, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useTierInfo } from "@/hooks/useTierInfo";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
@@ -23,7 +24,6 @@ import {
   ZoomOut
 } from "lucide-react";
 import type { Story } from "@shared/schema";
-import jsPDF from "jspdf";
 import { StoryReadingControls } from "@/components/story-reading-controls";
 import { StoryActions } from "@/components/story-actions";
 
@@ -31,6 +31,7 @@ export default function StoryReader() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
+  const { data: tierInfo } = useTierInfo();
   const { toast } = useToast();
   const storyId = params.id;
 
@@ -120,64 +121,53 @@ export default function StoryReader() {
     }
   }, [error, toast]);
 
-  const downloadPDF = useCallback(() => {
+  const downloadPDF = useCallback(async () => {
     if (!story) return;
 
     try {
-      const pdf = new jsPDF();
-      const pageWidth = pdf.internal.pageSize.getWidth();
-      const margin = 20;
-      const maxWidth = pageWidth - (margin * 2);
-      
-      // Title
-      pdf.setFontSize(18);
-      pdf.setFont("helvetica", "bold");
-      const titleLines = pdf.splitTextToSize(story.title, maxWidth);
-      pdf.text(titleLines, margin, 30);
-      
-      // Subtitle
-      let yPosition = 30 + (titleLines.length * 7) + 10;
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "normal");
-      pdf.text("A magical bedtime story", margin, yPosition);
-      
-      // Story metadata
-      yPosition += 20;
-      pdf.setFontSize(10);
-      pdf.text(`Created: ${new Date(story.createdAt || '').toLocaleDateString()}`, margin, yPosition);
-      yPosition += 7;
-      pdf.text(`Reading time: ${story.length === 'short' ? '2-3' : '4-5'} minutes`, margin, yPosition);
-      yPosition += 7;
-      pdf.text(`Age: ${story.childAge} years old`, margin, yPosition);
-      
-      // Story content
-      yPosition += 20;
-      pdf.setFontSize(12);
-      pdf.setFont("helvetica", "normal");
-      
-      // Split content into paragraphs and fit to page
-      const paragraphs = story.content.split('\n\n');
-      
-      paragraphs.forEach((paragraph) => {
-        if (paragraph.trim()) {
-          const lines = pdf.splitTextToSize(paragraph.trim(), maxWidth);
-          
-          // Check if we need a new page
-          if (yPosition + (lines.length * 7) > pdf.internal.pageSize.getHeight() - margin) {
-            pdf.addPage();
-            yPosition = margin;
-          }
-          
-          pdf.text(lines, margin, yPosition);
-          yPosition += (lines.length * 7) + 10;
-        }
+      // Check if user has PDF download access
+      if (!tierInfo?.limits.canDownloadPdf) {
+        toast({
+          title: "Premium Feature",
+          description: "PDF downloads are available for Premium and Family subscribers only.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      const response = await fetch(`/api/stories/${story.id}/pdf`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/pdf',
+        },
       });
-      
-      pdf.save(`${story.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`);
-      
+
+      if (!response.ok) {
+        if (response.status === 403) {
+          const errorData = await response.json();
+          toast({
+            title: "Access Restricted",
+            description: errorData.message || "PDF downloads are available for Premium subscribers only.",
+            variant: "destructive"
+          });
+          return;
+        }
+        throw new Error('Failed to download PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${story.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
       toast({
-        title: "Success",
-        description: "Story downloaded as PDF!",
+        title: "PDF Downloaded",
+        description: "Your story has been saved as a PDF!"
       });
     } catch (error) {
       toast({
@@ -186,7 +176,7 @@ export default function StoryReader() {
         variant: "destructive",
       });
     }
-  }, [story, toast]);
+  }, [story, toast, tierInfo]);
 
   const shareStory = useCallback(() => {
     if (navigator.share && story) {
@@ -384,6 +374,7 @@ export default function StoryReader() {
           onDownloadPDF={downloadPDF}
           onShare={shareStory}
           onCreateAnother={() => setLocation("/story-wizard")}
+          tierInfo={tierInfo}
           cardClasses={cardClasses}
         />
       </div>
