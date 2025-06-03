@@ -100,7 +100,7 @@ export default function Dashboard() {
         user: user?.id
       });
     }
-  }, [user, isLoading, error, toast, stories, favoriteStories, showFavorites, tierInfo]);
+  }, [user, isLoading, error, showActionToast, stories, favoriteStories, showFavorites, tierInfo]);
 
   if (isLoading) {
     return <LoadingOverlay isLoading={true} message="Loading your story library..." />;
