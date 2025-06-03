@@ -381,7 +381,9 @@ export default function StoryWizard() {
                         </div>
                         <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
                           tierInfo?.tier === 'free' 
-                            ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
+                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>y-50 opacity-60 cursor-not-allowed' 
                             : 'border-gray-200 hover:border-purple-300'
                         }`}>
                           <RadioGroupItem 

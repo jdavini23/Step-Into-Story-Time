@@ -126,7 +126,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const { tier } = await getUserTier(userId);
       let stories = await storage.getUserStories(userId);
-      
+
       // Apply story library restrictions for free users
       if (tier === 'free') {
         // Sort by creation date (newest first) and limit to 3 most recent
@@ -138,7 +138,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           })
           .slice(0, 3);
       }
-      
+
       res.json(stories);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -174,7 +174,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
@@ -188,7 +188,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           upgradeRequired: true
         });
       }
-      
+
       const story = await storage.getStory(storyId, userId);
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
@@ -198,13 +198,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const pdfBuffer = tier === 'family' 
         ? generateEnhancedPDF(story)
         : generateStoryPDF(story);
-      
+
       const filename = `${story.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
-      
+
       res.setHeader('Content-Type', 'application/pdf');
       res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
       res.setHeader('Content-Length', pdfBuffer.length);
-      
+
       res.send(pdfBuffer);
     } catch (error) {
       console.error("Error generating PDF:", error);
@@ -593,10 +593,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
 
           // Find user by Stripe customer ID
-          const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
+          const userResults = await db.select().from(users).where(eq(users.stripeCustomerId, customer.id));
 
-          if (users.length > 0) {
-            const user = users[0];
+          if (userResults.length > 0) {
+            const user = userResults[0];
 
             // Determine tier based on subscription items
             let tier: 'free' | 'premium' | 'family' = 'free';
@@ -624,10 +624,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
 
           // Find user by Stripe customer ID
-          const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
+          const userResults = await db.select().from(users).where(eq(users.stripeCustomerId, customer.id));
 
-          if (users.length > 0) {
-            const user = users[0];
+          if (userResults.length > 0) {
+            const user = userResults[0];
             await updateUserSubscription(user.id, 'free', 'canceled');
             console.log(`Downgraded user ${user.id} to free tier (subscription canceled)`);
           }
@@ -652,11 +652,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const userId = req.user.claims.sub;
         const { tier, status = 'active' } = req.body;
-        
+
         if (!['free', 'premium', 'family'].includes(tier)) {
           return res.status(400).json({ message: 'Invalid tier' });
         }
-        
+
         await updateUserSubscription(userId, tier, status);
         res.json({ message: `User tier set to ${tier}`, tier, status });
       } catch (error) {
@@ -670,14 +670,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const userId = req.user.claims.sub;
         const weekStart = getCurrentWeekStart();
-        
+
         await db.update(usageTracking)
           .set({ storiesGenerated: 0, updatedAt: new Date() })
           .where(and(
             eq(usageTracking.userId, userId),
             eq(usageTracking.weekStart, weekStart)
           ));
-          
+
         res.json({ message: 'Weekly usage reset' });
       } catch (error) {
         console.error('Error resetting usage:', error);
@@ -693,7 +693,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { tier, status } = await getUserTier(userId);
         const weeklyUsage = await getUserWeeklyUsage(userId);
         const permissionCheck = await canUserGenerateStory(userId);
-        
+
         res.json({
           user: {
             id: user?.id,
@@ -718,7 +718,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const { eventType, tier = 'premium' } = req.body;
         const userId = req.user.claims.sub;
         const user = await storage.getUser(userId);
-        
+
         if (!user) {
           return res.status(404).json({ message: 'User not found' });
         }
@@ -728,17 +728,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
             await updateUserSubscription(userId, tier, 'active');
             res.json({ message: `Simulated payment success for ${tier} tier` });
             break;
-          
+
           case 'subscription_canceled':
             await updateUserSubscription(userId, 'free', 'canceled');
             res.json({ message: 'Simulated subscription cancellation' });
             break;
-          
+
           case 'payment_failed':
             await updateUserSubscription(userId, tier, 'past_due');
             res.json({ message: 'Simulated payment failure' });
             break;
-          
+
           default:
             res.status(400).json({ message: 'Invalid event type' });
         }

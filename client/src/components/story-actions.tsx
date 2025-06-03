@@ -1,5 +1,4 @@
 
-import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Download, Share2, Plus, Lock } from "lucide-react";
