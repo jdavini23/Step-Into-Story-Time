@@ -52,20 +52,39 @@ const SubscribeForm = ({ selectedTier, currentPricing }: { selectedTier: string;
     });
 
     if (error) {
-      // Handle different error types
-      if (error.type === 'card_error' || error.type === 'validation_error') {
-        toast({
-          title: "Payment Failed",
-          description: error.message,
-          variant: "destructive",
-        });
-      } else {
-        toast({
-          title: "Payment Error", 
-          description: "An unexpected error occurred. Please try again.",
-          variant: "destructive",
-        });
+      console.error('Payment error details:', error);
+      
+      let errorMessage = "An unexpected error occurred. Please try again.";
+      
+      // Handle different error types with more specific messages
+      if (error.type === 'card_error') {
+        switch (error.code) {
+          case 'card_declined':
+            errorMessage = "Your card was declined. Please try a different payment method.";
+            break;
+          case 'insufficient_funds':
+            errorMessage = "Insufficient funds. Please check your account balance.";
+            break;
+          case 'incorrect_cvc':
+            errorMessage = "The CVC code is incorrect. Please check and try again.";
+            break;
+          case 'expired_card':
+            errorMessage = "Your card has expired. Please use a different card.";
+            break;
+          default:
+            errorMessage = error.message || "Card error occurred.";
+        }
+      } else if (error.type === 'validation_error') {
+        errorMessage = error.message || "Please check your payment information.";
+      } else if (error.type === 'authentication_required') {
+        errorMessage = "Additional authentication required. Please complete the verification.";
       }
+      
+      toast({
+        title: "Payment Failed",
+        description: errorMessage,
+        variant: "destructive",
+      });
     } else {
       // Payment succeeded
       toast({

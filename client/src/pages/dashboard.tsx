@@ -14,6 +14,7 @@ import { StoryCard } from "@/components/dashboard/story-card";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
 import LoadingOverlay from "@/components/loading-overlay";
+import { DebugPanel } from "@/components/debug-panel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Calendar, Crown, TrendingUp, Sparkles, X } from "lucide-react";
@@ -278,6 +279,9 @@ export default function Dashboard() {
       </div>
 
       <FloatingActionButton />
+      
+      {/* Debug Panel - only show in development */}
+      {import.meta.env.DEV && <DebugPanel />}
     </div>
   );
 }
