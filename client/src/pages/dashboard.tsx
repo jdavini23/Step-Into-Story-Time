@@ -74,30 +74,32 @@ export default function Dashboard() {
 
   const displayedStories = showFavorites ? favoriteStories : stories;
 
-  // Consolidated notification logic
+  // Single consolidated notification system
   const getActiveNotification = () => {
     if (!tierInfo) return null;
 
-    const weeklyUsage = tierInfo.weeklyUsage;
-    const maxStories = tierInfo.limits.storiesPerWeek;
-    const isAtWeeklyLimit = weeklyUsage >= maxStories;
-    const isNearWeeklyLimit = weeklyUsage >= maxStories * 0.8;
-
     const currentStoryCount = stories.length;
     const maxStorageStories = tierInfo.limits.maxStoriesInLibrary;
-    const isAtStorageLimit = currentStoryCount >= maxStorageStories;
-    const isNearStorageLimit = currentStoryCount >= maxStorageStories * 0.9;
-
+    const weeklyUsage = tierInfo.weeklyUsage;
+    const maxWeeklyStories = tierInfo.limits.storiesPerWeek;
     const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription;
 
-    // Priority order: Critical alerts first, then warnings, then promotional
+    // Storage limits (highest priority)
+    const isAtStorageLimit = currentStoryCount >= maxStorageStories;
+    const isNearStorageLimit = currentStoryCount >= maxStorageStories * 0.9;
+    
+    // Weekly limits
+    const isAtWeeklyLimit = weeklyUsage >= maxWeeklyStories;
+    const isNearWeeklyLimit = weeklyUsage >= maxWeeklyStories * 0.8;
+
+    // Priority: Critical storage > Critical weekly > Warning storage > Warning weekly > Promotional
     if (isAtStorageLimit && !dismissedNotifications.includes('storage-limit')) {
       return {
         id: 'storage-limit',
         type: 'critical' as const,
         title: 'Story Library Full',
-        message: `You've reached your limit of ${maxStorageStories} stories. To create new stories, you'll need to delete older ones or upgrade to Premium.`,
-        action: { text: 'Upgrade', onClick: () => setLocation("/pricing") },
+        message: `You've reached your limit of ${maxStorageStories} stories. Delete older stories or upgrade to Premium.`,
+        action: { text: 'Upgrade Now', onClick: () => setLocation("/pricing") },
         progress: { current: currentStoryCount, max: maxStorageStories }
       };
     }
@@ -106,10 +108,10 @@ export default function Dashboard() {
       return {
         id: 'weekly-limit',
         type: 'critical' as const,
-        title: 'Weekly Story Limit Reached',
-        message: `You've used all ${maxStories} stories this week. Premium users get unlimited stories.`,
-        action: { text: 'Upgrade', onClick: () => setLocation("/pricing") },
-        progress: { current: weeklyUsage, max: maxStories }
+        title: 'Weekly Story Limit Reached', 
+        message: `You've created ${maxWeeklyStories} stories this week. Premium users get unlimited stories.`,
+        action: { text: 'Upgrade Now', onClick: () => setLocation("/pricing") },
+        progress: { current: weeklyUsage, max: maxWeeklyStories }
       };
     }
 
@@ -118,7 +120,7 @@ export default function Dashboard() {
         id: 'storage-warning',
         type: 'warning' as const,
         title: 'Library Almost Full',
-        message: `You have ${currentStoryCount} of ${maxStorageStories} stories. Premium users get unlimited story storage.`,
+        message: `${currentStoryCount} of ${maxStorageStories} stories used. Premium users get unlimited storage.`,
         action: { text: 'Upgrade', onClick: () => setLocation("/pricing") },
         progress: { current: currentStoryCount, max: maxStorageStories }
       };
@@ -126,12 +128,12 @@ export default function Dashboard() {
 
     if (isNearWeeklyLimit && !dismissedNotifications.includes('weekly-warning')) {
       return {
-        id: 'weekly-warning',
+        id: 'weekly-warning', 
         type: 'warning' as const,
         title: 'Weekly Usage High',
-        message: `You've used ${weeklyUsage} of ${maxStories} stories this week. Premium users get unlimited stories.`,
+        message: `${weeklyUsage} of ${maxWeeklyStories} weekly stories used. Premium users get unlimited stories.`,
         action: { text: 'Upgrade', onClick: () => setLocation("/pricing") },
-        progress: { current: weeklyUsage, max: maxStories }
+        progress: { current: weeklyUsage, max: maxWeeklyStories }
       };
     }
 
@@ -140,8 +142,8 @@ export default function Dashboard() {
         id: 'premium-offer',
         type: 'info' as const,
         title: 'Unlock Premium Features',
-        message: 'Get unlimited stories, PDF downloads, and priority support with Premium.',
-        action: { text: 'Learn More', onClick: () => setLocation("/pricing") }
+        message: 'Get unlimited stories, PDF downloads, and priority support.',
+        action: { text: 'View Plans', onClick: () => setLocation("/pricing") }
       };
     }
 
@@ -166,71 +168,67 @@ export default function Dashboard() {
             activeNotification.type === 'warning' ? 'border-amber-200 bg-amber-50 dark:bg-amber-950 dark:border-amber-800' :
             'border-blue-200 bg-blue-50 dark:bg-blue-950 dark:border-blue-800'
           }`}>
-            <CardContent className="p-6">
-              <div className="flex items-start justify-between">
-                <div className="flex items-start space-x-4 flex-1">
+            <CardContent className="px-4 py-3">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-3 flex-1">
                   <div className="flex-shrink-0">
-                    {activeNotification.type === 'critical' && <AlertTriangle className="h-6 w-6 text-red-600 dark:text-red-400" />}
-                    {activeNotification.type === 'warning' && <Calendar className="h-6 w-6 text-amber-600 dark:text-amber-400" />}
-                    {activeNotification.type === 'info' && <Sparkles className="h-6 w-6 text-blue-600 dark:text-blue-400" />}
+                    {activeNotification.type === 'critical' && <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />}
+                    {activeNotification.type === 'warning' && <Calendar className="h-5 w-5 text-amber-600 dark:text-amber-400" />}
+                    {activeNotification.type === 'info' && <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />}
                   </div>
                   <div className="flex-1">
-                    <h3 className={`font-semibold ${
-                      activeNotification.type === 'critical' ? 'text-red-800 dark:text-red-200' :
-                      activeNotification.type === 'warning' ? 'text-amber-800 dark:text-amber-200' :
-                      'text-blue-800 dark:text-blue-200'
-                    }`}>
-                      {activeNotification.title}
-                    </h3>
-                    <p className={`text-sm mt-1 ${
-                      activeNotification.type === 'critical' ? 'text-red-700 dark:text-red-300' :
-                      activeNotification.type === 'warning' ? 'text-amber-700 dark:text-amber-300' :
-                      'text-blue-700 dark:text-blue-300'
-                    }`}>
-                      {activeNotification.message}
-                    </p>
-                    
-                    {activeNotification.progress && (
-                      <div className="flex items-center space-x-2 mt-3">
-                        <div className={`w-32 rounded-full h-2 ${
-                          activeNotification.type === 'critical' ? 'bg-red-200 dark:bg-red-800' :
-                          activeNotification.type === 'warning' ? 'bg-amber-200 dark:bg-amber-800' :
-                          'bg-blue-200 dark:bg-blue-800'
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <h4 className={`font-semibold text-sm ${
+                          activeNotification.type === 'critical' ? 'text-red-800 dark:text-red-200' :
+                          activeNotification.type === 'warning' ? 'text-amber-800 dark:text-amber-200' :
+                          'text-blue-800 dark:text-blue-200'
                         }`}>
-                          <div 
-                            className={`h-2 rounded-full transition-all duration-300 ${
-                              activeNotification.type === 'critical' ? 'bg-red-600 dark:bg-red-400' :
-                              activeNotification.type === 'warning' ? 'bg-amber-600 dark:bg-amber-400' :
-                              'bg-blue-600 dark:bg-blue-400'
-                            }`}
-                            style={{ width: `${Math.min((activeNotification.progress.current / activeNotification.progress.max) * 100, 100)}%` }}
-                          />
-                        </div>
-                        <span className={`text-xs font-medium ${
-                          activeNotification.type === 'critical' ? 'text-red-600 dark:text-red-400' :
-                          activeNotification.type === 'warning' ? 'text-amber-600 dark:text-amber-400' :
-                          'text-blue-600 dark:text-blue-400'
+                          {activeNotification.title}
+                        </h4>
+                        <p className={`text-xs mt-0.5 ${
+                          activeNotification.type === 'critical' ? 'text-red-700 dark:text-red-300' :
+                          activeNotification.type === 'warning' ? 'text-amber-700 dark:text-amber-300' :
+                          'text-blue-700 dark:text-blue-300'
                         }`}>
-                          {activeNotification.progress.current}/{activeNotification.progress.max}
-                        </span>
+                          {activeNotification.message}
+                        </p>
                       </div>
-                    )}
-
-                    <div className="flex items-center justify-between mt-4">
-                      <div className="flex items-center space-x-2">
-                        <TrendingUp className="w-4 h-4 text-purple-600" />
-                        <span className="text-sm font-medium text-gray-900 dark:text-gray-100">
-                          {activeNotification.type === 'info' ? 'Ready to upgrade?' : 'Need more capacity?'}
-                        </span>
+                      <div className="flex items-center space-x-2 ml-4">
+                        {activeNotification.progress && (
+                          <div className="flex items-center space-x-2">
+                            <div className={`w-16 rounded-full h-1.5 ${
+                              activeNotification.type === 'critical' ? 'bg-red-200 dark:bg-red-800' :
+                              activeNotification.type === 'warning' ? 'bg-amber-200 dark:bg-amber-800' :
+                              'bg-blue-200 dark:bg-blue-800'
+                            }`}>
+                              <div 
+                                className={`h-1.5 rounded-full transition-all duration-300 ${
+                                  activeNotification.type === 'critical' ? 'bg-red-600 dark:bg-red-400' :
+                                  activeNotification.type === 'warning' ? 'bg-amber-600 dark:bg-amber-400' :
+                                  'bg-blue-600 dark:bg-blue-400'
+                                }`}
+                                style={{ width: `${Math.min((activeNotification.progress.current / activeNotification.progress.max) * 100, 100)}%` }}
+                              />
+                            </div>
+                            <span className={`text-xs font-medium ${
+                              activeNotification.type === 'critical' ? 'text-red-600 dark:text-red-400' :
+                              activeNotification.type === 'warning' ? 'text-amber-600 dark:text-amber-400' :
+                              'text-blue-600 dark:text-blue-400'
+                            }`}>
+                              {activeNotification.progress.current}/{activeNotification.progress.max}
+                            </span>
+                          </div>
+                        )}
+                        <Button
+                          onClick={activeNotification.action.onClick}
+                          size="sm"
+                          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 text-xs px-3 py-1 h-7"
+                        >
+                          <Crown className="w-3 h-3 mr-1" />
+                          {activeNotification.action.text}
+                        </Button>
                       </div>
-                      <Button
-                        onClick={activeNotification.action.onClick}
-                        size="sm"
-                        className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90"
-                      >
-                        <Crown className="w-4 h-4 mr-1" />
-                        {activeNotification.action.text}
-                      </Button>
                     </div>
                   </div>
                 </div>
@@ -240,7 +238,7 @@ export default function Dashboard() {
                   onClick={() => dismissNotification(activeNotification.id)}
                   className="ml-2 h-6 w-6 p-0 hover:bg-gray-100 dark:hover:bg-gray-800"
                 >
-                  <X className="h-4 w-4" />
+                  <X className="h-3 w-3" />
                 </Button>
               </div>
             </CardContent>
