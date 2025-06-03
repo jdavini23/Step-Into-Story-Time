@@ -9,8 +9,8 @@ import { checkStoryGenerationPermissions, validateStoryParameters, addTierInfoTo
 import { incrementWeeklyUsage, getCurrentWeekStart, updateUserSubscription, getUserTier, canUserGenerateStory, getUserWeeklyUsage } from "./tierManager";
 import { generateStoryPDF, generateEnhancedPDF } from "./pdfGenerator";
 import { db } from "./db";
-import { users } from "../shared/schema";
-import { eq } from "drizzle-orm";
+import { users, usageTracking } from "../shared/schema";
+import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 if (!process.env.STRIPE_SECRET_KEY) {
