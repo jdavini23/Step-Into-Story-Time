@@ -85,13 +85,13 @@ export default function Dashboard() {
     const maxWeeklyStories = tierInfo.limits.storiesPerWeek;
     const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription;
 
-    // Storage limits (highest priority)
-    const isAtStorageLimit = currentStoryCount >= maxStorageStories;
-    const isNearStorageLimit = currentStoryCount >= maxStorageStories * 0.9;
+    // Storage limits (highest priority) - skip for unlimited storage
+    const isAtStorageLimit = maxStorageStories !== null && currentStoryCount >= maxStorageStories;
+    const isNearStorageLimit = maxStorageStories !== null && currentStoryCount >= maxStorageStories * 0.9;
     
-    // Weekly limits
-    const isAtWeeklyLimit = weeklyUsage >= maxWeeklyStories;
-    const isNearWeeklyLimit = weeklyUsage >= maxWeeklyStories * 0.8;
+    // Weekly limits - skip for unlimited weekly stories
+    const isAtWeeklyLimit = maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories;
+    const isNearWeeklyLimit = maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories * 0.8;
 
     // Priority: Critical storage > Critical weekly > Warning storage > Warning weekly > Promotional
     if (isAtStorageLimit && !dismissedNotifications.includes('storage-limit')) {
