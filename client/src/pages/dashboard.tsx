@@ -27,14 +27,18 @@ export default function Dashboard() {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
 
-  const { data: stories = [], isLoading: storiesLoading, error } = useQuery<Story[]>({
+  const { data: stories = [], isLoading: storiesLoading, error, refetch: refetchStories } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
     enabled: !!user,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: true,
   });
 
-  const { data: favoriteStories = [] } = useQuery<Story[]>({
+  const { data: favoriteStories = [], refetch: refetchFavorites } = useQuery<Story[]>({
     queryKey: ["/api/favorites"],
     enabled: !!user,
+    staleTime: 30000, // 30 seconds
+    refetchOnWindowFocus: true,
   });
 
   const { data: subscriptionStatus } = useQuery<{ hasActiveSubscription: boolean; status?: string }>({
@@ -68,6 +72,13 @@ export default function Dashboard() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
+    } else if (error) {
+      console.error('Stories loading error:', error);
+      toast({
+        title: "Error Loading Stories",
+        description: "There was a problem loading your stories. Please try refreshing the page.",
+        variant: "destructive",
+      });
     }
   }, [error, toast]);
 
@@ -76,6 +87,20 @@ export default function Dashboard() {
   }
 
   const displayedStories = showFavorites ? favoriteStories : stories;
+
+  // Debug logging to help identify the issue
+  useEffect(() => {
+    if (import.meta.env.DEV) {
+      console.log('Dashboard Debug:', {
+        storiesCount: stories.length,
+        favoritesCount: favoriteStories.length,
+        showFavorites,
+        displayedStoriesCount: displayedStories.length,
+        tierInfo: tierInfo?.tier,
+        user: user?.id
+      });
+    }
+  }, [stories, favoriteStories, showFavorites, displayedStories, tierInfo, user]);
 
   // Single consolidated notification system
   const getActiveNotification = () => {
@@ -255,14 +280,47 @@ export default function Dashboard() {
 
         {tierInfo && <PremiumFeatureShowcase tierInfo={tierInfo} />}
 
-        <StoryFilterButtons 
-          stories={stories}
-          favoriteStories={favoriteStories}
-          showFavorites={showFavorites}
-          onShowFavorites={setShowFavorites}
-        />
+        <div className="flex items-center justify-between mb-6">
+          <StoryFilterButtons 
+            stories={stories}
+            favoriteStories={favoriteStories}
+            showFavorites={showFavorites}
+            onShowFavorites={setShowFavorites}
+          />
+          
+          {import.meta.env.DEV && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                refetchStories();
+                refetchFavorites();
+              }}
+            >
+              Refresh Stories
+            </Button>
+          )}
+        </div>
 
-        {displayedStories.length > 0 ? (
+        {error && (
+          <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800 mb-6">
+            <CardContent className="px-4 py-3">
+              <div className="flex items-center space-x-3">
+                <AlertTriangle className="h-5 w-5 text-red-600 dark:text-red-400" />
+                <div>
+                  <h4 className="font-semibold text-sm text-red-800 dark:text-red-200">
+                    Error Loading Stories
+                  </h4>
+                  <p className="text-xs mt-0.5 text-red-700 dark:text-red-300">
+                    There was a problem loading your stories. Please try refreshing the page.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {!error && displayedStories.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedStories.map((story) => {
               const isFavorited = favoriteStories.some(fav => fav.id === story.id);
@@ -275,9 +333,9 @@ export default function Dashboard() {
               );
             })}
           </div>
-        ) : (
+        ) : !error && !storiesLoading ? (
           <EmptyState showFavorites={showFavorites} />
-        )}
+        ) : null}
       </div>
 
       <FloatingActionButton />
