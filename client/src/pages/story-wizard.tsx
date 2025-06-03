@@ -97,11 +97,9 @@ export default function StoryWizard() {
               title: "Upgrade Required",
               description: errorData.message,
               variant: "destructive",
-              action: {
-                label: "Upgrade",
-                onClick: () => setLocation("/pricing")
-              }
             });
+            // Show upgrade prompt
+            setTimeout(() => setLocation("/pricing"), 2000);
             return;
           }
         } catch {
@@ -175,11 +173,11 @@ export default function StoryWizard() {
   const progressPercentage = (currentStep / STEPS.length) * 100;
 
   if (isLoading) {
-    return <LoadingOverlay />;
+    return <LoadingOverlay isLoading={true} />;
   }
 
   if (generateStoryMutation.isPending) {
-    return <LoadingOverlay isLoading={true} message={loadingMessage} />;
+    return <LoadingOverlay isLoading={true} message={loadingMessage} progress={loadingStage * 25} showProgress={true} />;
   }
 
   return (
@@ -363,7 +361,15 @@ export default function StoryWizard() {
                   </div>
 
                   <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-4">Story Length *</Label>
+                    <div className="flex items-center justify-between mb-4">
+                      <Label className="text-sm font-medium text-gray-700">Story Length *</Label>
+                      {tierInfo?.tier === 'free' && (
+                        <Badge variant="outline" className="text-xs">
+                          <Lock className="h-3 w-3 mr-1" />
+                          Free: Short only
+                        </Badge>
+                      )}
+                    </div>
                     <RadioGroup value={formData.length} onValueChange={(value) => updateFormData("length", value)}>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
@@ -373,15 +379,41 @@ export default function StoryWizard() {
                             <p className="text-sm text-gray-500">2-3 minutes reading time</p>
                           </div>
                         </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="medium" id="medium" />
-                          <div>
-                            <Label htmlFor="medium" className="font-medium cursor-pointer">📖 Medium</Label>
+                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
+                          tierInfo?.tier === 'free' 
+                            ? 'border-gray-100 bg-gray-50 opacity-60 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>
+                          <RadioGroupItem 
+                            value="medium" 
+                            id="medium" 
+                            disabled={tierInfo?.tier === 'free'}
+                          />
+                          <div className="flex-1">
+                            <div className="flex items-center justify-between">
+                              <Label htmlFor="medium" className={`font-medium ${tierInfo?.tier === 'free' ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
+                                📖 Medium
+                              </Label>
+                              {tierInfo?.tier === 'free' && (
+                                <Crown className="h-4 w-4 text-amber-500" />
+                              )}
+                            </div>
                             <p className="text-sm text-gray-500">4-5 minutes reading time</p>
+                            {tierInfo?.tier === 'free' && (
+                              <p className="text-xs text-amber-600 mt-1">Premium feature</p>
+                            )}
                           </div>
                         </div>
                       </div>
                     </RadioGroup>
+                    {tierInfo?.tier === 'free' && (
+                      <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                        <p className="text-sm text-amber-800">
+                          <Crown className="h-4 w-4 inline mr-1" />
+                          Upgrade to Premium for medium and long story options
+                        </p>
+                      </div>
+                    )}
                   </div>
                 </>
               )}
