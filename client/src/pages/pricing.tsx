@@ -5,9 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Star, Crown, Sparkles, Heart, Users } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
+import { useState } from "react";
 
 export default function Pricing() {
   const { isAuthenticated } = useAuth();
+  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   const handlePlanClick = (tier: string) => {
     if (!isAuthenticated) {
@@ -136,9 +138,38 @@ export default function Pricing() {
             </span>
             <br />Adventure
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
             From first bedtime stories to family traditions, we have the perfect plan to create magical moments for your family.
           </p>
+          
+          {/* Billing Period Toggle */}
+          <div className="flex items-center justify-center mb-8">
+            <div className="bg-gray-100 p-1 rounded-lg flex">
+              <button
+                onClick={() => setBillingPeriod('monthly')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
+                  billingPeriod === 'monthly'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Monthly
+              </button>
+              <button
+                onClick={() => setBillingPeriod('yearly')}
+                className={`px-6 py-2 rounded-md text-sm font-medium transition-all relative ${
+                  billingPeriod === 'yearly'
+                    ? 'bg-white text-gray-900 shadow-sm'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Yearly
+                <Badge className="absolute -top-2 -right-2 bg-green-500 text-white text-xs px-1.5 py-0.5">
+                  Save 30%
+                </Badge>
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Pricing Cards */}
@@ -173,17 +204,33 @@ export default function Pricing() {
                 
                 <div className="mt-4">
                   <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
-                    {tier.period && (
+                    <span className="text-4xl font-bold text-gray-900">
+                      {tier.id === 'free' 
+                        ? tier.price 
+                        : billingPeriod === 'yearly' && tier.yearlyPrice 
+                          ? tier.yearlyPrice 
+                          : tier.price
+                      }
+                    </span>
+                    {tier.period && tier.id !== 'free' && (
+                      <span className="text-gray-600 ml-2">
+                        /{billingPeriod === 'yearly' ? 'year' : 'month'}
+                      </span>
+                    )}
+                    {tier.id === 'free' && tier.period && (
                       <span className="text-gray-600 ml-2">/{tier.period}</span>
                     )}
                   </div>
-                  {tier.yearlyPrice && (
+                  {billingPeriod === 'yearly' && tier.yearlyPrice && (
                     <div className="mt-1">
-                      <span className="text-lg text-green-600 font-semibold">{tier.yearlyPrice}/{tier.yearlyPeriod}</span>
-                      <Badge variant="secondary" className="ml-2 bg-green-100 text-green-800">
-                        Save 30%
+                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                        Save 30% vs monthly
                       </Badge>
+                    </div>
+                  )}
+                  {billingPeriod === 'monthly' && tier.yearlyPrice && (
+                    <div className="mt-1 text-sm text-gray-500">
+                      {tier.yearlyPrice}/year available
                     </div>
                   )}
                 </div>
