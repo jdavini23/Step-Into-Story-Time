@@ -23,22 +23,22 @@ export interface IStorage {
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
-  updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string): Promise<User>;
+  updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string | null): Promise<User>;
   updateUserSubscription(userId: string, tier: string, status: string): Promise<User>;
-  
+
   // Story operations
   createStory(userId: string, story: InsertStory): Promise<Story>;
   getUserStories(userId: string): Promise<Story[]>;
   getStory(id: number, userId: string): Promise<Story | undefined>;
   updateStory(id: number, userId: string, updates: Partial<InsertStory>): Promise<Story | undefined>;
   deleteStory(id: number, userId: string): Promise<boolean>;
-  
+
   // Favorite operations
   addFavorite(userId: string, storyId: number): Promise<Favorite>;
   removeFavorite(userId: string, storyId: number): Promise<boolean>;
   getUserFavorites(userId: string): Promise<Story[]>;
   isStoryFavorited(userId: string, storyId: number): Promise<boolean>;
-  
+
   // Usage tracking operations
   getUserWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking | undefined>;
   createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking>;
@@ -74,7 +74,7 @@ export class DatabaseStorage implements IStorage {
     // Validate content sizes before insertion
     validateContentSize(story.title, FILE_SIZE_LIMITS.maxTitleSize, "Story title");
     validateContentSize(story.content, FILE_SIZE_LIMITS.maxStoryContentSize, "Story content");
-    
+
     if (story.bedtimeMessage) {
       validateContentSize(story.bedtimeMessage, 500, "Bedtime message");
     }
@@ -186,7 +186,7 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string): Promise<User> {
+  async updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string | null): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ stripeCustomerId, stripeSubscriptionId })
@@ -236,7 +236,7 @@ export class DatabaseStorage implements IStorage {
   async incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking> {
     // First, get current usage
     let usage = await this.getUserWeeklyUsage(userId, weekStart);
-    
+
     if (!usage) {
       // Create new usage record if doesn't exist
       usage = await this.createUsageTracking(userId, weekStart);
@@ -254,7 +254,7 @@ export class DatabaseStorage implements IStorage {
         eq(usageTracking.weekStart, weekStart)
       ))
       .returning();
-    
+
     return updatedUsage;
   }
 }

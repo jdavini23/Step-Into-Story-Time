@@ -325,27 +325,37 @@ export async function registerRoutes(app: Express): Promise<Server> {
           expand: ['latest_invoice.payment_intent'],
         });
 
-        let clientSecret = null;
+        console.log('Existing subscription status:', subscription.status);
 
-        // If subscription is incomplete, get the client secret
-        if (subscription.status === 'incomplete' || subscription.status === 'past_due') {
-          if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
-            const invoice = subscription.latest_invoice;
-            if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
-              clientSecret = invoice.payment_intent.client_secret;
+        // If subscription is expired, cancel it and create a new one
+        if (subscription.status === 'incomplete_expired') {
+          console.log('Subscription expired, canceling and creating new one');
+          await stripe.subscriptions.cancel(subscription.id);
+          // Clear the expired subscription ID and continue to create new one
+          user = await storage.updateUserStripeInfo(userId, user.stripeCustomerId!, null);
+        } else {
+          // Handle active or recoverable subscriptions
+          let clientSecret = null;
+
+          // If subscription is incomplete, get the client secret
+          if (subscription.status === 'incomplete' || subscription.status === 'past_due') {
+            if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
+              const invoice = subscription.latest_invoice;
+              if (invoice.payment_intent && typeof invoice.payment_intent === 'object') {
+                clientSecret = invoice.payment_intent.client_secret;
+              }
             }
           }
+
+          console.log('Existing subscription client secret:', clientSecret ? 'Yes' : 'No');
+
+          res.send({
+            subscriptionId: subscription.id,
+            clientSecret,
+            status: subscription.status,
+          });
+          return;
         }
-
-        console.log('Existing subscription status:', subscription.status);
-        console.log('Existing subscription client secret:', clientSecret ? 'Yes' : 'No');
-
-        res.send({
-          subscriptionId: subscription.id,
-          clientSecret,
-          status: subscription.status,
-        });
-        return;
       }
 
       if (!user.email) {
