@@ -152,16 +152,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
 
+      console.log(`Fetching story ${storyId} for user ${userId}`);
+
       if (isNaN(storyId)) {
+        console.log(`Invalid story ID provided: ${req.params.id}`);
         return res.status(400).json({ message: "Invalid story ID" });
       }
 
       const story = await storage.getStory(storyId, userId);
 
       if (!story) {
+        console.log(`Story ${storyId} not found for user ${userId}`);
         return res.status(404).json({ message: "Story not found" });
       }
 
+      console.log(`Successfully fetched story ${storyId} for user ${userId}`);
       res.json(story);
     } catch (error) {
       console.error("Error fetching story:", error);

@@ -35,6 +35,19 @@ export default function StoryReader() {
   const { toast } = useToast();
   const storyId = params.id;
 
+  // Validate story ID
+  useEffect(() => {
+    if (!storyId || isNaN(parseInt(storyId))) {
+      console.error('Invalid story ID:', storyId);
+      toast({
+        title: "Invalid Story",
+        description: "The story ID is invalid.",
+        variant: "destructive",
+      });
+      setTimeout(() => setLocation("/"), 1000);
+    }
+  }, [storyId, toast, setLocation]);
+
   // Reading experience state
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [fontSize, setFontSize] = useState(18);
@@ -44,7 +57,13 @@ export default function StoryReader() {
   const { data: story, isLoading: storyLoading, error } = useQuery<Story>({
     queryKey: [`/api/stories/${storyId}`],
     enabled: !!user && !!storyId,
-    retry: 2,
+    retry: (failureCount, error: any) => {
+      // Don't retry for 404 (not found) or 403 (forbidden) errors
+      if (error?.status === 404 || error?.status === 403) {
+        return false;
+      }
+      return failureCount < 2;
+    },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
@@ -97,6 +116,7 @@ export default function StoryReader() {
 
   useEffect(() => {
     if (!isLoading && !user) {
+      console.log('Story reader: User not authenticated, redirecting to login');
       toast({
         title: "Unauthorized",
         description: "You are logged out. Logging in again...",
@@ -109,17 +129,27 @@ export default function StoryReader() {
   }, [user, isLoading, toast]);
 
   useEffect(() => {
-    if (error && isUnauthorizedError(error as Error)) {
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
+    if (error) {
+      console.error('Story reader error:', {
+        error,
+        storyId,
+        userId: user?.id,
+        status: (error as any)?.status,
+        message: (error as any)?.message
       });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+      
+      if (isUnauthorizedError(error as Error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/api/login";
+        }, 500);
+      }
     }
-  }, [error, toast]);
+  }, [error, toast, storyId, user?.id]);
 
   const downloadPDF = useCallback(async () => {
     if (!story) return;
@@ -239,14 +269,36 @@ export default function StoryReader() {
   }
 
   if (error && !isUnauthorizedError(error as Error)) {
+    const errorStatus = (error as any)?.status;
+    const errorMessage = (error as any)?.message || 'Unknown error occurred';
+    
+    let displayTitle = "Something went wrong";
+    let displayMessage = "We couldn't load this story. Please try again.";
+    
+    if (errorStatus === 404) {
+      displayTitle = "Story Not Found";
+      displayMessage = "This story doesn't exist or you don't have permission to view it.";
+    } else if (errorStatus === 403) {
+      displayTitle = "Access Denied";
+      displayMessage = "You don't have permission to view this story.";
+    } else if (errorStatus >= 500) {
+      displayTitle = "Server Error";
+      displayMessage = "There's a problem with our servers. Please try again in a few moments.";
+    }
+    
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <Card className="w-full max-w-md mx-4">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">Something went wrong</h2>
-              <p className="text-gray-600 mb-6">We couldn't load this story. Please try again.</p>
+              <h2 className="text-2xl font-bold text-gray-700 mb-2">{displayTitle}</h2>
+              <p className="text-gray-600 mb-2">{displayMessage}</p>
+              {import.meta.env.DEV && (
+                <p className="text-xs text-gray-400 mb-4">
+                  Debug: {errorStatus ? `${errorStatus} - ` : ''}{errorMessage}
+                </p>
+              )}
               <div className="space-x-4">
                 <Button onClick={() => window.location.reload()}>
                   Try Again
