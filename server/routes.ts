@@ -370,40 +370,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } else {
         throw new Error('Invalid tier specified');
       }
-      const productName = tier === 'family' ? 'Storytime Pro (Family Plan)' : 'Storytime Plus (Premium Plan)';
-
-      // Create a price for the subscription
-      const price = await stripe.prices.create({
-        currency: 'usd',
-        unit_amount: priceInCents,
-        recurring: { interval: 'month' },
-        product_data: {
-          name: productName,
-        },
-      });
 
       // Create subscription for premium stories
-       const subscription = await stripe.subscriptions.create({
-          customer: customer.id,
-          items: [{
-            price_data: {
-              currency: 'usd',
-              product_data: {
-                name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
-                description: tier === 'family' 
-                  ? 'Unlimited stories for the whole family'
-                  : 'Unlimited personalized bedtime stories'
-              },
-              unit_amount: priceInCents,
-              recurring: {
-                interval: billing === 'yearly' ? 'year' : 'month',
-              },
+      const subscription = await stripe.subscriptions.create({
+        customer: customer.id,
+        items: [{
+          price_data: {
+            currency: 'usd',
+            product_data: {
+              name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
+              description: tier === 'family' 
+                ? 'Unlimited stories for the whole family'
+                : 'Unlimited personalized bedtime stories'
             },
-          }],
-          payment_behavior: 'default_incomplete',
-          payment_settings: { save_default_payment_method: 'on_subscription' },
-          expand: ['latest_invoice.payment_intent'],
-        });
+            unit_amount: priceInCents,
+            recurring: {
+              interval: billing === 'yearly' ? 'year' : 'month',
+            },
+          },
+        }],
+        payment_behavior: 'default_incomplete',
+        payment_settings: { save_default_payment_method: 'on_subscription' },
+        expand: ['latest_invoice.payment_intent'],
+      });
 
       await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
 
@@ -416,10 +405,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       console.log('Subscription created:', subscription.id);
+      console.log('Billing period:', billing);
+      console.log('Price in cents:', priceInCents);
       console.log('Client secret generated:', clientSecret ? 'Yes' : 'No');
-      console.log('Latest invoice payment intent:', typeof invoice?.payment_intent);
+      console.log('Latest invoice payment intent:', subscription.latest_invoice ? typeof subscription.latest_invoice.payment_intent : 'No invoice');
 
       if (!clientSecret) {
+        console.error('Failed to generate client secret. Subscription details:', {
+          id: subscription.id,
+          status: subscription.status,
+          latest_invoice: subscription.latest_invoice ? 'exists' : 'missing'
+        });
         throw new Error('Failed to create payment intent for subscription');
       }
 
