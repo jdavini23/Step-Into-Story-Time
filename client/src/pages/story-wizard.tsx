@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
+import { useTierInfo } from "@/hooks/useTierInfo";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -9,10 +10,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
+import { Badge } from "@/components/ui/badge";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { Crown, Lock, Star } from "lucide-react";
 import type { InsertStory } from "@shared/schema";
 import LoadingOverlay from "@/components/loading-overlay";
 
@@ -24,6 +28,7 @@ const STEPS = [
 
 export default function StoryWizard() {
   const { user, isLoading } = useAuth();
+  const { data: tierInfo, isLoading: tierLoading } = useTierInfo();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const [currentStep, setCurrentStep] = useState(1);
@@ -67,7 +72,7 @@ export default function StoryWizard() {
         setLocation(`/story/${story.id}`);
       }, 1000);
     },
-    onError: (error) => {
+    onError: async (error: any) => {
       setLoadingStage(0);
       setLoadingMessage("Creating your magical story...");
       
@@ -82,6 +87,28 @@ export default function StoryWizard() {
         }, 500);
         return;
       }
+
+      // Handle tier restriction errors
+      if (error.status === 403) {
+        try {
+          const errorData = await error.json();
+          if (errorData.upgradeRequired) {
+            toast({
+              title: "Upgrade Required",
+              description: errorData.message,
+              variant: "destructive",
+              action: {
+                label: "Upgrade",
+                onClick: () => setLocation("/pricing")
+              }
+            });
+            return;
+          }
+        } catch {
+          // Failed to parse error response, fall through to generic error
+        }
+      }
+      
       toast({
         title: "Error",
         description: "Failed to generate story. Please try again.",
@@ -167,6 +194,49 @@ export default function StoryWizard() {
           </div>
           <Progress value={progressPercentage} className="h-2" />
         </div>
+
+        {/* Tier Status Indicator */}
+        {tierInfo && (
+          <div className="mb-6">
+            {tierInfo.tier === 'free' && (
+              <Alert className="border-yellow-200 bg-yellow-50">
+                <Star className="h-4 w-4 text-yellow-600" />
+                <AlertDescription className="text-yellow-800">
+                  <div className="flex items-center justify-between">
+                    <span>
+                      Free Plan: {tierInfo.storiesRemaining || 0} stories remaining this week
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setLocation("/pricing")}
+                      className="ml-4"
+                    >
+                      <Crown className="h-3 w-3 mr-1" />
+                      Upgrade
+                    </Button>
+                  </div>
+                </AlertDescription>
+              </Alert>
+            )}
+            {tierInfo.tier === 'premium' && (
+              <Alert className="border-purple-200 bg-purple-50">
+                <Crown className="h-4 w-4 text-purple-600" />
+                <AlertDescription className="text-purple-800">
+                  Premium Plan: Unlimited story generation
+                </AlertDescription>
+              </Alert>
+            )}
+            {tierInfo.tier === 'family' && (
+              <Alert className="border-emerald-200 bg-emerald-50">
+                <Crown className="h-4 w-4 text-emerald-600" />
+                <AlertDescription className="text-emerald-800">
+                  Family Plan: Ultimate storytelling experience
+                </AlertDescription>
+              </Alert>
+            )}
+          </div>
+        )}
 
         {/* Step content */}
         <Card className="shadow-2xl">
