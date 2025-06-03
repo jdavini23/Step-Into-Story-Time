@@ -4,6 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { getQueryFn } from "@/lib/queryClient";
 import { useEffect, useState } from "react";
 import type { Story } from "@shared/schema";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
@@ -29,6 +30,7 @@ export default function Dashboard() {
 
   const { data: stories = [], isLoading: storiesLoading, error, refetch: refetchStories } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
+    queryFn: getQueryFn<Story[]>({ on401: "throw" }),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
@@ -36,6 +38,7 @@ export default function Dashboard() {
 
   const { data: favoriteStories = [], refetch: refetchFavorites } = useQuery<Story[]>({
     queryKey: ["/api/favorites"],
+    queryFn: getQueryFn<Story[]>({ on401: "throw" }),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
@@ -43,6 +46,7 @@ export default function Dashboard() {
 
   const { data: subscriptionStatus } = useQuery<{ hasActiveSubscription: boolean; status?: string }>({
     queryKey: ["/api/subscription-status"],
+    queryFn: getQueryFn<{ hasActiveSubscription: boolean; status?: string }>({ on401: "throw" }),
     enabled: !!user,
   });
 
