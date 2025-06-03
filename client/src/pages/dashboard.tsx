@@ -15,6 +15,8 @@ import { StoryCard } from "@/components/dashboard/story-card";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
 import { LibraryCapacityWarning } from "@/components/dashboard/library-capacity-warning";
+import { PremiumFeatureShowcase } from "@/components/dashboard/premium-feature-showcase";
+import { WeeklyUsageTracker } from "@/components/dashboard/weekly-usage-tracker";
 import LoadingOverlay from "@/components/loading-overlay";
 
 export default function Dashboard() {
@@ -81,10 +83,18 @@ export default function Dashboard() {
         <PremiumStatusCard subscriptionStatus={subscriptionStatus} />
 
         {tierInfo && (
+          <WeeklyUsageTracker tierInfo={tierInfo} />
+        )}
+
+        {tierInfo && (
           <LibraryCapacityWarning 
             tierInfo={tierInfo}
             currentStoryCount={stories.length}
           />
+        )}
+
+        {tierInfo && (
+          <PremiumFeatureShowcase tierInfo={tierInfo} />
         )}
 
         <QuickActionsGrid 
