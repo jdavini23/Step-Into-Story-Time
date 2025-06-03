@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { useEffect, useState } from "react";
 import type { Story } from "@shared/schema";
+import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 
 import { DashboardHeader } from "@/components/dashboard/dashboard-header";
 import { QuickActionsGrid } from "@/components/dashboard/quick-actions-grid";
@@ -13,6 +14,7 @@ import { StoryFilterButtons } from "@/components/dashboard/story-filter-buttons"
 import { StoryCard } from "@/components/dashboard/story-card";
 import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
+import { PremiumFeatureShowcase } from "@/components/dashboard/premium-feature-showcase";
 import LoadingOverlay from "@/components/loading-overlay";
 import { DebugPanel } from "@/components/debug-panel";
 import { Card, CardContent } from "@/components/ui/card";
@@ -41,7 +43,7 @@ export default function Dashboard() {
   });
 
   const [showFavorites, setShowFavorites] = useState(false);
-  const [dismissedNotifications, setDismissedNotifications] = useState<string[]>([]);
+  const { dismissedNotifications, dismissNotification, isDismissed } = useNotificationPreferences();
 
   useEffect(() => {
     if (!isLoading && !user) {
@@ -94,7 +96,7 @@ export default function Dashboard() {
     const isNearWeeklyLimit = maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories * 0.8;
 
     // Priority: Critical storage > Critical weekly > Warning storage > Warning weekly > Promotional
-    if (isAtStorageLimit && !dismissedNotifications.includes('storage-limit')) {
+    if (isAtStorageLimit && !isDismissed('storage-limit')) {
       return {
         id: 'storage-limit',
         type: 'critical' as const,
@@ -105,7 +107,7 @@ export default function Dashboard() {
       };
     }
 
-    if (isAtWeeklyLimit && !dismissedNotifications.includes('weekly-limit')) {
+    if (isAtWeeklyLimit && !isDismissed('weekly-limit')) {
       return {
         id: 'weekly-limit',
         type: 'critical' as const,
@@ -116,7 +118,7 @@ export default function Dashboard() {
       };
     }
 
-    if (isNearStorageLimit && !dismissedNotifications.includes('storage-warning')) {
+    if (isNearStorageLimit && !isDismissed('storage-warning')) {
       return {
         id: 'storage-warning',
         type: 'warning' as const,
@@ -127,7 +129,7 @@ export default function Dashboard() {
       };
     }
 
-    if (isNearWeeklyLimit && !dismissedNotifications.includes('weekly-warning')) {
+    if (isNearWeeklyLimit && !isDismissed('weekly-warning')) {
       return {
         id: 'weekly-warning', 
         type: 'warning' as const,
@@ -138,7 +140,7 @@ export default function Dashboard() {
       };
     }
 
-    if (!hasActiveSubscription && tierInfo.tier === 'free' && !dismissedNotifications.includes('premium-offer')) {
+    if (!hasActiveSubscription && tierInfo.tier === 'free' && !isDismissed('premium-offer')) {
       return {
         id: 'premium-offer',
         type: 'info' as const,
@@ -153,9 +155,7 @@ export default function Dashboard() {
 
   const activeNotification = getActiveNotification();
 
-  const dismissNotification = (id: string) => {
-    setDismissedNotifications(prev => [...prev, id]);
-  };
+  
 
   return (
     <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
@@ -252,6 +252,8 @@ export default function Dashboard() {
           showFavorites={showFavorites}
           onToggleFavorites={() => setShowFavorites(!showFavorites)}
         />
+
+        {tierInfo && <PremiumFeatureShowcase tierInfo={tierInfo} />}
 
         <StoryFilterButtons 
           stories={stories}
