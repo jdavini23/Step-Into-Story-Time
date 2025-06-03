@@ -141,7 +141,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid story ID" });
       }
 
-      const story = await storage.getStory(storyId, userId);
+      const story = await await storage.getStory(storyId, userId);
 
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
@@ -390,20 +390,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
         throw new Error('Invalid tier specified');
       }
 
+      // Create product first
+      const product = await stripe.products.create({
+        name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
+      });
+
+      // Create price for the product
+      const price = await stripe.prices.create({
+        currency: 'usd',
+        product: product.id,
+        unit_amount: priceInCents,
+        recurring: {
+          interval: billing === 'yearly' ? 'year' : 'month',
+        },
+      });
+
       // Create subscription for premium stories
       const subscription = await stripe.subscriptions.create({
         customer: customer.id,
         items: [{
-          price_data: {
-            currency: 'usd',
-            product_data: {
-              name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
-            },
-            unit_amount: priceInCents,
-            recurring: {
-              interval: billing === 'yearly' ? 'year' : 'month',
-            },
-          },
+          price: price.id,
         }],
         payment_behavior: 'default_incomplete',
         payment_settings: { save_default_payment_method: 'on_subscription' },
