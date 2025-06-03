@@ -639,6 +639,74 @@ export async function registerRoutes(app: Express): Promise<Server> {
     res.json({ received: true });
   });
 
+  // Debug endpoints for testing (remove in production)
+  if (process.env.NODE_ENV === 'development') {
+    // Force set user tier for testing
+    app.post('/api/debug/set-tier', isAuthenticated, async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const { tier, status = 'active' } = req.body;
+        
+        if (!['free', 'premium', 'family'].includes(tier)) {
+          return res.status(400).json({ message: 'Invalid tier' });
+        }
+        
+        await updateUserSubscription(userId, tier, status);
+        res.json({ message: `User tier set to ${tier}`, tier, status });
+      } catch (error) {
+        console.error('Error setting tier:', error);
+        res.status(500).json({ message: 'Failed to set tier' });
+      }
+    });
+
+    // Reset weekly usage for testing
+    app.post('/api/debug/reset-usage', isAuthenticated, async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const weekStart = getCurrentWeekStart();
+        
+        await db.update(usageTracking)
+          .set({ storiesGenerated: 0, updatedAt: new Date() })
+          .where(and(
+            eq(usageTracking.userId, userId),
+            eq(usageTracking.weekStart, weekStart)
+          ));
+          
+        res.json({ message: 'Weekly usage reset' });
+      } catch (error) {
+        console.error('Error resetting usage:', error);
+        res.status(500).json({ message: 'Failed to reset usage' });
+      }
+    });
+
+    // Get debug info
+    app.get('/api/debug/user-info', isAuthenticated, async (req: any, res) => {
+      try {
+        const userId = req.user.claims.sub;
+        const user = await storage.getUser(userId);
+        const { tier, status } = await getUserTier(userId);
+        const weeklyUsage = await getUserWeeklyUsage(userId);
+        const permissionCheck = await canUserGenerateStory(userId);
+        
+        res.json({
+          user: {
+            id: user?.id,
+            email: user?.email,
+            stripeCustomerId: user?.stripeCustomerId,
+            stripeSubscriptionId: user?.stripeSubscriptionId,
+          },
+          tier,
+          status,
+          weeklyUsage: weeklyUsage.storiesGenerated,
+          permissionCheck,
+        });
+      } catch (error) {
+        console.error('Error getting debug info:', error);
+        res.status(500).json({ message: 'Failed to get debug info' });
+      }
+    });
+  }
+
   const httpServer = createServer(app);
   return httpServer;
 }
