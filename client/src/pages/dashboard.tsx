@@ -49,7 +49,9 @@ export default function Dashboard() {
   const [showFavorites, setShowFavorites] = useState(false);
   const { dismissedNotifications, dismissNotification, isDismissed } = useNotificationPreferences();
 
+  // Consolidated useEffect for all side effects
   useEffect(() => {
+    // Handle unauthorized user
     if (!isLoading && !user) {
       toast({
         title: "Unauthorized",
@@ -59,10 +61,10 @@ export default function Dashboard() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
+      return;
     }
-  }, [user, isLoading, toast]);
 
-  useEffect(() => {
+    // Handle API errors
     if (error && isUnauthorizedError(error as Error)) {
       toast({
         title: "Unauthorized",
@@ -72,6 +74,7 @@ export default function Dashboard() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
+      return;
     } else if (error) {
       console.error('Stories loading error:', error);
       toast({
@@ -80,17 +83,10 @@ export default function Dashboard() {
         variant: "destructive",
       });
     }
-  }, [error, toast]);
 
-  if (isLoading || storiesLoading) {
-    return <LoadingOverlay isLoading={true} message="Loading your story library..." />;
-  }
-
-  const displayedStories = showFavorites ? favoriteStories : stories;
-
-  // Debug logging to help identify the issue
-  useEffect(() => {
+    // Debug logging - only in development
     if (import.meta.env.DEV) {
+      const displayedStories = showFavorites ? favoriteStories : stories;
       console.log('Dashboard Debug:', {
         storiesCount: stories.length,
         favoritesCount: favoriteStories.length,
@@ -100,7 +96,13 @@ export default function Dashboard() {
         user: user?.id
       });
     }
-  }, [stories, favoriteStories, showFavorites, displayedStories, tierInfo, user]);
+  }, [user, isLoading, error, toast, stories, favoriteStories, showFavorites, tierInfo]);
+
+  if (isLoading || storiesLoading) {
+    return <LoadingOverlay isLoading={true} message="Loading your story library..." />;
+  }
+
+  const displayedStories = showFavorites ? favoriteStories : stories;
 
   // Single consolidated notification system
   const getActiveNotification = () => {
