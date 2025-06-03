@@ -383,8 +383,6 @@ export default function StoryWizard() {
                           tierInfo?.tier === 'free' 
                             ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
                             : 'border-gray-200 hover:border-purple-300'
-                        }`}>y-50 opacity-60 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
                         }`}>
                           <RadioGroupItem 
                             value="medium" 
