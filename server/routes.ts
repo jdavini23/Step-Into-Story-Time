@@ -45,11 +45,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.get('/api/user/tier-info', isAuthenticated, addTierInfoToResponse, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       const { tier, status } = await getUserTier(userId);
       const permissionCheck = await canUserGenerateStory(userId);
       const weeklyUsage = await getUserWeeklyUsage(userId);
-      
+
       res.json({
         tier,
         status,
@@ -74,13 +74,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      
+
       console.log("Request body:", req.body);
       console.log("Request schema fields:", Object.keys(storyGenerationRequestSchema.shape));
-      
+
       // Validate request body (excluding title and content which are generated)
       const storyData = storyGenerationRequestSchema.parse(req.body);
-      
+
       // Generate story using OpenAI
       const generatedStory = await generateBedtimeStory({
         childName: storyData.childName,
@@ -91,7 +91,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         length: storyData.length,
         bedtimeMessage: storyData.bedtimeMessage || undefined,
       });
-      
+
       // Save story to database
       const story = await storage.createStory(userId, {
         ...storyData,
@@ -103,7 +103,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       if (req.userTier === 'free') {
         await incrementWeeklyUsage(userId);
       }
-      
+
       res.json({
         ...story,
         userTier: req.userTier,
@@ -136,17 +136,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       const story = await storage.getStory(storyId, userId);
-      
+
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
       }
-      
+
       res.json(story);
     } catch (error) {
       console.error("Error fetching story:", error);
@@ -159,20 +159,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       // Validate partial update data
       const updateData = insertStorySchema.partial().parse(req.body);
-      
+
       const story = await storage.updateStory(storyId, userId, updateData);
-      
+
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
       }
-      
+
       res.json(story);
     } catch (error) {
       console.error("Error updating story:", error);
@@ -189,17 +189,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       const deleted = await storage.deleteStory(storyId, userId);
-      
+
       if (!deleted) {
         return res.status(404).json({ message: "Story not found" });
       }
-      
+
       res.json({ message: "Story deleted successfully" });
     } catch (error) {
       console.error("Error deleting story:", error);
@@ -212,23 +212,23 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.storyId);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       // Check if story exists and belongs to user
       const story = await storage.getStory(storyId, userId);
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
       }
-      
+
       // Check if already favorited
       const isAlreadyFavorited = await storage.isStoryFavorited(userId, storyId);
       if (isAlreadyFavorited) {
         return res.status(200).json({ message: "Story is already favorited" });
       }
-      
+
       const favorite = await storage.addFavorite(userId, storyId);
       res.json(favorite);
     } catch (error) {
@@ -242,17 +242,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.storyId);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       const removed = await storage.removeFavorite(userId, storyId);
-      
+
       if (!removed) {
         return res.status(404).json({ message: "Favorite not found" });
       }
-      
+
       res.json({ message: "Favorite removed successfully" });
     } catch (error) {
       console.error("Error removing favorite:", error);
@@ -277,11 +277,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.storyId);
-      
+
       if (isNaN(storyId)) {
         return res.status(400).json({ message: "Invalid story ID" });
       }
-      
+
       const isFavorited = await storage.isStoryFavorited(userId, storyId);
       res.json({ isFavorited });
     } catch (error) {
@@ -291,7 +291,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Stripe payment routes
-  
+
   // Create payment intent for one-time payments
   app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
     try {
@@ -308,11 +308,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Create or get subscription for premium features
+  // Get or create subscription for premium features
   app.post('/api/get-or-create-subscription', isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
+        const { tier, billing = 'monthly' } = req.body;
 
       if (!user) {
         return res.status(404).json({ message: "User not found" });
@@ -323,9 +324,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
         const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId, {
           expand: ['latest_invoice.payment_intent'],
         });
-        
+
         let clientSecret = null;
-        
+
         // If subscription is incomplete, get the client secret
         if (subscription.status === 'incomplete' || subscription.status === 'past_due') {
           if (subscription.latest_invoice && typeof subscription.latest_invoice === 'object') {
@@ -360,14 +361,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
       user = await storage.updateStripeCustomerId(userId, customer.id);
 
       // Determine pricing based on tier (default to premium if not specified)
-      const tier = req.body.tier || 'premium';
-      const unitAmount = tier === 'family' ? 1299 : 699; // $12.99 for family, $6.99 for premium
+      // Determine pricing based on tier and billing period
+      let priceInCents: number;
+      if (tier === 'family') {
+        priceInCents = billing === 'yearly' ? 10900 : 1299; // $109/year or $12.99/month
+      } else if (tier === 'premium') {
+        priceInCents = billing === 'yearly' ? 5900 : 699; // $59/year or $6.99/month
+      } else {
+        throw new Error('Invalid tier specified');
+      }
       const productName = tier === 'family' ? 'Storytime Pro (Family Plan)' : 'Storytime Plus (Premium Plan)';
 
       // Create a price for the subscription
       const price = await stripe.prices.create({
         currency: 'usd',
-        unit_amount: unitAmount,
+        unit_amount: priceInCents,
         recurring: { interval: 'month' },
         product_data: {
           name: productName,
@@ -375,16 +383,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
       });
 
       // Create subscription for premium stories
-      const subscription = await stripe.subscriptions.create({
-        customer: customer.id,
-        items: [{ price: price.id }],
-        payment_behavior: 'default_incomplete',
-        payment_settings: {
-          payment_method_types: ['card'],
-          save_default_payment_method: 'on_subscription',
-        },
-        expand: ['latest_invoice.payment_intent'],
-      });
+       const subscription = await stripe.subscriptions.create({
+          customer: customer.id,
+          items: [{
+            price_data: {
+              currency: 'usd',
+              product_data: {
+                name: tier === 'family' ? 'Storytime Pro' : 'Storytime Plus',
+                description: tier === 'family' 
+                  ? 'Unlimited stories for the whole family'
+                  : 'Unlimited personalized bedtime stories'
+              },
+              unit_amount: priceInCents,
+              recurring: {
+                interval: billing === 'yearly' ? 'year' : 'month',
+              },
+            },
+          }],
+          payment_behavior: 'default_incomplete',
+          payment_settings: { save_default_payment_method: 'on_subscription' },
+          expand: ['latest_invoice.payment_intent'],
+        });
 
       await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
 
@@ -425,7 +444,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
 
       const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      
+
       res.json({ 
         hasActiveSubscription: subscription.status === 'active',
         status: subscription.status,
@@ -459,47 +478,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
       switch (event.type) {
         case 'invoice.payment_succeeded': {
           const invoice = event.data.object as Stripe.Invoice;
-          
+
           if (invoice.subscription) {
             const subscription = await stripe.subscriptions.retrieve(invoice.subscription as string);
             const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-            
+
             // Find user by Stripe customer ID
             const userResults = await db.select().from(users).where(eq(users.stripeCustomerId, customer.id));
-            
+
             if (userResults.length > 0) {
               const user = userResults[0];
-              
+
               // Determine tier based on subscription amount
               const priceAmount = invoice.amount_paid;
               let tier: 'premium' | 'family' = 'premium';
-              
+
               if (priceAmount >= 1299) { // $12.99 or higher = family plan
                 tier = 'family';
               }
-              
+
               // Update user subscription tier and status
               await updateUserSubscription(user.id, tier, subscription.status);
-              
+
               console.log(`Updated user ${user.id} to ${tier} tier with status ${subscription.status}`);
             }
           }
           break;
         }
-        
+
         case 'customer.subscription.updated': {
           const subscription = event.data.object as Stripe.Subscription;
           const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-          
+
           // Find user by Stripe customer ID
           const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
-          
+
           if (users.length > 0) {
             const user = users[0];
-            
+
             // Determine tier based on subscription items
             let tier: 'free' | 'premium' | 'family' = 'free';
-            
+
             if (subscription.status === 'active' || subscription.status === 'trialing') {
               // Check the price to determine tier
               if (subscription.items.data.length > 0) {
@@ -511,20 +530,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
                 }
               }
             }
-            
+
             await updateUserSubscription(user.id, tier, subscription.status);
             console.log(`Updated user ${user.id} subscription: ${tier} tier, status ${subscription.status}`);
           }
           break;
         }
-        
+
         case 'customer.subscription.deleted': {
           const subscription = event.data.object as Stripe.Subscription;
           const customer = await stripe.customers.retrieve(subscription.customer as string) as Stripe.Customer;
-          
+
           // Find user by Stripe customer ID
           const users = await db.select().from(storage.users).where(eq(storage.users.stripeCustomerId, customer.id));
-          
+
           if (users.length > 0) {
             const user = users[0];
             await updateUserSubscription(user.id, 'free', 'canceled');
@@ -532,7 +551,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
           break;
         }
-        
+
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }

@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { CheckCircle } from 'lucide-react';
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
@@ -15,7 +16,7 @@ if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
-const SubscribeForm = ({ selectedTier }: { selectedTier: string }) => {
+const SubscribeForm = ({ selectedTier, currentPricing }: { selectedTier: string; currentPricing: { price: string; period: string; savings?: string } }) => {
   const stripe = useStripe();
   const elements = useElements();
   const { toast } = useToast();
@@ -84,7 +85,7 @@ const SubscribeForm = ({ selectedTier }: { selectedTier: string }) => {
         }}
       />
       <Button type="submit" disabled={!stripe || isLoading} className="w-full">
-        {isLoading ? "Processing..." : `Subscribe for ${selectedTier === 'family' ? '$12.99' : '$6.99'}/month`}
+        {isLoading ? "Processing..." : `Subscribe for ${currentPricing.price}/${currentPricing.period}`}
       </Button>
     </form>
   );
@@ -95,9 +96,10 @@ export default function Subscribe() {
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   
-  // Get tier from URL parameters
+  // Get tier and billing period from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
   const selectedTier = urlParams.get('tier') || 'premium';
+  const billingPeriod = urlParams.get('billing') || 'monthly';
 
   // Redirect to login if not authenticated
   useEffect(() => {
@@ -113,7 +115,8 @@ export default function Subscribe() {
     // Only create subscription if user is authenticated
     if (user) {
       apiRequest("POST", "/api/get-or-create-subscription", {
-        tier: selectedTier
+        tier: selectedTier,
+        billing: billingPeriod
       })
         .then((res) => res.json())
         .then((data) => {
@@ -146,6 +149,26 @@ export default function Subscribe() {
     return null;
   }
 
+  // Calculate pricing based on tier and billing period
+  const getPricing = () => {
+    const isYearly = billingPeriod === 'yearly';
+    
+    if (selectedTier === 'family') {
+      return {
+        monthly: { price: '$12.99', period: 'month' },
+        yearly: { price: '$109', period: 'year', savings: 'Save $47/year' }
+      };
+    } else {
+      return {
+        monthly: { price: '$6.99', period: 'month' },
+        yearly: { price: '$59', period: 'year', savings: 'Save $25/year' }
+      };
+    }
+  };
+
+  const pricing = getPricing();
+  const currentPricing = billingPeriod === 'yearly' ? pricing.yearly : pricing.monthly;
+
   const features = [
     "Unlimited AI-generated bedtime stories",
     "Personalized characters and themes",
@@ -167,6 +190,13 @@ export default function Subscribe() {
               : 'Unlock unlimited personalized bedtime stories for your little one'
             }
           </p>
+          {billingPeriod === 'yearly' && (
+            <div className="mt-4">
+              <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1">
+                💰 {currentPricing.savings} with yearly billing
+              </Badge>
+            </div>
+          )}
         </div>
 
         <div className="grid lg:grid-cols-2 gap-8 items-start">
@@ -190,9 +220,14 @@ export default function Subscribe() {
               <div className="mt-6 p-4 bg-purple-50 rounded-lg">
                 <div className="text-center">
                   <div className="text-3xl font-bold text-purple-600">
-                    {selectedTier === 'family' ? '$12.99' : '$6.99'}
+                    {currentPricing.price}
                   </div>
-                  <div className="text-sm text-gray-600">per month</div>
+                  <div className="text-sm text-gray-600">per {currentPricing.period}</div>
+                  {billingPeriod === 'yearly' && (
+                    <div className="text-xs text-green-600 mt-1 font-medium">
+                      {currentPricing.savings}
+                    </div>
+                  )}
                   <div className="text-xs text-gray-500 mt-1">Cancel anytime</div>
                 </div>
               </div>
@@ -226,7 +261,7 @@ export default function Subscribe() {
                     }
                   }}
                 >
-                  <SubscribeForm selectedTier={selectedTier} />
+                  <SubscribeForm selectedTier={selectedTier} currentPricing={currentPricing} />
                 </Elements>
               ) : (
                 <div className="text-center py-8">

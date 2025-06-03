@@ -14,14 +14,14 @@ export default function Pricing() {
   const handlePlanClick = (tier: string) => {
     if (!isAuthenticated) {
       // Store the intended destination and redirect to login
-      const returnUrl = tier === 'free' ? '/' : `/subscribe?tier=${tier}`;
+      const returnUrl = tier === 'free' ? '/' : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
       window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
     } else {
       // User is authenticated, proceed to subscription
       if (tier === 'free') {
         window.location.href = '/';
       } else {
-        window.location.href = `/subscribe?tier=${tier}`;
+        window.location.href = `/subscribe?tier=${tier}&billing=${billingPeriod}`;
       }
     }
   };
