@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
+import { getQueryFn } from "@/lib/queryClient";
 import { useEffect, useState, useCallback, useMemo } from "react";
 import { 
   Download, 
@@ -56,6 +57,7 @@ export default function StoryReader() {
 
   const { data: story, isLoading: storyLoading, error } = useQuery<Story>({
     queryKey: [`/api/stories/${storyId}`],
+    queryFn: getQueryFn<Story>({ on401: "throw" }),
     enabled: !!user && !!storyId,
     retry: (failureCount, error: any) => {
       // Don't retry for 404 (not found) or 403 (forbidden) errors
