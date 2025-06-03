@@ -2,14 +2,16 @@
 import React from 'react';
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Share2, Plus } from "lucide-react";
+import { Download, Share2, Plus, Lock } from "lucide-react";
 import type { Story } from "@shared/schema";
+import type { TierInfo } from "@/hooks/useTierInfo";
 
 interface StoryActionsProps {
   story: Story;
   onDownloadPDF: () => void;
   onShare: () => void;
   onCreateAnother: () => void;
+  tierInfo?: TierInfo;
   cardClasses?: string;
 }
 
@@ -18,18 +20,26 @@ export function StoryActions({
   onDownloadPDF,
   onShare,
   onCreateAnother,
+  tierInfo,
   cardClasses = "",
 }: StoryActionsProps) {
+  const canDownloadPdf = tierInfo?.limits.canDownloadPdf ?? false;
+  
   return (
     <Card className={`shadow-2xl p-6 ${cardClasses}`}>
       <div className="flex flex-col sm:flex-row gap-4">
         <Button
-          onClick={onDownloadPDF}
+          onClick={canDownloadPdf ? onDownloadPDF : undefined}
           variant="outline"
-          className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all"
+          disabled={!canDownloadPdf}
+          className={`flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all ${
+            !canDownloadPdf ? 'opacity-50 cursor-not-allowed' : ''
+          }`}
+          title={!canDownloadPdf ? 'PDF downloads available for Premium and Family subscribers' : ''}
         >
-          <Download className="w-5 h-5" />
+          {canDownloadPdf ? <Download className="w-5 h-5" /> : <Lock className="w-5 h-5" />}
           <span>Download PDF</span>
+          {!canDownloadPdf && <span className="text-xs ml-1">(Premium)</span>}
         </Button>
         
         <Button

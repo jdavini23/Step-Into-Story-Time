@@ -7,6 +7,7 @@ import { insertStorySchema } from "@shared/schema";
 import { generateBedtimeStory } from "./openai";
 import { checkStoryGenerationPermissions, validateStoryParameters, addTierInfoToResponse } from "./tierMiddleware";
 import { incrementWeeklyUsage, getCurrentWeekStart, updateUserSubscription, getUserTier, canUserGenerateStory, getUserWeeklyUsage } from "./tierManager";
+import { generateStoryPDF, generateEnhancedPDF } from "./pdfGenerator";
 import { db } from "./db";
 import { users } from "../shared/schema";
 import { eq } from "drizzle-orm";
@@ -119,11 +120,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Get user's stories
+  // Get user's stories with tier-based restrictions
   app.get("/api/stories", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const stories = await storage.getUserStories(userId);
+      const { tier } = await getUserTier(userId);
+      let stories = await storage.getUserStories(userId);
+      
+      // Apply story library restrictions for free users
+      if (tier === 'free') {
+        // Sort by creation date (newest first) and limit to 3 most recent
+        stories = stories
+          .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+          .slice(0, 3);
+      }
+      
       res.json(stories);
     } catch (error) {
       console.error("Error fetching stories:", error);
@@ -141,7 +152,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid story ID" });
       }
 
-      const story = await await storage.getStory(storyId, userId);
+      const story = await storage.getStory(storyId, userId);
 
       if (!story) {
         return res.status(404).json({ message: "Story not found" });
@@ -151,6 +162,49 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error("Error fetching story:", error);
       res.status(500).json({ message: "Failed to fetch story" });
+    }
+  });
+
+  // Download story as PDF (Premium feature)
+  app.get("/api/stories/:id/pdf", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const storyId = parseInt(req.params.id);
+      
+      if (isNaN(storyId)) {
+        return res.status(400).json({ message: "Invalid story ID" });
+      }
+
+      // Check if user has PDF download access
+      const { tier } = await getUserTier(userId);
+      if (tier === 'free') {
+        return res.status(403).json({
+          error: 'PDF download restricted',
+          message: 'PDF downloads are available for Premium and Family subscribers only.',
+          upgradeRequired: true
+        });
+      }
+      
+      const story = await storage.getStory(storyId, userId);
+      if (!story) {
+        return res.status(404).json({ message: "Story not found" });
+      }
+
+      // Generate PDF based on tier
+      const pdfBuffer = tier === 'family' 
+        ? generateEnhancedPDF(story)
+        : generateStoryPDF(story);
+      
+      const filename = `${story.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+      res.setHeader('Content-Length', pdfBuffer.length);
+      
+      res.send(pdfBuffer);
+    } catch (error) {
+      console.error("Error generating PDF:", error);
+      res.status(500).json({ message: "Failed to generate PDF" });
     }
   });
 
