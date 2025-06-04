@@ -122,3 +122,51 @@ export function registerDebugRoutes(app: Express) {
     },
   );
 }
+
+export function setupDebugRoutes(app: Express) {
+  app.get("/api/debug/auth", isAuthenticated, async (req, res) => {
+    const user = req.user as any;
+
+    res.json({
+      isAuthenticated: req.isAuthenticated(),
+      user: {
+        claims: user?.claims,
+        expires_at: user?.expires_at,
+        hasRefreshToken: !!user?.refresh_token,
+      },
+      session: {
+        id: req.sessionID,
+        cookie: req.session.cookie,
+      },
+    });
+  });
+
+  app.get("/api/debug/subscription", isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      const userId = user?.claims?.sub;
+
+      if (!userId) {
+        return res.status(400).json({ error: "No user ID found in claims" });
+      }
+
+      // Try to get user data from storage
+      const userData = await storage.getUser(userId);
+
+      res.json({
+        userId,
+        userData,
+        claims: user?.claims,
+        environment: {
+          NODE_ENV: process.env.NODE_ENV,
+          DATABASE_URL: process.env.DATABASE_URL ? "SET" : "NOT SET",
+        }
+      });
+    } catch (error) {
+      res.status(500).json({ 
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: error instanceof Error ? error.stack : undefined
+      });
+    }
+  });
+}
