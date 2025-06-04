@@ -327,14 +327,13 @@ export default function Pricing() {
             <Button 
               variant="secondary" 
               onClick={() => handlePlanClick('free')}
-              className="bg-white text-purple-600 hover:bg-gray-100"
+              className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
             >
               Start Free Today
             </Button>
             <Button 
-              variant="outline" 
               onClick={() => handlePlanClick('premium')}
-              className="border-white text-white hover:bg-white hover:text-purple-600"
+              className="bg-white text-purple-600 hover:bg-gray-100 border-2 border-white font-semibold shadow-lg"
             >
               Upgrade to Premium
             </Button>
