@@ -92,7 +92,7 @@ export function StoryCard({ story, isFavorited }: StoryCardProps) {
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
             <span>{new Date(story.createdAt || '').toLocaleDateString()}</span>
-            <span>{story.length === 'short' ? '2-3' : '4-5'} min read</span>
+            <span>{story.length === 'short' ? '2-3' : story.length === 'medium' ? '5-7' : '10-15'} min read</span>
           </div>
         </CardContent>
       </Link>

@@ -392,7 +392,7 @@ export default function StoryReader() {
           <p className="text-gray-600 dark:text-gray-400 mb-4">A magical bedtime adventure</p>
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
             <span>📅 {new Date(story.createdAt || '').toLocaleDateString()}</span>
-            <span>⏱️ {story.length === 'short' ? '2-3' : '4-5'} min read</span>
+            <span>⏱️ {story.length === 'short' ? '2-3' : story.length === 'medium' ? '5-7' : '10-15'} min read</span>
             <span>🎯 Age {story.childAge}</span>
           </div>
         </Card>
