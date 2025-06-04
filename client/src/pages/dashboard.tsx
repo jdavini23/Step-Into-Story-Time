@@ -19,7 +19,7 @@ import LoadingOverlay from "@/components/loading-overlay";
 import { DebugPanel } from "@/components/debug-panel";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Calendar, Sparkles, X } from "lucide-react";
+import { AlertTriangle, Calendar, Sparkles, X, Crown } from "lucide-react";
 import { SkeletonCard, SkeletonQuickActions } from "@/components/ui/skeleton-card";
 import { EnhancedErrorState } from "@/components/enhanced-error-state";
 import { useEnhancedToast } from "@/components/enhanced-toast-system";
@@ -83,22 +83,10 @@ export default function Dashboard() {
       }, 500);
       return;
     } else if (error) {
-      console.error('Stories loading error:', error);
-      // Error handling is now done in the UI component
+      // Error handling is done in the EnhancedErrorState component below
     }
 
-    // Debug logging - only in development
-    if (import.meta.env.DEV) {
-      const displayedStories = showFavorites ? favoriteStories : stories;
-      console.log('Dashboard Debug:', {
-        storiesCount: stories.length,
-        favoritesCount: favoriteStories.length,
-        showFavorites,
-        displayedStoriesCount: displayedStories.length,
-        tierInfo: tierInfo?.tier,
-        user: user?.id
-      });
-    }
+    // Debug logging removed - use DebugPanel component instead if needed
   }, [user, isLoading, error, showActionToast, stories, favoriteStories, showFavorites, tierInfo]);
 
   if (isLoading) {

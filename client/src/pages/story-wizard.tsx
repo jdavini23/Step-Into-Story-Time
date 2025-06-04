@@ -37,23 +37,19 @@ export default function StoryWizard() {
     bedtimeMessage: "",
   });
 
-  const [loadingStage, setLoadingStage] = useState(0);
   const [loadingMessage, setLoadingMessage] = useState("Creating your magical story...");
 
   const generateStoryMutation = useMutation({
     mutationFn: async (data: InsertStory) => {
       // Start loading sequence
-      setLoadingStage(1);
       setLoadingMessage("Crafting your story idea...");
 
       // Simulate stages for better UX
       setTimeout(() => {
-        setLoadingStage(2);
         setLoadingMessage("Writing your magical adventure...");
       }, 2000);
 
       setTimeout(() => {
-        setLoadingStage(3);
         setLoadingMessage("Adding finishing touches...");
       }, 6000);
 
@@ -61,14 +57,12 @@ export default function StoryWizard() {
       return await response.json();
     },
     onSuccess: (story) => {
-      setLoadingStage(4);
       setLoadingMessage("Story complete! Taking you there...");
       setTimeout(() => {
         setLocation(`/story/${story.id}`);
       }, 1000);
     },
     onError: async (error: any) => {
-      setLoadingStage(0);
       setLoadingMessage("Creating your magical story...");
 
       if (isUnauthorizedError(error)) {
@@ -170,7 +164,7 @@ export default function StoryWizard() {
   }
 
   if (generateStoryMutation.isPending) {
-    return <LoadingOverlay isLoading={true} message={loadingMessage} progress={loadingStage * 25} showProgress={true} />;
+    return <LoadingOverlay isLoading={true} message={loadingMessage} showProgress={false} />;
   }
 
   const currentStepData = STEPS[currentStep - 1];
