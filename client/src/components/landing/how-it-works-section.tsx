@@ -12,9 +12,9 @@ export default function HowItWorksSection() {
   }, []);
 
   const steps = [
-    { icon: "👶", title: "Tell us about your child", description: "Name, age, favorite themes" },
-    { icon: "🎭", title: "Choose story style", description: "Adventure, calming, silly, or educational" },
-    { icon: "✨", title: "Get your story", description: "Ready in under 2 minutes" }
+    { icon: "👶", title: "Tell us about your child", description: "Name, age, and what they love — we'll take it from there." },
+    { icon: "🎭", title: "Choose a story style", description: "Pick a tone: adventurous, calming, silly, or educational." },
+    { icon: "✨", title: "Get your story", description: "In under 2 minutes, your personalized story is ready to read, save, or share." }
   ];
 
   return (
@@ -25,7 +25,7 @@ export default function HowItWorksSection() {
             How It Works
           </h3>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto">
-            Creating magical bedtime stories is as easy as 1-2-3!
+            Bedtime magic in 3 easy steps — no stress, just smiles.
           </p>
         </div>
 
