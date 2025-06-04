@@ -1,4 +1,3 @@
-
 import OpenAI from "openai";
 import crypto from "crypto";
 
@@ -26,16 +25,16 @@ const RATE_LIMIT_MAX_REQUESTS = 10; // Max 10 stories per hour per user
 const checkRateLimit = (userId: string): boolean => {
   const now = Date.now();
   const usage = userUsage.get(userId);
-  
+
   if (!usage || now - usage.windowStart > RATE_LIMIT_WINDOW) {
     userUsage.set(userId, { count: 1, windowStart: now });
     return true;
   }
-  
+
   if (usage.count >= RATE_LIMIT_MAX_REQUESTS) {
     return false;
   }
-  
+
   usage.count++;
   return true;
 };
@@ -61,12 +60,12 @@ const generateCacheKey = (params: StoryGenerationParams): string => {
 const getCachedStory = (cacheKey: string): { title: string; content: string } | null => {
   const cached = storyCache.get(cacheKey);
   if (!cached) return null;
-  
+
   if (Date.now() - cached.timestamp > CACHE_TTL) {
     storyCache.delete(cacheKey);
     return null;
   }
-  
+
   return cached.story;
 };
 
@@ -97,7 +96,7 @@ const MAX_CONTENT_SIZE_MAP = {
 
 const createPrompt = (params: StoryGenerationParams) => {
   const { childName, childAge, childGender, favoriteThemes, tone, length, bedtimeMessage } = params;
-  
+
   const lengthSpec = length === 'short' ? '2-3 minutes' : '4-5 minutes';
   const paragraphCount = length === 'short' ? '4-5 paragraphs' : '6-8 paragraphs';
   const themeSpec = favoriteThemes ? ` featuring ${favoriteThemes}` : '';
@@ -141,16 +140,16 @@ async function retryWithBackoff<T>(
       return await fn();
     } catch (error) {
       if (attempt === maxRetries) throw error;
-      
+
       // Check if it's a retryable error
       const isRetryable = error instanceof Error && 
         (error.message.includes('rate limit') || 
          error.message.includes('timeout') || 
          error.message.includes('503') ||
          error.message.includes('502'));
-      
+
       if (!isRetryable) throw error;
-      
+
       const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000;
       console.warn(`API call failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
       await sleep(delay);
@@ -171,7 +170,7 @@ export async function generateBedtimeStory(
     throw new Error("Rate limit exceeded. Please try again later.");
   }
   const MAX_CONTENT_SIZE = MAX_CONTENT_SIZE_MAP[params.length as keyof typeof MAX_CONTENT_SIZE_MAP] || MAX_CONTENT_SIZE_MAP['medium'];
-  
+
   // Check cache first (only if no custom bedtime message)
   if (!params.bedtimeMessage) {
     const cacheKey = generateCacheKey(params);
@@ -181,8 +180,30 @@ export async function generateBedtimeStory(
       return cachedStory;
     }
   }
-  
+
   const prompt = createPrompt(params);
+
+  // Adjust content length based on story length
+  let targetWords: number;
+  let targetParagraphs: number;
+
+  switch (params.length) {
+    case 'short':
+      targetWords = 200;
+      targetParagraphs = 4;
+      break;
+    case 'medium':
+      targetWords = 400;
+      targetParagraphs = 6;
+      break;
+    case 'long':
+      targetWords = 800;
+      targetParagraphs = 10;
+      break;
+    default:
+      targetWords = 200;
+      targetParagraphs = 4;
+  }
 
   try {
     const response = await retryWithBackoff(() => 
@@ -204,7 +225,7 @@ export async function generateBedtimeStory(
     );
 
     const result = JSON.parse(response.choices[0].message.content || '{}');
-    
+
     if (!result || !result.title || !result.content) {
       throw new Error("Invalid response: Title or content missing.");
     }
@@ -220,7 +241,7 @@ export async function generateBedtimeStory(
       const inappropriateWords = ['violence', 'scary', 'frightening', 'nightmare'];
       const lowercaseContent = content.toLowerCase();
       const foundInappropriate = inappropriateWords.find(word => lowercaseContent.includes(word));
-      
+
       if (foundInappropriate) {
         console.warn(`Potentially inappropriate content detected: ${foundInappropriate}`);
         // Could regenerate or filter content here

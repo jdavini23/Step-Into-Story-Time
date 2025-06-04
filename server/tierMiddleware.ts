@@ -30,7 +30,7 @@ export const checkStoryGenerationPermissions = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
-    
+
     if (!userId) {
       res.status(401).json({ 
         error: 'Authentication required',
@@ -41,7 +41,7 @@ export const checkStoryGenerationPermissions = async (
 
     // Check if user can generate a story
     const permissionCheck = await canUserGenerateStory(userId);
-    
+
     if (!permissionCheck.canGenerate) {
       let message = 'Story generation not allowed';
       let upgradeRequired = false;
@@ -88,7 +88,7 @@ export const validateStoryParameters = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
-    
+
     if (!userId) {
       res.status(401).json({ 
         error: 'Authentication required',
@@ -104,7 +104,7 @@ export const validateStoryParameters = async (
     if (favoriteThemes && tier === 'free') {
       const themes = favoriteThemes.split(',').map((t: string) => t.trim().toLowerCase());
       const invalidThemes = themes.filter((theme: string) => !canAccessTheme(tier, theme));
-      
+
       if (invalidThemes.length > 0) {
         res.status(403).json({
           error: 'Theme access restricted',
@@ -147,7 +147,7 @@ export const addTierInfoToResponse = async (
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
-    
+
     if (userId) {
       const { tier } = await getUserTier(userId);
       req.userTier = tier;

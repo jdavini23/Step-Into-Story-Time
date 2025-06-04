@@ -371,7 +371,7 @@ export default function StoryWizard() {
                       )}
                     </div>
                     <RadioGroup value={formData.length} onValueChange={(value) => updateFormData("length", value)}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
                           <RadioGroupItem value="short" id="short" />
                           <div>
@@ -382,6 +382,241 @@ export default function StoryWizard() {
                         <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
                           tierInfo?.tier === 'free' 
                             ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>
+                          <RadioGroupItem 
+                            value="medium" 
+                            id="medium" 
+                            disabled={tierInfo?.tier === 'free'}
+                          />
+                          <div>
+                            <Label htmlFor="medium" className={`font-medium ${
+                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
+                            }`}>📖 Medium</Label>
+                            <p className="text-sm text-gray-500">5-7 minutes reading time</p>
+                          </div>
+                        </div>
+                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
+                          tierInfo?.tier === 'free' 
+                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>
+                          <RadioGroupItem 
+                            value="long" 
+                            id="long" 
+                            disabled={tierInfo?.tier === 'free'}
+                          />
+                          <div>
+                            <Label htmlFor="long" className={`font-medium ${
+                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
+                            }`}>📚 Long</Label>
+                            <p className="text-sm text-gray-500">10-15 minutes reading time</p>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
+
+                    {tierInfo?.tier === 'free' && (
+                      <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                        <div className="flex items-start space-x-3">
+                          <Lock className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-purple-900">Medium and Long Stories</p>
+                            <p className="text-sm text-purple-700 mt-1">
+                              Upgrade to Premium to unlock medium (5-7 min) and long (10-15 min) story lengths.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}y-50 opacity-50 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>
+                          <RadioGroupItem 
+                            value="medium" 
+                            id="medium" 
+                            disabled={tierInfo?.tier === 'free'}
+                          />
+                          <div>
+                            <Label htmlFor="medium" className={`font-medium ${
+                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
+                            }`}>📖 Medium</Label>
+                            <p className="text-sm text-gray-500">5-7 minutes reading time</p>
+                          </div>
+                        </div>
+                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
+                          tierInfo?.tier === 'free' 
+                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
+                            : 'border-gray-200 hover:border-purple-300'
+                        }`}>
+                          <RadioGroupItem 
+                            value="long" 
+                            id="long" 
+                            disabled={tierInfo?.tier === 'free'}
+                          />
+                          <div>
+                            <Label htmlFor="long" className={`font-medium ${
+                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
+                            }`}>📚 Long</Label>
+                            <p className="text-sm text-gray-500">10-15 minutes reading time</p>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
+
+                    {tierInfo?.tier === 'free' && (
+                      <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+                        <div className="flex items-start space-x-3">
+                          <Lock className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+                          <div>
+                            <p className="text-sm font-medium text-purple-900">Medium and Long Stories</p>
+                            <p className="text-sm text-purple-700 mt-1">
+                              Upgrade to Premium to unlock medium (5-7 min) and long (10-15 min) story lengths.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  <div>
+                    <Label className="text-sm font-medium text-gray-700">Story Tone *</Label>
+                    <RadioGroup value={formData.tone} onValueChange={(value) => updateFormData("tone", value)}>
+                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="adventurous" id="adventurous" />
+                          <div>
+                            <Label htmlFor="adventurous" className="font-medium cursor-pointer">🏔️ Adventurous</Label>
+                            <p className="text-sm text-gray-500">Exciting quests</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="silly" id="silly" />
+                          <div>
+                            <Label htmlFor="silly" className="font-medium cursor-pointer">😄 Silly</Label>
+                            <p className="text-sm text-gray-500">Fun and giggly</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="calming" id="calming" />
+                          <div>
+                            <Label htmlFor="calming" className="font-medium cursor-pointer">🌙 Calming</Label>
+                            <p className="text-sm text-gray-500">Peaceful & soothing</p>
+                          </div>
+                        </div>
+                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+                          <RadioGroupItem value="educational" id="educational" />
+                          <div>
+                            <Label htmlFor="educational" className="font-medium cursor-pointer">🎓 Educational</Label>
+                            <p className="text-sm text-gray-500">Learning focused</p>
+                          </div>
+                        </div>
+                      </div>
+                    </RadioGroup>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Personal Touch */}
+              {currentStep === 3 && (
+                <div className="space-y-8">
+                  <div>
+                    <Label htmlFor="bedtime-message" className="text-sm font-medium text-gray-700">
+                      Bedtime Message (Optional)
+                    </Label>
+                    <p className="text-sm text-gray-500 mb-4">
+                      Add a special message or lesson you'd like woven into the story
+                    </p>
+                    <Textarea
+                      id="bedtime-message"
+                      placeholder="Remember to always be kind to others, or brush your teeth before bed..."
+                      value={formData.bedtimeMessage || ""}
+                      onChange={(e) => updateFormData("bedtimeMessage", e.target.value)}
+                      className="min-h-[100px] resize-none"
+                      maxLength={200}
+                    />
+                    <p className="text-xs text-gray-400 mt-2">
+                      {(formData.bedtimeMessage?.length || 0)}/200 characters
+                    </p>
+                  </div>
+
+                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6">
+                    <div className="flex items-start space-x-4">
+                      <div className="bg-purple-100 rounded-full p-2 flex-shrink-0">
+                        <span className="text-2xl">✨</span>
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-purple-900 mb-2">Ready to Create Magic?</h3>
+                        <p className="text-purple-700 text-sm">
+                          Your personalized bedtime story will be ready in just a few moments. 
+                          Each story is unique and crafted just for {formData.childName || 'your little one'}!
+                        </p>
+                        {tierInfo?.tier === 'free' && tierInfo.storiesRemaining !== undefined && (
+                          <p className="text-purple-600 text-sm mt-2 font-medium">
+                            {tierInfo.storiesRemaining} stories remaining this week
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Navigation */}
+              <div className="flex justify-between pt-8 border-t border-gray-200">
+                <Button
+                  variant="outline"
+                  onClick={handlePreviousStep}
+                  disabled={currentStep === 1}
+                  className="flex items-center space-x-2"
+                >
+                  <ArrowLeft className="h-4 w-4" />
+                  <span>Previous</span>
+                </Button>
+
+                {currentStep < STEPS.length ? (
+                  <Button
+                    onClick={handleNextStep}
+                    disabled={!isStepValid()}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    <span>Next</span>
+                    <ArrowRight className="h-4 w-4" />
+                  </Button>
+                ) : (
+                  <Button
+                    onClick={handleSubmit}
+                    disabled={!isStepValid() || isLoading}
+                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+                  >
+                    {isLoading ? (
+                      <>
+                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                        <span>Creating Story...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Sparkles className="h-4 w-4" />
+                        <span>Create Story</span>
+                      </>
+                    )}
+                  </Button>
+                )}
+              </div>
+            </div>
+          </Card>
+        </div>
+      )}
+
+      {/* Loading Overlay */}
+      {isLoading && (
+        <LoadingOverlay
+          stage={loadingStage}
+          message={loadingMessage}
+          onCancel={() => {
+            // Reset loading state if user cancels
+            setIsLoading(false);
+            setLoadingStage(0);
+            setLoadingMessage("Creating your magical sty-50 opacity-50 cursor-not-allowed' 
                             : 'border-gray-200 hover:border-purple-300'
                         }`}>
                           <RadioGroupItem 

@@ -59,6 +59,8 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
 
 export const FREE_TIER_THEMES = ['bedtime', 'fantasy', 'adventure'];
 export const FREE_TIER_LENGTHS = ['short'];
+export const PREMIUM_TIER_LENGTHS = ['short', 'medium', 'long'];
+export const FAMILY_TIER_LENGTHS = ['short', 'medium', 'long'];
 
 /**
  * Get the current week start (Monday 00:00:00)
@@ -234,5 +236,12 @@ export function canAccessLength(userTier: SubscriptionTier, length: string): boo
     return true;
   }
 
-  return FREE_TIER_LENGTHS.includes(length.toLowerCase());
+  // Map tiers to their allowed lengths
+  const allowedLengths = {
+    free: FREE_TIER_LENGTHS,
+    premium: PREMIUM_TIER_LENGTHS,
+    family: FAMILY_TIER_LENGTHS,
+  };
+
+  return allowedLengths[userTier].includes(length.toLowerCase());
 }

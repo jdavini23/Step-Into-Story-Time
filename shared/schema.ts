@@ -50,7 +50,7 @@ export const stories = pgTable("stories", {
   childGender: varchar("child_gender").notNull(), // 'boy', 'girl'
   favoriteThemes: varchar("favorite_themes"),
   tone: varchar("tone").notNull(), // 'adventurous', 'silly', 'calming', 'educational'
-  length: varchar("length").notNull(), // 'short', 'medium'
+  length: varchar("length").notNull(), // 'short', 'medium', 'long'
   bedtimeMessage: text("bedtime_message"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
