@@ -16,7 +16,7 @@ import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { Crown, Lock, Star } from "lucide-react";
+import { Crown, Lock, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 import type { InsertStory } from "@shared/schema";
 import LoadingOverlay from "@/components/loading-overlay";
 
@@ -50,18 +50,18 @@ export default function StoryWizard() {
       // Start loading sequence
       setLoadingStage(1);
       setLoadingMessage("Crafting your story idea...");
-      
+
       // Simulate stages for better UX
       setTimeout(() => {
         setLoadingStage(2);
         setLoadingMessage("Writing your magical adventure...");
       }, 2000);
-      
+
       setTimeout(() => {
         setLoadingStage(3);
         setLoadingMessage("Adding finishing touches...");
       }, 6000);
-      
+
       const response = await apiRequest("POST", "/api/stories/generate", data);
       return await response.json();
     },
@@ -75,7 +75,7 @@ export default function StoryWizard() {
     onError: async (error: any) => {
       setLoadingStage(0);
       setLoadingMessage("Creating your magical story...");
-      
+
       if (isUnauthorizedError(error)) {
         toast({
           title: "Unauthorized",
@@ -106,7 +106,7 @@ export default function StoryWizard() {
           // Failed to parse error response, fall through to generic error
         }
       }
-      
+
       toast({
         title: "Error",
         description: "Failed to generate story. Please try again.",
@@ -180,10 +180,48 @@ export default function StoryWizard() {
     return <LoadingOverlay isLoading={true} message={loadingMessage} progress={loadingStage * 25} showProgress={true} />;
   }
 
+  const handlePreviousStep = () => {
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+    }
+  };
+
+  const handleNextStep = () => {
+    if (currentStep < STEPS.length) {
+      setCurrentStep(currentStep + 1);
+    }
+  };
+
+  const isStepValid = () => {
+    switch (currentStep) {
+      case 1:
+        return !!formData.childName && !!formData.childAge && !!formData.childGender;
+      case 2:
+        return !!formData.tone && !!formData.length;
+      case 3:
+        return true;
+      default:
+        return false;
+    }
+  };
+
+  const handleSubmit = () => {
+    if (!isStepValid()) {
+      toast({
+        title: "Error",
+        description: "Please fill in all the required fields.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    generateStoryMutation.mutate(formData as InsertStory);
+  };
+
   return (
     <div className="min-h-screen bg-white py-12">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        
+
         {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
@@ -265,7 +303,7 @@ export default function StoryWizard() {
                       className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
                     />
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="childAge" className="block text-sm font-medium text-gray-700 mb-2">
                       Age *
@@ -285,7 +323,7 @@ export default function StoryWizard() {
                       </SelectContent>
                     </Select>
                   </div>
-                  
+
                   <div>
                     <Label className="block text-sm font-medium text-gray-700 mb-4">Gender *</Label>
                     <RadioGroup value={formData.childGender} onValueChange={(value) => updateFormData("childGender", value)}>
@@ -305,7 +343,7 @@ export default function StoryWizard() {
                       </div>
                     </RadioGroup>
                   </div>
-                  
+
                   <div>
                     <Label htmlFor="favoriteThemes" className="block text-sm font-medium text-gray-700 mb-2">
                       Favorite Animals or Characters
@@ -428,92 +466,9 @@ export default function StoryWizard() {
                           </div>
                         </div>
                       </div>
-                    )}y-50 opacity-50 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
-                        }`}>
-                          <RadioGroupItem 
-                            value="medium" 
-                            id="medium" 
-                            disabled={tierInfo?.tier === 'free'}
-                          />
-                          <div>
-                            <Label htmlFor="medium" className={`font-medium ${
-                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
-                            }`}>📖 Medium</Label>
-                            <p className="text-sm text-gray-500">5-7 minutes reading time</p>
-                          </div>
-                        </div>
-                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
-                          tierInfo?.tier === 'free' 
-                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
-                        }`}>
-                          <RadioGroupItem 
-                            value="long" 
-                            id="long" 
-                            disabled={tierInfo?.tier === 'free'}
-                          />
-                          <div>
-                            <Label htmlFor="long" className={`font-medium ${
-                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
-                            }`}>📚 Long</Label>
-                            <p className="text-sm text-gray-500">10-15 minutes reading time</p>
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
-
-                    {tierInfo?.tier === 'free' && (
-                      <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
-                        <div className="flex items-start space-x-3">
-                          <Lock className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium text-purple-900">Medium and Long Stories</p>
-                            <p className="text-sm text-purple-700 mt-1">
-                              Upgrade to Premium to unlock medium (5-7 min) and long (10-15 min) story lengths.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
                     )}
                   </div>
-
-                  <div>
-                    <Label className="text-sm font-medium text-gray-700">Story Tone *</Label>
-                    <RadioGroup value={formData.tone} onValueChange={(value) => updateFormData("tone", value)}>
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="adventurous" id="adventurous" />
-                          <div>
-                            <Label htmlFor="adventurous" className="font-medium cursor-pointer">🏔️ Adventurous</Label>
-                            <p className="text-sm text-gray-500">Exciting quests</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="silly" id="silly" />
-                          <div>
-                            <Label htmlFor="silly" className="font-medium cursor-pointer">😄 Silly</Label>
-                            <p className="text-sm text-gray-500">Fun and giggly</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="calming" id="calming" />
-                          <div>
-                            <Label htmlFor="calming" className="font-medium cursor-pointer">🌙 Calming</Label>
-                            <p className="text-sm text-gray-500">Peaceful & soothing</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="educational" id="educational" />
-                          <div>
-                            <Label htmlFor="educational" className="font-medium cursor-pointer">🎓 Educational</Label>
-                            <p className="text-sm text-gray-500">Learning focused</p>
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                </div>
+                </>
               )}
 
               {/* Step 3: Personal Touch */}
@@ -565,7 +520,7 @@ export default function StoryWizard() {
               <div className="flex justify-between pt-8 border-t border-gray-200">
                 <Button
                   variant="outline"
-                  onClick={handlePreviousStep}
+                  onClick={prevStep}
                   disabled={currentStep === 1}
                   className="flex items-center space-x-2"
                 >
@@ -575,8 +530,8 @@ export default function StoryWizard() {
 
                 {currentStep < STEPS.length ? (
                   <Button
-                    onClick={handleNextStep}
-                    disabled={!isStepValid()}
+                    onClick={nextStep}
+                    disabled={!canProceed()}
                     className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
                     <span>Next</span>
@@ -584,124 +539,15 @@ export default function StoryWizard() {
                   </Button>
                 ) : (
                   <Button
-                    onClick={handleSubmit}
-                    disabled={!isStepValid() || isLoading}
+                    onClick={handleGenerate}
+                    disabled={!canProceed()}
                     className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
                   >
-                    {isLoading ? (
-                      <>
-                        <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                        <span>Creating Story...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Sparkles className="h-4 w-4" />
-                        <span>Create Story</span>
-                      </>
-                    )}
+                    <Sparkles className="h-4 w-4" />
+                    <span>Create Story</span>
                   </Button>
                 )}
               </div>
-            </div>
-          </Card>
-        </div>
-      )}
-
-      {/* Loading Overlay */}
-      {isLoading && (
-        <LoadingOverlay
-          stage={loadingStage}
-          message={loadingMessage}
-          onCancel={() => {
-            // Reset loading state if user cancels
-            setIsLoading(false);
-            setLoadingStage(0);
-            setLoadingMessage("Creating your magical sty-50 opacity-50 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
-                        }`}>
-                          <RadioGroupItem 
-                            value="medium" 
-                            id="medium" 
-                            disabled={tierInfo?.tier === 'free'}
-                          />
-                          <div className="flex-1">
-                            <div className="flex items-center justify-between">
-                              <Label htmlFor="medium" className={`font-medium ${tierInfo?.tier === 'free' ? 'cursor-not-allowed' : 'cursor-pointer'}`}>
-                                📖 Medium
-                              </Label>
-                              {tierInfo?.tier === 'free' && (
-                                <Crown className="h-4 w-4 text-amber-500" />
-                              )}
-                            </div>
-                            <p className="text-sm text-gray-500">4-5 minutes reading time</p>
-                            {tierInfo?.tier === 'free' && (
-                              <p className="text-xs text-amber-600 mt-1">Premium feature</p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
-                    {tierInfo?.tier === 'free' && (
-                      <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
-                        <p className="text-sm text-amber-800">
-                          <Crown className="h-4 w-4 inline mr-1" />
-                          Upgrade to Premium for medium and long story options
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Step 3: Personal Touch */}
-              {currentStep === 3 && (
-                <div>
-                  <Label htmlFor="bedtimeMessage" className="block text-sm font-medium text-gray-700 mb-2">
-                    Personal Bedtime Message (Optional)
-                  </Label>
-                  <Textarea
-                    id="bedtimeMessage"
-                    placeholder="e.g., Sweet dreams, Emma! Remember that you're braver than you believe. Goodnight from Dad ❤️"
-                    value={formData.bedtimeMessage || ""}
-                    onChange={(e) => updateFormData("bedtimeMessage", e.target.value)}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    rows={4}
-                  />
-                  <p className="text-sm text-gray-500 mt-2">
-                    Add a special message that will appear at the end of the story
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Navigation buttons */}
-            <div className="flex justify-between mt-8">
-              <Button
-                variant="ghost"
-                onClick={prevStep}
-                disabled={currentStep === 1}
-                className="px-6 py-3 text-gray-500 hover:text-gray-700 transition-colors"
-              >
-                ← Previous
-              </Button>
-              
-              {currentStep < STEPS.length ? (
-                <Button
-                  onClick={nextStep}
-                  disabled={!canProceed()}
-                  className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200"
-                >
-                  Next Step →
-                </Button>
-              ) : (
-                <Button
-                  onClick={handleGenerate}
-                  disabled={!canProceed()}
-                  className="bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 hover:opacity-90 text-white px-8 py-3 rounded-xl font-semibold transition-all duration-200"
-                >
-                  ✨ Generate Story
-                </Button>
-              )}
             </div>
           </CardContent>
         </Card>
