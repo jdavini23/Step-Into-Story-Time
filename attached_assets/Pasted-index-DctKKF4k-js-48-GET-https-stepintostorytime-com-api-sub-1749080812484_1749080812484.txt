@@ -1,0 +1,160 @@
+index-DctKKF4k.js:48 
+            
+            
+           GET https://stepintostorytime.com/api/subscription-status 500 (Internal Server Error)
+(anonymous) @ index-DctKKF4k.js:48
+s @ index-DctKKF4k.js:48
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+(anonymous) @ index-DctKKF4k.js:40
+setTimeout
+o @ index-DctKKF4k.js:48
+i @ index-DctKKF4k.js:48
+batch @ index-DctKKF4k.js:48
+ln @ index-DctKKF4k.js:48
+setData @ index-DctKKF4k.js:48
+onSuccess @ index-DctKKF4k.js:48
+f @ index-DctKKF4k.js:48
+Promise.then
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+kv @ index-DctKKF4k.js:40
+C @ index-DctKKF4k.js:25
+T @ index-DctKKF4k.js:25Understand this error
+index-DctKKF4k.js:48 
+            
+            
+           GET https://stepintostorytime.com/api/subscription-status 500 (Internal Server Error)
+(anonymous) @ index-DctKKF4k.js:48
+s @ index-DctKKF4k.js:48
+b @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Promise.then
+(anonymous) @ index-DctKKF4k.js:48
+Promise.catch
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+(anonymous) @ index-DctKKF4k.js:40
+setTimeout
+o @ index-DctKKF4k.js:48
+i @ index-DctKKF4k.js:48
+batch @ index-DctKKF4k.js:48
+ln @ index-DctKKF4k.js:48
+setData @ index-DctKKF4k.js:48
+onSuccess @ index-DctKKF4k.js:48
+f @ index-DctKKF4k.js:48
+Promise.then
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+kv @ index-DctKKF4k.js:40
+C @ index-DctKKF4k.js:25
+T @ index-DctKKF4k.js:25Understand this error
+index-DctKKF4k.js:48 
+            
+            
+           GET https://stepintostorytime.com/api/subscription-status 500 (Internal Server Error)
+(anonymous) @ index-DctKKF4k.js:48
+s @ index-DctKKF4k.js:48
+b @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Promise.then
+(anonymous) @ index-DctKKF4k.js:48
+Promise.catch
+b @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Promise.then
+(anonymous) @ index-DctKKF4k.js:48
+Promise.catch
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+(anonymous) @ index-DctKKF4k.js:40
+setTimeout
+o @ index-DctKKF4k.js:48
+i @ index-DctKKF4k.js:48
+batch @ index-DctKKF4k.js:48
+ln @ index-DctKKF4k.js:48
+setData @ index-DctKKF4k.js:48
+onSuccess @ index-DctKKF4k.js:48
+f @ index-DctKKF4k.js:48
+Promise.then
+b @ index-DctKKF4k.js:48
+start @ index-DctKKF4k.js:48
+fetch @ index-DctKKF4k.js:48
+Ss @ index-DctKKF4k.js:48
+onSubscribe @ index-DctKKF4k.js:48
+subscribe @ index-DctKKF4k.js:48
+(anonymous) @ index-DctKKF4k.js:48
+Yg @ index-DctKKF4k.js:38
+pl @ index-DctKKF4k.js:40
+fo @ index-DctKKF4k.js:40
+im @ index-DctKKF4k.js:40
+ar @ index-DctKKF4k.js:38
+fN @ index-DctKKF4k.js:40
+fr @ index-DctKKF4k.js:40
+kv @ index-DctKKF4k.js:40
+C @ index-DctKKF4k.js:25
+T @ index-DctKKF4k.js:25Understand this error
+index-DctKKF4k.js:48 
+            
+            
+           GET https://stepintostorytime.com/api/subscription-status 500 (Internal Server Error)
