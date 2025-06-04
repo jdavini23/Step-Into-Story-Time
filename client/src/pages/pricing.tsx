@@ -12,6 +12,11 @@ export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
 
   const handlePlanClick = (tier: string) => {
+    // Don't allow clicking on coming soon tiers
+    if (tier === 'family') {
+      return;
+    }
+    
     if (!isAuthenticated) {
       // Store the intended destination and redirect to login
       const returnUrl = tier === 'free' ? '/' : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
@@ -37,6 +42,7 @@ export default function Pricing() {
       icon: <Sparkles className="h-6 w-6" />,
       color: "from-blue-500 to-purple-500",
       popular: false,
+      comingSoon: false,
       features: [
         "3 stories per week",
         "Basic personalization (child's name, 1 trait)",
@@ -65,6 +71,7 @@ export default function Pricing() {
       icon: <Heart className="h-6 w-6" />,
       color: "from-purple-500 to-pink-500",
       popular: true,
+      comingSoon: false,
       features: [
         "Unlimited stories",
         "Full personalization (name, traits, family members, interests)",
@@ -92,6 +99,7 @@ export default function Pricing() {
       icon: <Users className="h-6 w-6" />,
       color: "from-emerald-500 to-blue-500",
       popular: false,
+      comingSoon: true,
       features: [
         "Everything in Storytime Plus",
         "Up to 5 child profiles",
@@ -106,8 +114,8 @@ export default function Pricing() {
         "Priority support"
       ],
       limitations: [],
-      cta: "Go Pro",
-      ctaVariant: "default" as const
+      cta: "Coming Soon",
+      ctaVariant: "outline" as const
     }
   ];
 
@@ -177,7 +185,9 @@ export default function Pricing() {
           {tiers.map((tier, index) => (
             <Card 
               key={tier.id} 
-              className={`relative overflow-hidden transition-all duration-300 hover:scale-105 ${
+              className={`relative overflow-hidden transition-all duration-300 ${
+                tier.comingSoon ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105'
+              } ${
                 tier.popular ? 'ring-2 ring-purple-500 shadow-2xl' : 'shadow-xl'
               }`}
             >
@@ -186,6 +196,14 @@ export default function Pricing() {
                   <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-2 text-sm font-semibold">
                     <Star className="inline h-4 w-4 mr-1" />
                     Most Popular
+                  </div>
+                </div>
+              )}
+              {tier.comingSoon && (
+                <div className="absolute top-0 left-0 right-0">
+                  <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white text-center py-2 text-sm font-semibold">
+                    <Sparkles className="inline h-4 w-4 mr-1" />
+                    Coming Soon
                   </div>
                 </div>
               )}
@@ -251,13 +269,19 @@ export default function Pricing() {
                 <Button 
                   variant={tier.ctaVariant}
                   onClick={() => handlePlanClick(tier.id)}
+                  disabled={tier.comingSoon}
                   className={`w-full py-3 ${
                     tier.popular 
                       ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' 
                       : ''
+                  } ${
+                    tier.comingSoon 
+                      ? 'opacity-50 cursor-not-allowed' 
+                      : ''
                   }`}
                 >
-                  {tier.id === 'family' && <Crown className="h-4 w-4 mr-2" />}
+                  {tier.id === 'family' && !tier.comingSoon && <Crown className="h-4 w-4 mr-2" />}
+                  {tier.comingSoon && <Sparkles className="h-4 w-4 mr-2" />}
                   {tier.cta}
                 </Button>
               </CardContent>
@@ -335,7 +359,7 @@ export default function Pricing() {
               onClick={() => handlePlanClick('premium')}
               className="bg-white text-purple-600 hover:bg-gray-100 border-2 border-white font-semibold shadow-lg"
             >
-              Upgrade to Premium
+              Upgrade to Plus
             </Button>
           </div>
         </div>
