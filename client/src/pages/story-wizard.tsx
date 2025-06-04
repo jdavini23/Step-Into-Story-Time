@@ -2,6 +2,18 @@ import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTierInfo } from "@/hooks/useTierInfo";
 import { useLocation } from "wouter";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
+import { isUnauthorizedError } from "@/lib/authUtils";
+import type { InsertStory } from "@shared/schema";
+import LoadingOverlay from "@/components/loading-overlay";
+import { WizardStep } from "@/components/story-wizard/wizard-step";
+import { ChildInfoStep } from "@/components/story-wizard/child-info-step";
+import { StoryStyleStep } from "@/components/story-wizard/story-style-step";
+import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
+import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
+import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,18 +24,12 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
-import { useToast } from "@/hooks/use-toast";
-import { isUnauthorizedError } from "@/lib/authUtils";
 import { Crown, Lock, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
-import type { InsertStory } from "@shared/schema";
-import LoadingOverlay from "@/components/loading-overlay";
 
 const STEPS = [
-  { id: 1, title: "Tell us about your little one", icon: "👶" },
-  { id: 2, title: "Choose the story style", icon: "🎭" },
-  { id: 3, title: "Add a personal touch", icon: "💝" },
+  { id: 1, title: "Tell us about your little one", subtitle: "We'll create a story just for them", icon: "👶" },
+  { id: 2, title: "Choose the story style", subtitle: "What kind of adventure should it be?", icon: "🎭" },
+  { id: 3, title: "Add a personal touch", subtitle: "Make it extra special with a personal message", icon: "💝" },
 ];
 
 export default function StoryWizard() {
@@ -170,8 +176,6 @@ export default function StoryWizard() {
     generateStoryMutation.mutate(formData as InsertStory);
   };
 
-  const progressPercentage = (currentStep / STEPS.length) * 100;
-
   if (isLoading) {
     return <LoadingOverlay isLoading={true} />;
   }
@@ -180,378 +184,52 @@ export default function StoryWizard() {
     return <LoadingOverlay isLoading={true} message={loadingMessage} progress={loadingStage * 25} showProgress={true} />;
   }
 
-  const handlePreviousStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
-  };
+  const currentStepData = STEPS[currentStep - 1];
 
-  const handleNextStep = () => {
-    if (currentStep < STEPS.length) {
-      setCurrentStep(currentStep + 1);
-    }
-  };
-
-  const isStepValid = () => {
+  const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return !!formData.childName && !!formData.childAge && !!formData.childGender;
+        return <ChildInfoStep formData={formData} updateFormData={updateFormData} />;
       case 2:
-        return !!formData.tone && !!formData.length;
+        return <StoryStyleStep formData={formData} updateFormData={updateFormData} tierInfo={tierInfo} />;
       case 3:
-        return true;
+        return <PersonalTouchStep formData={formData} updateFormData={updateFormData} tierInfo={tierInfo} />;
       default:
-        return false;
+        return null;
     }
-  };
-
-  const handleSubmit = () => {
-    if (!isStepValid()) {
-      toast({
-        title: "Error",
-        description: "Please fill in all the required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
-
-    generateStoryMutation.mutate(formData as InsertStory);
   };
 
   return (
-    <div className="min-h-screen bg-white py-12">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-
-        {/* Progress indicator */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-purple-600">Step {currentStep} of {STEPS.length}</span>
-            <span className="text-sm text-gray-500">Almost there! ✨</span>
-          </div>
-          <Progress value={progressPercentage} className="h-2" />
+    <WizardStep
+      currentStep={currentStep}
+      totalSteps={STEPS.length}
+      title={currentStepData.title}
+      subtitle={currentStepData.subtitle}
+      icon={currentStepData.icon}
+    >
+      {/* Tier Status Indicator */}
+      {tierInfo && (
+        <div className="mb-6">
+          <TierStatusAlert
+            tierInfo={tierInfo}
+            onUpgradeClick={() => setLocation("/pricing")}
+          />
         </div>
+      )}
 
-        {/* Tier Status Indicator */}
-        {tierInfo && (
-          <div className="mb-6">
-            {tierInfo.tier === 'free' && (
-              <Alert className="border-yellow-200 bg-yellow-50">
-                <Star className="h-4 w-4 text-yellow-600" />
-                <AlertDescription className="text-yellow-800">
-                  <div className="flex items-center justify-between">
-                    <span>
-                      Free Plan: {tierInfo.storiesRemaining || 0} stories remaining this week
-                    </span>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setLocation("/pricing")}
-                      className="ml-4"
-                    >
-                      <Crown className="h-3 w-3 mr-1" />
-                      Upgrade
-                    </Button>
-                  </div>
-                </AlertDescription>
-              </Alert>
-            )}
-            {tierInfo.tier === 'premium' && (
-              <Alert className="border-purple-200 bg-purple-50">
-                <Crown className="h-4 w-4 text-purple-600" />
-                <AlertDescription className="text-purple-800">
-                  Premium Plan: Unlimited story generation
-                </AlertDescription>
-              </Alert>
-            )}
-            {tierInfo.tier === 'family' && (
-              <Alert className="border-emerald-200 bg-emerald-50">
-                <Crown className="h-4 w-4 text-emerald-600" />
-                <AlertDescription className="text-emerald-800">
-                  Family Plan: Ultimate storytelling experience
-                </AlertDescription>
-              </Alert>
-            )}
-          </div>
-        )}
+      <div className="space-y-6">
+        {renderStepContent()}
 
-        {/* Step content */}
-        <Card className="shadow-2xl">
-          <CardContent className="p-8">
-            <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
-                <span className="text-2xl">{STEPS[currentStep - 1].icon}</span>
-              </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-2">{STEPS[currentStep - 1].title}</h3>
-              {currentStep === 1 && <p className="text-gray-600">We'll create a story just for them</p>}
-              {currentStep === 2 && <p className="text-gray-600">What kind of adventure should it be?</p>}
-              {currentStep === 3 && <p className="text-gray-600">Make it extra special with a personal message</p>}
-            </div>
-
-            <div className="space-y-6">
-              {/* Step 1: Child Information */}
-              {currentStep === 1 && (
-                <>
-                  <div>
-                    <Label htmlFor="childName" className="block text-sm font-medium text-gray-700 mb-2">
-                      Child's Name *
-                    </Label>
-                    <Input
-                      id="childName"
-                      placeholder="e.g., Emma"
-                      value={formData.childName || ""}
-                      onChange={(e) => updateFormData("childName", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="childAge" className="block text-sm font-medium text-gray-700 mb-2">
-                      Age *
-                    </Label>
-                    <Select value={formData.childAge?.toString()} onValueChange={(value) => updateFormData("childAge", parseInt(value))}>
-                      <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
-                        <SelectValue placeholder="Select age" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="2">2 years old</SelectItem>
-                        <SelectItem value="3">3 years old</SelectItem>
-                        <SelectItem value="4">4 years old</SelectItem>
-                        <SelectItem value="5">5 years old</SelectItem>
-                        <SelectItem value="6">6 years old</SelectItem>
-                        <SelectItem value="7">7 years old</SelectItem>
-                        <SelectItem value="8">8 years old</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-4">Gender *</Label>
-                    <RadioGroup value={formData.childGender} onValueChange={(value) => updateFormData("childGender", value)}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <Label htmlFor="boy" className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors cursor-pointer">
-                          <RadioGroupItem value="boy" id="boy" />
-                          <div>
-                            <span className="font-medium">👦 Boy</span>
-                          </div>
-                        </Label>
-                        <Label htmlFor="girl" className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors cursor-pointer">
-                          <RadioGroupItem value="girl" id="girl" />
-                          <div>
-                            <span className="font-medium">👧 Girl</span>
-                          </div>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div>
-                    <Label htmlFor="favoriteThemes" className="block text-sm font-medium text-gray-700 mb-2">
-                      Favorite Animals or Characters
-                    </Label>
-                    <Input
-                      id="favoriteThemes"
-                      placeholder="e.g., dragons, unicorns, puppies"
-                      value={formData.favoriteThemes || ""}
-                      onChange={(e) => updateFormData("favoriteThemes", e.target.value)}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                    />
-                  </div>
-                </>
-              )}
-
-              {/* Step 2: Story Style */}
-              {currentStep === 2 && (
-                <>
-                  <div>
-                    <Label className="block text-sm font-medium text-gray-700 mb-4">Story Tone *</Label>
-                    <RadioGroup value={formData.tone} onValueChange={(value) => updateFormData("tone", value)}>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="adventurous" id="adventurous" />
-                          <div>
-                            <Label htmlFor="adventurous" className="font-medium cursor-pointer">🗺️ Adventurous</Label>
-                            <p className="text-sm text-gray-500">Exciting quests and discoveries</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="silly" id="silly" />
-                          <div>
-                            <Label htmlFor="silly" className="font-medium cursor-pointer">😄 Silly</Label>
-                            <p className="text-sm text-gray-500">Fun and giggly adventures</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
-                          <RadioGroupItem value="calming" id="calming" className="h-5 w-5" />
-                          <div className="flex-1">
-                            <Label htmlFor="calming" className="font-medium cursor-pointer text-sm sm:text-base">🌙 Calming</Label>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Peaceful and soothing tales</p>
-                          </div>
-                        </div>
-                        <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
-                          <RadioGroupItem value="educational" id="educational" className="h-5 w-5" />
-                          <div className="flex-1">
-                            <Label htmlFor="educational" className="font-medium cursor-pointer text-sm sm:text-base">📚 Educational</Label>
-                            <p className="text-xs sm:text-sm text-gray-500 mt-1">Learning through storytelling</p>
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
-                  </div>
-
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <Label className="text-sm font-medium text-gray-700">Story Length *</Label>
-                      {tierInfo?.tier === 'free' && (
-                        <Badge variant="outline" className="text-xs">
-                          <Lock className="h-3 w-3 mr-1" />
-                          Free: Short only
-                        </Badge>
-                      )}
-                    </div>
-                    <RadioGroup value={formData.length} onValueChange={(value) => updateFormData("length", value)}>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
-                          <RadioGroupItem value="short" id="short" />
-                          <div>
-                            <Label htmlFor="short" className="font-medium cursor-pointer">⏱️ Short</Label>
-                            <p className="text-sm text-gray-500">2-3 minutes reading time</p>
-                          </div>
-                        </div>
-                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
-                          tierInfo?.tier === 'free' 
-                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
-                        }`}>
-                          <RadioGroupItem 
-                            value="medium" 
-                            id="medium" 
-                            disabled={tierInfo?.tier === 'free'}
-                          />
-                          <div>
-                            <Label htmlFor="medium" className={`font-medium ${
-                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
-                            }`}>📖 Medium</Label>
-                            <p className="text-sm text-gray-500">5-7 minutes reading time</p>
-                          </div>
-                        </div>
-                        <div className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
-                          tierInfo?.tier === 'free' 
-                            ? 'border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed' 
-                            : 'border-gray-200 hover:border-purple-300'
-                        }`}>
-                          <RadioGroupItem 
-                            value="long" 
-                            id="long" 
-                            disabled={tierInfo?.tier === 'free'}
-                          />
-                          <div>
-                            <Label htmlFor="long" className={`font-medium ${
-                              tierInfo?.tier === 'free' ? 'text-gray-400 cursor-not-allowed' : 'cursor-pointer'
-                            }`}>📚 Long</Label>
-                            <p className="text-sm text-gray-500">10-15 minutes reading time</p>
-                          </div>
-                        </div>
-                      </div>
-                    </RadioGroup>
-
-                    {tierInfo?.tier === 'free' && (
-                      <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
-                        <div className="flex items-start space-x-3">
-                          <Lock className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
-                          <div>
-                            <p className="text-sm font-medium text-purple-900">Medium and Long Stories</p>
-                            <p className="text-sm text-purple-700 mt-1">
-                              Upgrade to Premium to unlock medium (5-7 min) and long (10-15 min) story lengths.
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-
-              {/* Step 3: Personal Touch */}
-              {currentStep === 3 && (
-                <div className="space-y-8">
-                  <div>
-                    <Label htmlFor="bedtime-message" className="text-sm font-medium text-gray-700">
-                      Bedtime Message (Optional)
-                    </Label>
-                    <p className="text-sm text-gray-500 mb-4">
-                      Add a special message or lesson you'd like woven into the story
-                    </p>
-                    <Textarea
-                      id="bedtime-message"
-                      placeholder="Remember to always be kind to others, or brush your teeth before bed..."
-                      value={formData.bedtimeMessage || ""}
-                      onChange={(e) => updateFormData("bedtimeMessage", e.target.value)}
-                      className="min-h-[100px] resize-none"
-                      maxLength={200}
-                    />
-                    <p className="text-xs text-gray-400 mt-2">
-                      {(formData.bedtimeMessage?.length || 0)}/200 characters
-                    </p>
-                  </div>
-
-                  <div className="bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-200 rounded-xl p-6">
-                    <div className="flex items-start space-x-4">
-                      <div className="bg-purple-100 rounded-full p-2 flex-shrink-0">
-                        <span className="text-2xl">✨</span>
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-purple-900 mb-2">Ready to Create Magic?</h3>
-                        <p className="text-purple-700 text-sm">
-                          Your personalized bedtime story will be ready in just a few moments. 
-                          Each story is unique and crafted just for {formData.childName || 'your little one'}!
-                        </p>
-                        {tierInfo?.tier === 'free' && tierInfo.storiesRemaining !== undefined && (
-                          <p className="text-purple-600 text-sm mt-2 font-medium">
-                            {tierInfo.storiesRemaining} stories remaining this week
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Navigation */}
-              <div className="flex justify-between pt-8 border-t border-gray-200">
-                <Button
-                  variant="outline"
-                  onClick={prevStep}
-                  disabled={currentStep === 1}
-                  className="flex items-center space-x-2"
-                >
-                  <ArrowLeft className="h-4 w-4" />
-                  <span>Previous</span>
-                </Button>
-
-                {currentStep < STEPS.length ? (
-                  <Button
-                    onClick={nextStep}
-                    disabled={!canProceed()}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  >
-                    <span>Next</span>
-                    <ArrowRight className="h-4 w-4" />
-                  </Button>
-                ) : (
-                  <Button
-                    onClick={handleGenerate}
-                    disabled={!canProceed()}
-                    className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
-                  >
-                    <Sparkles className="h-4 w-4" />
-                    <span>Create Story</span>
-                  </Button>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Navigation */}
+        <WizardNavigation
+          currentStep={currentStep}
+          totalSteps={STEPS.length}
+          canProceed={canProceed()}
+          onPrevious={prevStep}
+          onNext={nextStep}
+          onSubmit={handleGenerate}
+        />
       </div>
-    </div>
+    </WizardStep>
   );
 }
