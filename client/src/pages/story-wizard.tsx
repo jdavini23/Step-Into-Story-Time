@@ -14,17 +14,6 @@ import { StoryStyleStep } from "@/components/story-wizard/story-style-step";
 import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
 import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Crown, Lock, Star, ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 
 const STEPS = [
   { id: 1, title: "Tell us about your little one", subtitle: "We'll create a story just for them", icon: "👶" },
