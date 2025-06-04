@@ -1,4 +1,3 @@
-
 import { AlertTriangle, RefreshCw, Wifi, WifiOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -12,12 +11,12 @@ interface EnhancedErrorStateProps {
   showNetworkStatus?: boolean;
 }
 
-export function EnhancedErrorState({ 
-  error, 
-  onRetry, 
-  title = "Something went wrong", 
+export function EnhancedErrorState({
+  error,
+  onRetry,
+  title = "Something went wrong",
   description,
-  showNetworkStatus = true 
+  showNetworkStatus = true,
 }: EnhancedErrorStateProps) {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
   const [isRetrying, setIsRetrying] = useState(false);
@@ -26,12 +25,12 @@ export function EnhancedErrorState({
     const handleOnline = () => setIsOnline(true);
     const handleOffline = () => setIsOnline(false);
 
-    window.addEventListener('online', handleOnline);
-    window.addEventListener('offline', handleOffline);
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
 
     return () => {
-      window.removeEventListener('online', handleOnline);
-      window.removeEventListener('offline', handleOffline);
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
     };
   }, []);
 
@@ -49,22 +48,26 @@ export function EnhancedErrorState({
       return {
         title: "No Internet Connection",
         description: "Please check your internet connection and try again.",
-        icon: <WifiOff className="h-12 w-12 text-red-500" />
+        icon: <WifiOff className="h-12 w-12 text-red-500" />,
       };
     }
 
-    if (error?.message?.includes('fetch')) {
+    if (error?.message?.includes("fetch")) {
       return {
         title: "Connection Error",
-        description: "Unable to connect to our servers. Please try again in a moment.",
-        icon: <Wifi className="h-12 w-12 text-amber-500" />
+        description:
+          "Unable to connect to our servers. Please try again in a moment.",
+        icon: <Wifi className="h-12 w-12 text-amber-500" />,
       };
     }
 
     return {
       title,
-      description: description || error?.message || "An unexpected error occurred. Please try again.",
-      icon: <AlertTriangle className="h-12 w-12 text-red-500" />
+      description:
+        description ||
+        error?.message ||
+        "An unexpected error occurred. Please try again.",
+      icon: <AlertTriangle className="h-12 w-12 text-red-500" />,
     };
   };
 
@@ -73,9 +76,7 @@ export function EnhancedErrorState({
   return (
     <Card className="border-red-200 bg-red-50 dark:bg-red-950 dark:border-red-800 max-w-md mx-auto">
       <CardHeader className="text-center pb-4">
-        <div className="flex justify-center mb-4">
-          {errorDetails.icon}
-        </div>
+        <div className="flex justify-center mb-4">{errorDetails.icon}</div>
         <CardTitle className="text-xl text-red-800 dark:text-red-200">
           {errorDetails.title}
         </CardTitle>
@@ -84,7 +85,7 @@ export function EnhancedErrorState({
         <p className="text-sm text-red-700 dark:text-red-300">
           {errorDetails.description}
         </p>
-        
+
         {showNetworkStatus && (
           <div className="flex items-center justify-center space-x-2 text-xs">
             {isOnline ? (
@@ -102,18 +103,20 @@ export function EnhancedErrorState({
         )}
 
         <div className="flex space-x-2 justify-center">
-          <Button 
+          <Button
             onClick={handleRetry}
             disabled={isRetrying || !isOnline}
             size="sm"
             className="flex items-center space-x-2"
           >
-            <RefreshCw className={`h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
-            <span>{isRetrying ? 'Retrying...' : 'Try Again'}</span>
+            <RefreshCw
+              className={`h-4 w-4 ${isRetrying ? "animate-spin" : ""}`}
+            />
+            <span>{isRetrying ? "Retrying..." : "Try Again"}</span>
           </Button>
-          
-          <Button 
-            variant="outline" 
+
+          <Button
+            variant="outline"
             size="sm"
             onClick={() => window.location.reload()}
           >

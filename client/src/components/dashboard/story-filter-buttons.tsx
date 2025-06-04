@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { BookOpen, Heart } from "lucide-react";
 import type { Story } from "@shared/schema";
@@ -10,11 +9,11 @@ interface StoryFilterButtonsProps {
   onShowFavorites: (show: boolean) => void;
 }
 
-export function StoryFilterButtons({ 
-  stories, 
-  favoriteStories, 
-  showFavorites, 
-  onShowFavorites 
+export function StoryFilterButtons({
+  stories,
+  favoriteStories,
+  showFavorites,
+  onShowFavorites,
 }: StoryFilterButtonsProps) {
   if (stories.length === 0) return null;
 

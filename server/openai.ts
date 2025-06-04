@@ -41,7 +41,9 @@ const checkRateLimit = (userId: string): boolean => {
 
 const trackUsage = (userId: string, tokensUsed: number = 0) => {
   // Could integrate with a proper analytics service here
-  console.log(`Story generated for user ${userId}, estimated tokens: ${tokensUsed}`);
+  console.log(
+    `Story generated for user ${userId}, estimated tokens: ${tokensUsed}`,
+  );
 };
 
 const generateCacheKey = (params: StoryGenerationParams): string => {
@@ -52,12 +54,14 @@ const generateCacheKey = (params: StoryGenerationParams): string => {
     childGender: params.childGender,
     favoriteThemes: params.favoriteThemes,
     tone: params.tone,
-    length: params.length
+    length: params.length,
   };
-  return crypto.createHash('md5').update(JSON.stringify(keyData)).digest('hex');
+  return crypto.createHash("md5").update(JSON.stringify(keyData)).digest("hex");
 };
 
-const getCachedStory = (cacheKey: string): { title: string; content: string } | null => {
+const getCachedStory = (
+  cacheKey: string,
+): { title: string; content: string } | null => {
   const cached = storyCache.get(cacheKey);
   if (!cached) return null;
 
@@ -69,14 +73,20 @@ const getCachedStory = (cacheKey: string): { title: string; content: string } | 
   return cached.story;
 };
 
-const setCachedStory = (cacheKey: string, story: { title: string; content: string }) => {
+const setCachedStory = (
+  cacheKey: string,
+  story: { title: string; content: string },
+) => {
   storyCache.set(cacheKey, {
     story,
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 };
-const openai = new OpenAI({ 
-  apiKey: process.env.OPENAI_API_KEY || process.env.OPENAI_API_KEY_ENV_VAR || "default_key" 
+const openai = new OpenAI({
+  apiKey:
+    process.env.OPENAI_API_KEY ||
+    process.env.OPENAI_API_KEY_ENV_VAR ||
+    "default_key",
 });
 
 export interface StoryGenerationParams {
@@ -95,18 +105,30 @@ const MAX_CONTENT_SIZE_MAP = {
 };
 
 const createPrompt = (params: StoryGenerationParams) => {
-  const { childName, childAge, childGender, favoriteThemes, tone, length, bedtimeMessage } = params;
+  const {
+    childName,
+    childAge,
+    childGender,
+    favoriteThemes,
+    tone,
+    length,
+    bedtimeMessage,
+  } = params;
 
-  const lengthSpec = length === 'short' ? '2-3 minutes' : '4-5 minutes';
-  const paragraphCount = length === 'short' ? '4-5 paragraphs' : '6-8 paragraphs';
-  const themeSpec = favoriteThemes ? ` featuring ${favoriteThemes}` : '';
-  const messageSpec = bedtimeMessage ? 
-    `\n\nEnd the story with this personalized bedtime message in a special highlighted box: "${bedtimeMessage}"` : 
-    `\n\nEnd with a gentle goodnight message encouraging sweet dreams.`;
+  const lengthSpec = length === "short" ? "2-3 minutes" : "4-5 minutes";
+  const paragraphCount =
+    length === "short" ? "4-5 paragraphs" : "6-8 paragraphs";
+  const themeSpec = favoriteThemes ? ` featuring ${favoriteThemes}` : "";
+  const messageSpec = bedtimeMessage
+    ? `\n\nEnd the story with this personalized bedtime message in a special highlighted box: "${bedtimeMessage}"`
+    : `\n\nEnd with a gentle goodnight message encouraging sweet dreams.`;
 
-  const pronouns = childGender === 'boy' ? { they: 'he', them: 'him', their: 'his' } :
-                   childGender === 'girl' ? { they: 'she', them: 'her', their: 'her' } :
-                   { they: 'they', them: 'them', their: 'their' };
+  const pronouns =
+    childGender === "boy"
+      ? { they: "he", them: "him", their: "his" }
+      : childGender === "girl"
+        ? { they: "she", them: "her", their: "her" }
+        : { they: "they", them: "them", their: "their" };
 
   return `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
 
@@ -128,12 +150,12 @@ Please respond with a JSON object containing:
 Make it enchanting and memorable while being perfect for bedtime!`;
 };
 
-const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 async function retryWithBackoff<T>(
   fn: () => Promise<T>,
   maxRetries: number = 3,
-  baseDelay: number = 1000
+  baseDelay: number = 1000,
 ): Promise<T> {
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
     try {
@@ -142,25 +164,28 @@ async function retryWithBackoff<T>(
       if (attempt === maxRetries) throw error;
 
       // Check if it's a retryable error
-      const isRetryable = error instanceof Error && 
-        (error.message.includes('rate limit') || 
-         error.message.includes('timeout') || 
-         error.message.includes('503') ||
-         error.message.includes('502'));
+      const isRetryable =
+        error instanceof Error &&
+        (error.message.includes("rate limit") ||
+          error.message.includes("timeout") ||
+          error.message.includes("503") ||
+          error.message.includes("502"));
 
       if (!isRetryable) throw error;
 
       const delay = baseDelay * Math.pow(2, attempt - 1) + Math.random() * 1000;
-      console.warn(`API call failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`);
+      console.warn(
+        `API call failed (attempt ${attempt}/${maxRetries}), retrying in ${delay}ms...`,
+      );
       await sleep(delay);
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error("Max retries exceeded");
 }
 
 export async function generateBedtimeStory(
-  params: StoryGenerationParams, 
-  userId?: string
+  params: StoryGenerationParams,
+  userId?: string,
 ): Promise<{
   title: string;
   content: string;
@@ -169,14 +194,16 @@ export async function generateBedtimeStory(
   if (userId && !checkRateLimit(userId)) {
     throw new Error("Rate limit exceeded. Please try again later.");
   }
-  const MAX_CONTENT_SIZE = MAX_CONTENT_SIZE_MAP[params.length as keyof typeof MAX_CONTENT_SIZE_MAP] || MAX_CONTENT_SIZE_MAP['medium'];
+  const MAX_CONTENT_SIZE =
+    MAX_CONTENT_SIZE_MAP[params.length as keyof typeof MAX_CONTENT_SIZE_MAP] ||
+    MAX_CONTENT_SIZE_MAP["medium"];
 
   // Check cache first (only if no custom bedtime message)
   if (!params.bedtimeMessage) {
     const cacheKey = generateCacheKey(params);
     const cachedStory = getCachedStory(cacheKey);
     if (cachedStory) {
-      console.log('Returning cached story for similar request');
+      console.log("Returning cached story for similar request");
       return cachedStory;
     }
   }
@@ -188,15 +215,15 @@ export async function generateBedtimeStory(
   let targetParagraphs: number;
 
   switch (params.length) {
-    case 'short':
+    case "short":
       targetWords = 200;
       targetParagraphs = 4;
       break;
-    case 'medium':
+    case "medium":
       targetWords = 400;
       targetParagraphs = 6;
       break;
-    case 'long':
+    case "long":
       targetWords = 800;
       targetParagraphs = 10;
       break;
@@ -206,13 +233,14 @@ export async function generateBedtimeStory(
   }
 
   try {
-    const response = await retryWithBackoff(() => 
+    const response = await retryWithBackoff(() =>
       openai.chat.completions.create({
         model: "gpt-4o",
         messages: [
           {
             role: "system",
-            content: "You are a professional children's bedtime story writer who creates magical, age-appropriate stories that help children drift off to sleep. Always respond with valid JSON.",
+            content:
+              "You are a professional children's bedtime story writer who creates magical, age-appropriate stories that help children drift off to sleep. Always respond with valid JSON.",
           },
           {
             role: "user",
@@ -221,10 +249,10 @@ export async function generateBedtimeStory(
         ],
         response_format: { type: "json_object" },
         temperature: 0.8,
-      })
+      }),
     );
 
-    const result = JSON.parse(response.choices[0].message.content || '{}');
+    const result = JSON.parse(response.choices[0].message.content || "{}");
 
     if (!result || !result.title || !result.content) {
       throw new Error("Invalid response: Title or content missing.");
@@ -238,18 +266,30 @@ export async function generateBedtimeStory(
       }
 
       // Check for inappropriate content (basic filtering)
-      const inappropriateWords = ['violence', 'scary', 'frightening', 'nightmare'];
+      const inappropriateWords = [
+        "violence",
+        "scary",
+        "frightening",
+        "nightmare",
+      ];
       const lowercaseContent = content.toLowerCase();
-      const foundInappropriate = inappropriateWords.find(word => lowercaseContent.includes(word));
+      const foundInappropriate = inappropriateWords.find((word) =>
+        lowercaseContent.includes(word),
+      );
 
       if (foundInappropriate) {
-        console.warn(`Potentially inappropriate content detected: ${foundInappropriate}`);
+        console.warn(
+          `Potentially inappropriate content detected: ${foundInappropriate}`,
+        );
         // Could regenerate or filter content here
       }
 
       // Ensure the child's name appears in the story
       const childNameLower = params.childName.toLowerCase();
-      if (!lowercaseContent.includes(childNameLower) && !title.toLowerCase().includes(childNameLower)) {
+      if (
+        !lowercaseContent.includes(childNameLower) &&
+        !title.toLowerCase().includes(childNameLower)
+      ) {
         console.warn(`Child's name "${params.childName}" not found in story`);
       }
 
@@ -259,7 +299,9 @@ export async function generateBedtimeStory(
     validateContent(result.content, result.title);
 
     if (result.content.length > MAX_CONTENT_SIZE) {
-      console.warn(`Story content too large: ${result.content.length} characters, truncating to ${MAX_CONTENT_SIZE}`);
+      console.warn(
+        `Story content too large: ${result.content.length} characters, truncating to ${MAX_CONTENT_SIZE}`,
+      );
       result.content = result.content.substring(0, MAX_CONTENT_SIZE) + "...";
     }
 
@@ -283,6 +325,8 @@ export async function generateBedtimeStory(
     return finalStory;
   } catch (error) {
     console.error("Error generating bedtime story:", error);
-    throw new Error(`Failed to generate story: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    throw new Error(
+      `Failed to generate story: ${error instanceof Error ? error.message : "Unknown error"}`,
+    );
   }
 }

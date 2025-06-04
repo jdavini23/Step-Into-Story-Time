@@ -1,4 +1,3 @@
-
 import { ReactNode } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -12,7 +11,14 @@ interface WizardStepProps {
   children: ReactNode;
 }
 
-export function WizardStep({ currentStep, totalSteps, title, subtitle, icon, children }: WizardStepProps) {
+export function WizardStep({
+  currentStep,
+  totalSteps,
+  title,
+  subtitle,
+  icon,
+  children,
+}: WizardStepProps) {
   const progressPercentage = (currentStep / totalSteps) * 100;
 
   return (
@@ -21,7 +27,9 @@ export function WizardStep({ currentStep, totalSteps, title, subtitle, icon, chi
         {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-purple-600">Step {currentStep} of {totalSteps}</span>
+            <span className="text-sm font-medium text-purple-600">
+              Step {currentStep} of {totalSteps}
+            </span>
             <span className="text-sm text-gray-500">Almost there! ✨</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />

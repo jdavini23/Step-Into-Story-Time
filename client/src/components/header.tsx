@@ -84,7 +84,9 @@ export default function Header() {
                 <h1 className="text-lg sm:text-xl font-bold text-gray-700 group-hover:text-purple-600 transition-colors">
                   Step Into Storytime
                 </h1>
-                <p className="text-xs sm:text-sm text-gray-500">Magical bedtime stories</p>
+                <p className="text-xs sm:text-sm text-gray-500">
+                  Magical bedtime stories
+                </p>
               </div>
               <div className="block sm:hidden">
                 <h1 className="text-base font-bold text-gray-700 group-hover:text-purple-600 transition-colors">
@@ -97,14 +99,19 @@ export default function Header() {
           {isAuthenticated ? (
             <>
               {/* Desktop Navigation */}
-              <nav className="hidden md:flex items-center space-x-6" role="navigation" aria-label="Main navigation">
+              <nav
+                className="hidden md:flex items-center space-x-6"
+                role="navigation"
+                aria-label="Main navigation"
+              >
                 {navigation.map((item) => (
                   <Link key={item.name} href={item.href}>
                     <Button
                       variant={location === item.href ? "default" : "ghost"}
-                      className={location === item.href 
-                        ? "bg-purple-600 text-white hover:bg-purple-700" 
-                        : "text-gray-700 hover:text-purple-600"
+                      className={
+                        location === item.href
+                          ? "bg-purple-600 text-white hover:bg-purple-700"
+                          : "text-gray-700 hover:text-purple-600"
                       }
                       aria-current={location === item.href ? "page" : undefined}
                     >
@@ -116,14 +123,14 @@ export default function Header() {
                 {/* User Menu */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="relative h-8 w-8 rounded-full hover:bg-purple-50"
                       aria-label={`User menu for ${userDisplayName}`}
                     >
                       <Avatar className="h-8 w-8">
-                        <AvatarImage 
-                          src={user?.profileImageUrl || undefined} 
+                        <AvatarImage
+                          src={user?.profileImageUrl || undefined}
                           alt={`${userDisplayName}'s profile picture`}
                         />
                         <AvatarFallback className="bg-purple-600 text-white text-sm font-medium">
@@ -165,7 +172,7 @@ export default function Header() {
               />
             </>
           ) : (
-            <Button 
+            <Button
               onClick={handleLogin}
               className="bg-purple-600 hover:bg-purple-700 text-white transition-colors"
             >
@@ -205,9 +212,9 @@ function MobileMenu({
   return (
     <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
       <SheetTrigger asChild>
-        <Button 
-          variant="ghost" 
-          size="icon" 
+        <Button
+          variant="ghost"
+          size="icon"
           className="md:hidden h-10 w-10 hover:bg-purple-50"
           aria-label="Open mobile menu"
         >
@@ -215,7 +222,11 @@ function MobileMenu({
         </Button>
       </SheetTrigger>
       <SheetContent side="right" className="w-[280px] sm:w-[320px]">
-        <nav className="flex flex-col space-y-3 mt-6" role="navigation" aria-label="Mobile navigation">
+        <nav
+          className="flex flex-col space-y-3 mt-6"
+          role="navigation"
+          aria-label="Mobile navigation"
+        >
           {navigation.map((item) => {
             const Icon = item.icon;
             return (
@@ -223,8 +234,8 @@ function MobileMenu({
                 <Button
                   variant={location === item.href ? "default" : "ghost"}
                   className={`w-full justify-start h-12 text-base transition-colors ${
-                    location === item.href 
-                      ? "bg-purple-600 text-white hover:bg-purple-700" 
+                    location === item.href
+                      ? "bg-purple-600 text-white hover:bg-purple-700"
                       : "hover:bg-purple-50"
                   }`}
                   onClick={onCloseMobileMenu}
@@ -241,8 +252,8 @@ function MobileMenu({
             {user && (
               <div className="flex items-center space-x-3 mb-4 p-2 rounded-lg bg-gray-50">
                 <Avatar className="h-10 w-10">
-                  <AvatarImage 
-                    src={user.profileImageUrl || undefined} 
+                  <AvatarImage
+                    src={user.profileImageUrl || undefined}
                     alt={`${userDisplayName}'s profile picture`}
                   />
                   <AvatarFallback className="bg-purple-600 text-white">

@@ -1,6 +1,11 @@
-
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, Star, Crown, Sparkles, Heart, Users } from "lucide-react";
 import { Link } from "wouter";
@@ -9,22 +14,27 @@ import { useState } from "react";
 
 export default function Pricing() {
   const { isAuthenticated } = useAuth();
-  const [billingPeriod, setBillingPeriod] = useState<'monthly' | 'yearly'>('monthly');
+  const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
+    "monthly",
+  );
 
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers
-    if (tier === 'family') {
+    if (tier === "family") {
       return;
     }
-    
+
     if (!isAuthenticated) {
       // Store the intended destination and redirect to login
-      const returnUrl = tier === 'free' ? '/' : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
+      const returnUrl =
+        tier === "free"
+          ? "/"
+          : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
       window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
     } else {
       // User is authenticated, proceed to subscription
-      if (tier === 'free') {
-        window.location.href = '/';
+      if (tier === "free") {
+        window.location.href = "/";
       } else {
         window.location.href = `/subscribe?tier=${tier}&billing=${billingPeriod}`;
       }
@@ -49,15 +59,15 @@ export default function Pricing() {
         "3 popular themes (bedtime, fantasy, adventure)",
         "Save last 3 stories",
         "Read online (text-only)",
-        "Community support"
+        "Community support",
       ],
       limitations: [
         "Limited story generation",
         "No illustrations or voice",
-        "Basic personalization only"
+        "Basic personalization only",
       ],
       cta: "Start for Free",
-      ctaVariant: "outline" as const
+      ctaVariant: "outline" as const,
     },
     {
       id: "premium",
@@ -81,11 +91,11 @@ export default function Pricing() {
         "Save and organize full story library",
         "Printable PDFs",
         "Scheduled story delivery (email or app push)",
-        "Premium support"
+        "Premium support",
       ],
       limitations: [],
       cta: "Upgrade to Plus",
-      ctaVariant: "default" as const
+      ctaVariant: "default" as const,
     },
     {
       id: "family",
@@ -111,27 +121,72 @@ export default function Pricing() {
         "Priority feature voting",
         "Early access to new features",
         "White-glove onboarding",
-        "Priority support"
+        "Priority support",
       ],
       limitations: [],
       cta: "Coming Soon",
-      ctaVariant: "outline" as const
-    }
+      ctaVariant: "outline" as const,
+    },
   ];
 
   const comparisonFeatures = [
-    { name: "Stories per week", free: "3", premium: "Unlimited", family: "Unlimited" },
+    {
+      name: "Stories per week",
+      free: "3",
+      premium: "Unlimited",
+      family: "Unlimited",
+    },
     { name: "Child profiles", free: "1", premium: "1", family: "Up to 5" },
-    { name: "Story personalization", free: "Basic", premium: "Full", family: "Advanced" },
-    { name: "Story themes", free: "3 popular", premium: "All genres", family: "All genres + Custom" },
-    { name: "Story lengths", free: "Short only", premium: "Short, Medium, Long", family: "All + Custom" },
-    { name: "AI illustrations", free: "None", premium: "1 per story", family: "3 per story" },
-    { name: "Audio narration", free: "None", premium: "None", family: "AI voice" },
-    { name: "Story library", free: "Last 3", premium: "Unlimited", family: "Unlimited + Sharing" },
-    { name: "PDF downloads", free: "None", premium: "Yes", family: "Yes + Enhanced" },
+    {
+      name: "Story personalization",
+      free: "Basic",
+      premium: "Full",
+      family: "Advanced",
+    },
+    {
+      name: "Story themes",
+      free: "3 popular",
+      premium: "All genres",
+      family: "All genres + Custom",
+    },
+    {
+      name: "Story lengths",
+      free: "Short only",
+      premium: "Short, Medium, Long",
+      family: "All + Custom",
+    },
+    {
+      name: "AI illustrations",
+      free: "None",
+      premium: "1 per story",
+      family: "3 per story",
+    },
+    {
+      name: "Audio narration",
+      free: "None",
+      premium: "None",
+      family: "AI voice",
+    },
+    {
+      name: "Story library",
+      free: "Last 3",
+      premium: "Unlimited",
+      family: "Unlimited + Sharing",
+    },
+    {
+      name: "PDF downloads",
+      free: "None",
+      premium: "Yes",
+      family: "Yes + Enhanced",
+    },
     { name: "Magic Letters", free: "None", premium: "None", family: "Yes" },
     { name: "Custom characters", free: "None", premium: "None", family: "Yes" },
-    { name: "Support", free: "Community", premium: "Premium", family: "Priority" }
+    {
+      name: "Support",
+      free: "Community",
+      premium: "Premium",
+      family: "Priority",
+    },
   ];
 
   return (
@@ -140,35 +195,37 @@ export default function Pricing() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
-            Choose Your 
+            Choose Your
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 ml-3">
               Storytelling
             </span>
-            <br />Adventure
+            <br />
+            Adventure
           </h1>
           <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
-            From first bedtime stories to family traditions, we have the perfect plan to create magical moments for your family.
+            From first bedtime stories to family traditions, we have the perfect
+            plan to create magical moments for your family.
           </p>
-          
+
           {/* Billing Period Toggle */}
           <div className="flex items-center justify-center mb-8">
             <div className="bg-gray-100 p-1 rounded-lg flex">
               <button
-                onClick={() => setBillingPeriod('monthly')}
+                onClick={() => setBillingPeriod("monthly")}
                 className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
-                  billingPeriod === 'monthly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                  billingPeriod === "monthly"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 Monthly
               </button>
               <button
-                onClick={() => setBillingPeriod('yearly')}
+                onClick={() => setBillingPeriod("yearly")}
                 className={`px-6 py-2 rounded-md text-sm font-medium transition-all relative ${
-                  billingPeriod === 'yearly'
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                  billingPeriod === "yearly"
+                    ? "bg-white text-gray-900 shadow-sm"
+                    : "text-gray-600 hover:text-gray-900"
                 }`}
               >
                 Yearly
@@ -183,12 +240,14 @@ export default function Pricing() {
         {/* Pricing Cards */}
         <div className="grid lg:grid-cols-3 gap-8 mb-16">
           {tiers.map((tier, index) => (
-            <Card 
-              key={tier.id} 
+            <Card
+              key={tier.id}
               className={`relative overflow-hidden transition-all duration-300 ${
-                tier.comingSoon ? 'opacity-75 cursor-not-allowed' : 'hover:scale-105'
+                tier.comingSoon
+                  ? "opacity-75 cursor-not-allowed"
+                  : "hover:scale-105"
               } ${
-                tier.popular ? 'ring-2 ring-purple-500 shadow-2xl' : 'shadow-xl'
+                tier.popular ? "ring-2 ring-purple-500 shadow-2xl" : "shadow-xl"
               }`}
             >
               {tier.popular && (
@@ -207,80 +266,85 @@ export default function Pricing() {
                   </div>
                 </div>
               )}
-              
-              <CardHeader className={`pb-6 ${tier.popular ? 'pt-12' : 'pt-6'}`}>
-                <div className={`w-12 h-12 rounded-xl bg-gradient-to-r ${tier.color} flex items-center justify-center text-white mb-4`}>
+
+              <CardHeader className={`pb-6 ${tier.popular ? "pt-12" : "pt-6"}`}>
+                <div
+                  className={`w-12 h-12 rounded-xl bg-gradient-to-r ${tier.color} flex items-center justify-center text-white mb-4`}
+                >
                   {tier.icon}
                 </div>
-                
+
                 <CardTitle className="text-2xl font-bold text-gray-900">
                   {tier.name}
                 </CardTitle>
                 <CardDescription className="text-gray-600">
                   {tier.subtitle}
                 </CardDescription>
-                
+
                 <div className="mt-4">
                   <div className="flex items-baseline">
                     <span className="text-4xl font-bold text-gray-900">
-                      {tier.id === 'free' 
-                        ? tier.price 
-                        : billingPeriod === 'yearly' && tier.yearlyPrice 
-                          ? tier.yearlyPrice 
-                          : tier.price
-                      }
+                      {tier.id === "free"
+                        ? tier.price
+                        : billingPeriod === "yearly" && tier.yearlyPrice
+                          ? tier.yearlyPrice
+                          : tier.price}
                     </span>
-                    {tier.period && tier.id !== 'free' && (
+                    {tier.period && tier.id !== "free" && (
                       <span className="text-gray-600 ml-2">
-                        /{billingPeriod === 'yearly' ? 'year' : 'month'}
+                        /{billingPeriod === "yearly" ? "year" : "month"}
                       </span>
                     )}
-                    {tier.id === 'free' && tier.period && (
+                    {tier.id === "free" && tier.period && (
                       <span className="text-gray-600 ml-2">/{tier.period}</span>
                     )}
                   </div>
-                  {billingPeriod === 'yearly' && tier.yearlyPrice && (
+                  {billingPeriod === "yearly" && tier.yearlyPrice && (
                     <div className="mt-1">
-                      <Badge variant="secondary" className="bg-green-100 text-green-800">
+                      <Badge
+                        variant="secondary"
+                        className="bg-green-100 text-green-800"
+                      >
                         Save 30% vs monthly
                       </Badge>
                     </div>
                   )}
-                  {billingPeriod === 'monthly' && tier.yearlyPrice && (
+                  {billingPeriod === "monthly" && tier.yearlyPrice && (
                     <div className="mt-1 text-sm text-gray-500">
                       {tier.yearlyPrice}/year available
                     </div>
                   )}
                 </div>
               </CardHeader>
-              
+
               <CardContent className="pb-8">
                 <p className="text-gray-600 mb-6">{tier.description}</p>
-                
+
                 <ul className="space-y-3 mb-8">
                   {tier.features.map((feature, featureIndex) => (
-                    <li key={featureIndex} className="flex items-start space-x-3">
+                    <li
+                      key={featureIndex}
+                      className="flex items-start space-x-3"
+                    >
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
                       <span className="text-gray-700 text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
-                
-                <Button 
+
+                <Button
                   variant={tier.ctaVariant}
                   onClick={() => handlePlanClick(tier.id)}
                   disabled={tier.comingSoon}
                   className={`w-full py-3 ${
-                    tier.popular 
-                      ? 'bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white' 
-                      : ''
-                  } ${
-                    tier.comingSoon 
-                      ? 'opacity-50 cursor-not-allowed' 
-                      : ''
-                  }`}
+                    tier.popular
+                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      : ""
+                  } ${tier.comingSoon ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
-                  {tier.id === 'family' && !tier.comingSoon && <Crown className="h-4 w-4 mr-2" />}
+                  {tier.id === "family" && !tier.comingSoon && (
+                    <Crown className="h-4 w-4 mr-2" />
+                  )}
                   {tier.comingSoon && <Sparkles className="h-4 w-4 mr-2" />}
                   {tier.cta}
                 </Button>
@@ -292,27 +356,47 @@ export default function Pricing() {
         {/* Feature Comparison Table */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-16">
           <div className="px-8 py-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-            <h3 className="text-2xl font-bold text-center">Compare All Features</h3>
-            <p className="text-center text-purple-100 mt-2">See what's included in each plan</p>
+            <h3 className="text-2xl font-bold text-center">
+              Compare All Features
+            </h3>
+            <p className="text-center text-purple-100 mt-2">
+              See what's included in each plan
+            </p>
           </div>
-          
+
           <div className="overflow-x-auto">
             <table className="w-full">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">Features</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Starter Magic</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Storytime Plus</th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">Storytime Pro</th>
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                    Features
+                  </th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                    Starter Magic
+                  </th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                    Storytime Plus
+                  </th>
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                    Storytime Pro
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200">
                 {comparisonFeatures.map((feature, index) => (
                   <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">{feature.name}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">{feature.free}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">{feature.premium}</td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">{feature.family}</td>
+                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                      {feature.name}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                      {feature.free}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                      {feature.premium}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                      {feature.family}
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -322,23 +406,45 @@ export default function Pricing() {
 
         {/* FAQ Section */}
         <div className="text-center mb-16">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">Frequently Asked Questions</h3>
+          <h3 className="text-3xl font-bold text-gray-900 mb-8">
+            Frequently Asked Questions
+          </h3>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">Can I change plans anytime?</h4>
-              <p className="text-gray-600">Yes! You can upgrade or downgrade your plan at any time. Changes take effect immediately.</p>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                Can I change plans anytime?
+              </h4>
+              <p className="text-gray-600">
+                Yes! You can upgrade or downgrade your plan at any time. Changes
+                take effect immediately.
+              </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">What happens to my stories if I downgrade?</h4>
-              <p className="text-gray-600">Your stories are always saved. You just won't be able to create new ones beyond your plan limits.</p>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                What happens to my stories if I downgrade?
+              </h4>
+              <p className="text-gray-600">
+                Your stories are always saved. You just won't be able to create
+                new ones beyond your plan limits.
+              </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">Is there a family discount?</h4>
-              <p className="text-gray-600">The Storytime Pro plan is designed for families with multiple children and offers the best value per child.</p>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                Is there a family discount?
+              </h4>
+              <p className="text-gray-600">
+                The Storytime Pro plan is designed for families with multiple
+                children and offers the best value per child.
+              </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">Do you offer yearly pricing?</h4>
-              <p className="text-gray-600">Yes! Save 30% when you pay annually. The yearly option is available for both paid plans.</p>
+              <h4 className="font-semibold text-gray-900 mb-3">
+                Do you offer yearly pricing?
+              </h4>
+              <p className="text-gray-600">
+                Yes! Save 30% when you pay annually. The yearly option is
+                available for both paid plans.
+              </p>
             </div>
           </div>
         </div>
@@ -346,17 +452,19 @@ export default function Pricing() {
         {/* Final CTA */}
         <div className="text-center bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-2xl p-8 text-white">
           <h3 className="text-2xl font-bold mb-4">Ready to Create Magic?</h3>
-          <p className="text-lg mb-6 text-purple-100">Join thousands of families creating unforgettable bedtime memories</p>
+          <p className="text-lg mb-6 text-purple-100">
+            Join thousands of families creating unforgettable bedtime memories
+          </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              variant="secondary" 
-              onClick={() => handlePlanClick('free')}
+            <Button
+              variant="secondary"
+              onClick={() => handlePlanClick("free")}
               className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
             >
               Start Free Today
             </Button>
-            <Button 
-              onClick={() => handlePlanClick('premium')}
+            <Button
+              onClick={() => handlePlanClick("premium")}
               className="bg-white text-purple-600 hover:bg-gray-100 border-2 border-white font-semibold shadow-lg"
             >
               Upgrade to Plus

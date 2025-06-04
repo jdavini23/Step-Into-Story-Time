@@ -1,4 +1,3 @@
-
 import { Link } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
@@ -18,11 +17,17 @@ export function StoryCard({ story, isFavorited }: StoryCardProps) {
   const queryClient = useQueryClient();
 
   const toggleFavoriteMutation = useMutation({
-    mutationFn: async ({ storyId, isFavorited }: { storyId: number; isFavorited: boolean }) => {
-      const method = isFavorited ? 'DELETE' : 'POST';
+    mutationFn: async ({
+      storyId,
+      isFavorited,
+    }: {
+      storyId: number;
+      isFavorited: boolean;
+    }) => {
+      const method = isFavorited ? "DELETE" : "POST";
       const response = await fetch(`/api/favorites/${storyId}`, {
         method,
-        credentials: 'include',
+        credentials: "include",
       });
       if (!response.ok) {
         const errorText = await response.text();
@@ -54,12 +59,14 @@ export function StoryCard({ story, isFavorited }: StoryCardProps) {
           <div className="h-48 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 flex items-center justify-center cursor-pointer">
             <div className="text-center">
               <span className="text-4xl mb-2 block">
-                {story.tone === 'adventurous' && '🗺️'}
-                {story.tone === 'silly' && '😄'}
-                {story.tone === 'calming' && '🌙'}
-                {story.tone === 'educational' && '📚'}
+                {story.tone === "adventurous" && "🗺️"}
+                {story.tone === "silly" && "😄"}
+                {story.tone === "calming" && "🌙"}
+                {story.tone === "educational" && "📚"}
               </span>
-              <p className="text-sm text-gray-600 capitalize">{story.tone} Adventure</p>
+              <p className="text-sm text-gray-600 capitalize">
+                {story.tone} Adventure
+              </p>
             </div>
           </div>
         </Link>
@@ -91,8 +98,15 @@ export function StoryCard({ story, isFavorited }: StoryCardProps) {
             {story.favoriteThemes && ` with ${story.favoriteThemes}`}...
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>{new Date(story.createdAt || '').toLocaleDateString()}</span>
-            <span>{story.length === 'short' ? '2-3' : story.length === 'medium' ? '5-7' : '10-15'} min read</span>
+            <span>{new Date(story.createdAt || "").toLocaleDateString()}</span>
+            <span>
+              {story.length === "short"
+                ? "2-3"
+                : story.length === "medium"
+                  ? "5-7"
+                  : "10-15"}{" "}
+              min read
+            </span>
           </div>
         </CardContent>
       </Link>

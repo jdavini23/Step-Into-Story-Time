@@ -1,9 +1,16 @@
-import { db } from './db';
-import { users, usageTracking } from '../shared/schema';
-import { eq, and, gte } from 'drizzle-orm';
+import { db } from "./db";
+import { users, usageTracking } from "../shared/schema";
+import { eq, and, gte } from "drizzle-orm";
 
-export type SubscriptionTier = 'free' | 'premium' | 'family';
-export type SubscriptionStatus = 'active' | 'canceled' | 'past_due' | 'incomplete' | 'incomplete_expired' | 'trialing' | 'unpaid';
+export type SubscriptionTier = "free" | "premium" | "family";
+export type SubscriptionStatus =
+  | "active"
+  | "canceled"
+  | "past_due"
+  | "incomplete"
+  | "incomplete_expired"
+  | "trialing"
+  | "unpaid";
 
 export interface TierLimits {
   storiesPerWeek: number | null; // null means unlimited
@@ -57,10 +64,10 @@ export const TIER_LIMITS: Record<SubscriptionTier, TierLimits> = {
   },
 };
 
-export const FREE_TIER_THEMES = ['bedtime', 'fantasy', 'adventure'];
-export const FREE_TIER_LENGTHS = ['short'];
-export const PREMIUM_TIER_LENGTHS = ['short', 'medium', 'long'];
-export const FAMILY_TIER_LENGTHS = ['short', 'medium', 'long'];
+export const FREE_TIER_THEMES = ["bedtime", "fantasy", "adventure"];
+export const FREE_TIER_LENGTHS = ["short"];
+export const PREMIUM_TIER_LENGTHS = ["short", "medium", "long"];
+export const FAMILY_TIER_LENGTHS = ["short", "medium", "long"];
 
 /**
  * Get the current week start (Monday 00:00:00)
@@ -77,35 +84,46 @@ export function getCurrentWeekStart(): Date {
 /**
  * Get user's subscription tier and status
  */
-export async function getUserTier(userId: string): Promise<{ tier: SubscriptionTier; status: SubscriptionStatus }> {
-  const user = await db.select({
-    subscriptionTier: users.subscriptionTier,
-    subscriptionStatus: users.subscriptionStatus,
-  }).from(users).where(eq(users.id, userId)).limit(1);
+export async function getUserTier(
+  userId: string,
+): Promise<{ tier: SubscriptionTier; status: SubscriptionStatus }> {
+  const user = await db
+    .select({
+      subscriptionTier: users.subscriptionTier,
+      subscriptionStatus: users.subscriptionStatus,
+    })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
 
   if (!user.length) {
-    throw new Error('User not found');
+    throw new Error("User not found");
   }
 
   return {
-    tier: (user[0].subscriptionTier as SubscriptionTier) || 'free',
-    status: (user[0].subscriptionStatus as SubscriptionStatus) || 'active',
+    tier: (user[0].subscriptionTier as SubscriptionTier) || "free",
+    status: (user[0].subscriptionStatus as SubscriptionStatus) || "active",
   };
 }
 
 /**
  * Get or create usage tracking for current week
  */
-export async function getUserWeeklyUsage(userId: string): Promise<{ storiesGenerated: number; weekStart: Date }> {
+export async function getUserWeeklyUsage(
+  userId: string,
+): Promise<{ storiesGenerated: number; weekStart: Date }> {
   const weekStart = getCurrentWeekStart();
 
   // Try to get existing usage record
-  const existingUsage = await db.select()
+  const existingUsage = await db
+    .select()
     .from(usageTracking)
-    .where(and(
-      eq(usageTracking.userId, userId),
-      eq(usageTracking.weekStart, weekStart)
-    ))
+    .where(
+      and(
+        eq(usageTracking.userId, userId),
+        eq(usageTracking.weekStart, weekStart),
+      ),
+    )
     .limit(1);
 
   if (existingUsage.length > 0) {
@@ -139,16 +157,19 @@ export async function incrementWeeklyUsage(userId: string): Promise<number> {
 
   // Update the count
   const newCount = usage.storiesGenerated + 1;
-  
-  await db.update(usageTracking)
-    .set({ 
+
+  await db
+    .update(usageTracking)
+    .set({
       storiesGenerated: newCount,
       updatedAt: new Date(),
     })
-    .where(and(
-      eq(usageTracking.userId, userId),
-      eq(usageTracking.weekStart, weekStart)
-    ));
+    .where(
+      and(
+        eq(usageTracking.userId, userId),
+        eq(usageTracking.weekStart, weekStart),
+      ),
+    );
 
   return newCount;
 }
@@ -156,18 +177,18 @@ export async function incrementWeeklyUsage(userId: string): Promise<number> {
 /**
  * Check if user can generate a story based on their tier and usage
  */
-export async function canUserGenerateStory(userId: string): Promise<{ 
-  canGenerate: boolean; 
-  reason?: string; 
-  storiesRemaining?: number 
+export async function canUserGenerateStory(userId: string): Promise<{
+  canGenerate: boolean;
+  reason?: string;
+  storiesRemaining?: number;
 }> {
   const { tier, status } = await getUserTier(userId);
 
   // Check if subscription is active (for paid tiers)
-  if (tier !== 'free' && status !== 'active' && status !== 'trialing') {
+  if (tier !== "free" && status !== "active" && status !== "trialing") {
     return {
       canGenerate: false,
-      reason: 'Subscription is not active',
+      reason: "Subscription is not active",
     };
   }
 
@@ -185,7 +206,7 @@ export async function canUserGenerateStory(userId: string): Promise<{
   if (storiesRemaining <= 0) {
     return {
       canGenerate: false,
-      reason: 'Weekly story limit reached',
+      reason: "Weekly story limit reached",
       storiesRemaining: 0,
     };
   }
@@ -200,12 +221,13 @@ export async function canUserGenerateStory(userId: string): Promise<{
  * Update user's subscription tier and status
  */
 export async function updateUserSubscription(
-  userId: string, 
-  tier: SubscriptionTier, 
-  status: SubscriptionStatus
+  userId: string,
+  tier: SubscriptionTier,
+  status: SubscriptionStatus,
 ): Promise<void> {
-  await db.update(users)
-    .set({ 
+  await db
+    .update(users)
+    .set({
       subscriptionTier: tier,
       subscriptionStatus: status,
       updatedAt: new Date(),
@@ -216,9 +238,12 @@ export async function updateUserSubscription(
 /**
  * Validate if user can access specific themes
  */
-export function canAccessTheme(userTier: SubscriptionTier, theme: string): boolean {
+export function canAccessTheme(
+  userTier: SubscriptionTier,
+  theme: string,
+): boolean {
   const limits = TIER_LIMITS[userTier];
-  
+
   if (limits.canAccessAllThemes) {
     return true;
   }
@@ -229,9 +254,12 @@ export function canAccessTheme(userTier: SubscriptionTier, theme: string): boole
 /**
  * Validate if user can access specific story lengths
  */
-export function canAccessLength(userTier: SubscriptionTier, length: string): boolean {
+export function canAccessLength(
+  userTier: SubscriptionTier,
+  length: string,
+): boolean {
   const limits = TIER_LIMITS[userTier];
-  
+
   if (limits.canAccessAllLengths) {
     return true;
   }

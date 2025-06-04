@@ -16,9 +16,24 @@ import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
 
 const STEPS = [
-  { id: 1, title: "Tell us about your little one", subtitle: "We'll create a story just for them", icon: "👶" },
-  { id: 2, title: "Choose the story style", subtitle: "What kind of adventure should it be?", icon: "🎭" },
-  { id: 3, title: "Add a personal touch", subtitle: "Make it extra special with a personal message", icon: "💝" },
+  {
+    id: 1,
+    title: "Tell us about your little one",
+    subtitle: "We'll create a story just for them",
+    icon: "👶",
+  },
+  {
+    id: 2,
+    title: "Choose the story style",
+    subtitle: "What kind of adventure should it be?",
+    icon: "🎭",
+  },
+  {
+    id: 3,
+    title: "Add a personal touch",
+    subtitle: "Make it extra special with a personal message",
+    icon: "💝",
+  },
 ];
 
 export default function StoryWizard() {
@@ -37,7 +52,9 @@ export default function StoryWizard() {
     bedtimeMessage: "",
   });
 
-  const [loadingMessage, setLoadingMessage] = useState("Creating your magical story...");
+  const [loadingMessage, setLoadingMessage] = useState(
+    "Creating your magical story...",
+  );
 
   const generateStoryMutation = useMutation({
     mutationFn: async (data: InsertStory) => {
@@ -118,7 +135,7 @@ export default function StoryWizard() {
   }, [user, isLoading, toast]);
 
   const updateFormData = (field: keyof InsertStory, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const nextStep = () => {
@@ -147,7 +164,13 @@ export default function StoryWizard() {
   };
 
   const handleGenerate = () => {
-    if (!formData.childName || !formData.childAge || !formData.childGender || !formData.tone || !formData.length) {
+    if (
+      !formData.childName ||
+      !formData.childAge ||
+      !formData.childGender ||
+      !formData.tone ||
+      !formData.length
+    ) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields.",
@@ -164,7 +187,13 @@ export default function StoryWizard() {
   }
 
   if (generateStoryMutation.isPending) {
-    return <LoadingOverlay isLoading={true} message={loadingMessage} showProgress={false} />;
+    return (
+      <LoadingOverlay
+        isLoading={true}
+        message={loadingMessage}
+        showProgress={false}
+      />
+    );
   }
 
   const currentStepData = STEPS[currentStep - 1];
@@ -172,11 +201,25 @@ export default function StoryWizard() {
   const renderStepContent = () => {
     switch (currentStep) {
       case 1:
-        return <ChildInfoStep formData={formData} updateFormData={updateFormData} />;
+        return (
+          <ChildInfoStep formData={formData} updateFormData={updateFormData} />
+        );
       case 2:
-        return <StoryStyleStep formData={formData} updateFormData={updateFormData} tierInfo={tierInfo} />;
+        return (
+          <StoryStyleStep
+            formData={formData}
+            updateFormData={updateFormData}
+            tierInfo={tierInfo}
+          />
+        );
       case 3:
-        return <PersonalTouchStep formData={formData} updateFormData={updateFormData} tierInfo={tierInfo} />;
+        return (
+          <PersonalTouchStep
+            formData={formData}
+            updateFormData={updateFormData}
+            tierInfo={tierInfo}
+          />
+        );
       default:
         return null;
     }

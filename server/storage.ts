@@ -22,15 +22,30 @@ export interface IStorage {
   // (IMPORTANT) these user operations are mandatory for Replit Auth.
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
-  updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User>;
-  updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string | null): Promise<User>;
-  updateUserSubscription(userId: string, tier: string, status: string): Promise<User>;
+  updateStripeCustomerId(
+    userId: string,
+    stripeCustomerId: string,
+  ): Promise<User>;
+  updateUserStripeInfo(
+    userId: string,
+    stripeCustomerId: string,
+    stripeSubscriptionId: string | null,
+  ): Promise<User>;
+  updateUserSubscription(
+    userId: string,
+    tier: string,
+    status: string,
+  ): Promise<User>;
 
   // Story operations
   createStory(userId: string, story: InsertStory): Promise<Story>;
   getUserStories(userId: string): Promise<Story[]>;
   getStory(id: number, userId: string): Promise<Story | undefined>;
-  updateStory(id: number, userId: string, updates: Partial<InsertStory>): Promise<Story | undefined>;
+  updateStory(
+    id: number,
+    userId: string,
+    updates: Partial<InsertStory>,
+  ): Promise<Story | undefined>;
   deleteStory(id: number, userId: string): Promise<boolean>;
 
   // Favorite operations
@@ -40,7 +55,10 @@ export interface IStorage {
   isStoryFavorited(userId: string, storyId: number): Promise<boolean>;
 
   // Usage tracking operations
-  getUserWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking | undefined>;
+  getUserWeeklyUsage(
+    userId: string,
+    weekStart: Date,
+  ): Promise<UsageTracking | undefined>;
   createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking>;
   incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking>;
 }
@@ -72,8 +90,16 @@ export class DatabaseStorage implements IStorage {
   // Story operations
   async createStory(userId: string, story: InsertStory): Promise<Story> {
     // Validate content sizes before insertion
-    validateContentSize(story.title, FILE_SIZE_LIMITS.maxTitleSize, "Story title");
-    validateContentSize(story.content, FILE_SIZE_LIMITS.maxStoryContentSize, "Story content");
+    validateContentSize(
+      story.title,
+      FILE_SIZE_LIMITS.maxTitleSize,
+      "Story title",
+    );
+    validateContentSize(
+      story.content,
+      FILE_SIZE_LIMITS.maxStoryContentSize,
+      "Story content",
+    );
 
     if (story.bedtimeMessage) {
       validateContentSize(story.bedtimeMessage, 500, "Bedtime message");
@@ -105,7 +131,11 @@ export class DatabaseStorage implements IStorage {
     return story;
   }
 
-  async updateStory(id: number, userId: string, updates: Partial<InsertStory>): Promise<Story | undefined> {
+  async updateStory(
+    id: number,
+    userId: string,
+    updates: Partial<InsertStory>,
+  ): Promise<Story | undefined> {
     const [updatedStory] = await db
       .update(stories)
       .set({
@@ -177,7 +207,10 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Stripe payment operations
-  async updateStripeCustomerId(userId: string, stripeCustomerId: string): Promise<User> {
+  async updateStripeCustomerId(
+    userId: string,
+    stripeCustomerId: string,
+  ): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ stripeCustomerId })
@@ -186,7 +219,11 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserStripeInfo(userId: string, stripeCustomerId: string, stripeSubscriptionId: string | null): Promise<User> {
+  async updateUserStripeInfo(
+    userId: string,
+    stripeCustomerId: string,
+    stripeSubscriptionId: string | null,
+  ): Promise<User> {
     const [user] = await db
       .update(users)
       .set({ stripeCustomerId, stripeSubscriptionId })
@@ -195,13 +232,17 @@ export class DatabaseStorage implements IStorage {
     return user;
   }
 
-  async updateUserSubscription(userId: string, tier: string, status: string): Promise<User> {
+  async updateUserSubscription(
+    userId: string,
+    tier: string,
+    status: string,
+  ): Promise<User> {
     const [user] = await db
       .update(users)
-      .set({ 
+      .set({
         subscriptionTier: tier,
         subscriptionStatus: status,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
       .where(eq(users.id, userId))
       .returning();
@@ -209,31 +250,42 @@ export class DatabaseStorage implements IStorage {
   }
 
   // Usage tracking operations
-  async getUserWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking | undefined> {
+  async getUserWeeklyUsage(
+    userId: string,
+    weekStart: Date,
+  ): Promise<UsageTracking | undefined> {
     const [usage] = await db
       .select()
       .from(usageTracking)
-      .where(and(
-        eq(usageTracking.userId, userId),
-        eq(usageTracking.weekStart, weekStart)
-      ))
+      .where(
+        and(
+          eq(usageTracking.userId, userId),
+          eq(usageTracking.weekStart, weekStart),
+        ),
+      )
       .limit(1);
     return usage;
   }
 
-  async createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking> {
+  async createUsageTracking(
+    userId: string,
+    weekStart: Date,
+  ): Promise<UsageTracking> {
     const [usage] = await db
       .insert(usageTracking)
       .values({
         userId,
         weekStart,
-        storiesGenerated: 0
+        storiesGenerated: 0,
       })
       .returning();
     return usage;
   }
 
-  async incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking> {
+  async incrementWeeklyUsage(
+    userId: string,
+    weekStart: Date,
+  ): Promise<UsageTracking> {
     // First, get current usage
     let usage = await this.getUserWeeklyUsage(userId, weekStart);
 
@@ -245,14 +297,16 @@ export class DatabaseStorage implements IStorage {
     // Increment the count
     const [updatedUsage] = await db
       .update(usageTracking)
-      .set({ 
+      .set({
         storiesGenerated: (usage.storiesGenerated || 0) + 1,
-        updatedAt: new Date()
+        updatedAt: new Date(),
       })
-      .where(and(
-        eq(usageTracking.userId, userId),
-        eq(usageTracking.weekStart, weekStart)
-      ))
+      .where(
+        and(
+          eq(usageTracking.userId, userId),
+          eq(usageTracking.weekStart, weekStart),
+        ),
+      )
       .returning();
 
     return updatedUsage;

@@ -2,7 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getQueryFn } from "@/lib/queryClient";
 
 export interface TierInfo {
-  tier: 'free' | 'premium' | 'family';
+  tier: "free" | "premium" | "family";
   status: string;
   canGenerate: boolean;
   reason?: string;
@@ -25,7 +25,7 @@ export interface TierInfo {
 
 export function useTierInfo() {
   return useQuery({
-    queryKey: ['/api/user/tier-info'],
+    queryKey: ["/api/user/tier-info"],
     queryFn: getQueryFn<TierInfo>({ on401: "returnNull" }),
     staleTime: 5 * 60 * 1000, // 5 minutes
     refetchOnWindowFocus: false,

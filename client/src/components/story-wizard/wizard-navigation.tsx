@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Sparkles } from "lucide-react";
 
@@ -11,13 +10,13 @@ interface WizardNavigationProps {
   onSubmit: () => void;
 }
 
-export function WizardNavigation({ 
-  currentStep, 
-  totalSteps, 
-  canProceed, 
-  onPrevious, 
-  onNext, 
-  onSubmit 
+export function WizardNavigation({
+  currentStep,
+  totalSteps,
+  canProceed,
+  onPrevious,
+  onNext,
+  onSubmit,
 }: WizardNavigationProps) {
   return (
     <div className="flex justify-between pt-8 border-t border-gray-200">

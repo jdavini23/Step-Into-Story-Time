@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 
 interface LoadingOverlayProps {
   isLoading: boolean;
@@ -8,11 +7,11 @@ interface LoadingOverlayProps {
   showProgress?: boolean;
 }
 
-export default function LoadingOverlay({ 
-  isLoading, 
-  message = "Loading...", 
+export default function LoadingOverlay({
+  isLoading,
+  message = "Loading...",
   progress = 0,
-  showProgress = false 
+  showProgress = false,
 }: LoadingOverlayProps) {
   if (!isLoading) return null;
 
@@ -39,12 +38,14 @@ export default function LoadingOverlay({
         </div>
 
         {/* Loading message */}
-        <p className="text-gray-700 text-sm sm:text-base font-medium mb-4">{message}</p>
+        <p className="text-gray-700 text-sm sm:text-base font-medium mb-4">
+          {message}
+        </p>
 
         {/* Progress bar (optional) */}
         {showProgress && (
           <div className="w-full bg-gray-200 rounded-full h-2 mb-4">
-            <div 
+            <div
               className="bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 h-2 rounded-full transition-all duration-500 ease-out"
               style={{ width: `${Math.min(progress, 100)}%` }}
             />
@@ -54,8 +55,14 @@ export default function LoadingOverlay({
         {/* Animated dots */}
         <div className="flex justify-center space-x-1">
           <div className="w-2 h-2 bg-purple-400 rounded-full animate-bounce"></div>
-          <div className="w-2 h-2 bg-blue-400 rounded-full animate-bounce" style={{ animationDelay: '0.1s' }}></div>
-          <div className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+          <div
+            className="w-2 h-2 bg-blue-400 rounded-full animate-bounce"
+            style={{ animationDelay: "0.1s" }}
+          ></div>
+          <div
+            className="w-2 h-2 bg-yellow-400 rounded-full animate-bounce"
+            style={{ animationDelay: "0.2s" }}
+          ></div>
         </div>
       </div>
     </div>

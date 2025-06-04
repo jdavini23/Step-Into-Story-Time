@@ -1,4 +1,3 @@
-
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import type { InsertStory } from "@shared/schema";
@@ -10,11 +9,18 @@ interface PersonalTouchStepProps {
   tierInfo?: TierInfo;
 }
 
-export function PersonalTouchStep({ formData, updateFormData, tierInfo }: PersonalTouchStepProps) {
+export function PersonalTouchStep({
+  formData,
+  updateFormData,
+  tierInfo,
+}: PersonalTouchStepProps) {
   return (
     <div className="space-y-8">
       <div>
-        <Label htmlFor="bedtime-message" className="text-sm font-medium text-gray-700">
+        <Label
+          htmlFor="bedtime-message"
+          className="text-sm font-medium text-gray-700"
+        >
           Bedtime Message (Optional)
         </Label>
         <p className="text-sm text-gray-500 mb-4">
@@ -29,7 +35,7 @@ export function PersonalTouchStep({ formData, updateFormData, tierInfo }: Person
           maxLength={200}
         />
         <p className="text-xs text-gray-400 mt-2">
-          {(formData.bedtimeMessage?.length || 0)}/200 characters
+          {formData.bedtimeMessage?.length || 0}/200 characters
         </p>
       </div>
 
@@ -39,16 +45,20 @@ export function PersonalTouchStep({ formData, updateFormData, tierInfo }: Person
             <span className="text-2xl">✨</span>
           </div>
           <div>
-            <h3 className="font-semibold text-purple-900 mb-2">Ready to Create Magic?</h3>
+            <h3 className="font-semibold text-purple-900 mb-2">
+              Ready to Create Magic?
+            </h3>
             <p className="text-purple-700 text-sm">
-              Your personalized bedtime story will be ready in just a few moments. 
-              Each story is unique and crafted just for {formData.childName || 'your little one'}!
+              Your personalized bedtime story will be ready in just a few
+              moments. Each story is unique and crafted just for{" "}
+              {formData.childName || "your little one"}!
             </p>
-            {tierInfo?.tier === 'free' && tierInfo.storiesRemaining !== undefined && (
-              <p className="text-purple-600 text-sm mt-2 font-medium">
-                {tierInfo.storiesRemaining} stories remaining this week
-              </p>
-            )}
+            {tierInfo?.tier === "free" &&
+              tierInfo.storiesRemaining !== undefined && (
+                <p className="text-purple-600 text-sm mt-2 font-medium">
+                  {tierInfo.storiesRemaining} stories remaining this week
+                </p>
+              )}
           </div>
         </div>
       </div>

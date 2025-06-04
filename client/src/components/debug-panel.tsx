@@ -1,5 +1,4 @@
-
-import { useState } from 'react';
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -22,25 +21,28 @@ export function DebugPanel() {
       const data = await response.json();
       setDebugInfo(data);
     } catch (error) {
-      console.error('Failed to fetch debug info:', error);
+      console.error("Failed to fetch debug info:", error);
     }
   };
 
-  const setTier = async (tier: string, status = 'active') => {
+  const setTier = async (tier: string, status = "active") => {
     try {
-      const response = await apiRequest("POST", "/api/debug/set-tier", { tier, status });
+      const response = await apiRequest("POST", "/api/debug/set-tier", {
+        tier,
+        status,
+      });
       const data = await response.json();
-      
+
       toast({
         title: "Tier Updated",
         description: data.message,
       });
-      
+
       // Refresh all relevant queries
       queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
       queryClient.invalidateQueries({ queryKey: ["/api/subscription-status"] });
       queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
-      
+
       await fetchDebugInfo();
     } catch (error) {
       toast({
@@ -55,17 +57,17 @@ export function DebugPanel() {
     try {
       const response = await apiRequest("POST", "/api/debug/reset-usage");
       const data = await response.json();
-      
+
       toast({
         title: "Usage Reset",
         description: data.message,
       });
-      
+
       queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
       await fetchDebugInfo();
     } catch (error) {
       toast({
-        title: "Error", 
+        title: "Error",
         description: "Failed to reset usage",
         variant: "destructive",
       });
@@ -94,7 +96,9 @@ export function DebugPanel() {
       <Card className="bg-yellow-50 border-yellow-400">
         <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
-            <CardTitle className="text-sm text-yellow-800">Debug Panel (Dev Only)</CardTitle>
+            <CardTitle className="text-sm text-yellow-800">
+              Debug Panel (Dev Only)
+            </CardTitle>
             <Button
               variant="ghost"
               size="sm"
@@ -106,15 +110,16 @@ export function DebugPanel() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3 text-xs">
-          
           {/* Current Status */}
           <div>
-            <h4 className="font-semibold text-yellow-800 mb-2">Current Status</h4>
+            <h4 className="font-semibold text-yellow-800 mb-2">
+              Current Status
+            </h4>
             <div className="space-y-1">
               <div className="flex justify-between">
                 <span>Tier:</span>
                 <Badge variant="outline" className="text-xs">
-                  {tierInfo?.tier || 'loading...'}
+                  {tierInfo?.tier || "loading..."}
                 </Badge>
               </div>
               <div className="flex justify-between">
@@ -123,7 +128,7 @@ export function DebugPanel() {
               </div>
               <div className="flex justify-between">
                 <span>Can Generate:</span>
-                <span>{tierInfo?.canGenerate ? '✅' : '❌'}</span>
+                <span>{tierInfo?.canGenerate ? "✅" : "❌"}</span>
               </div>
             </div>
           </div>
@@ -132,12 +137,14 @@ export function DebugPanel() {
 
           {/* Quick Actions */}
           <div>
-            <h4 className="font-semibold text-yellow-800 mb-2">Quick Test Actions</h4>
+            <h4 className="font-semibold text-yellow-800 mb-2">
+              Quick Test Actions
+            </h4>
             <div className="grid grid-cols-2 gap-2">
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setTier('free')}
+                onClick={() => setTier("free")}
                 className="text-xs"
               >
                 Set Free
@@ -145,7 +152,7 @@ export function DebugPanel() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setTier('premium')}
+                onClick={() => setTier("premium")}
                 className="text-xs"
               >
                 Set Premium
@@ -153,7 +160,7 @@ export function DebugPanel() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setTier('family')}
+                onClick={() => setTier("family")}
                 className="text-xs"
               >
                 Set Family
@@ -161,7 +168,7 @@ export function DebugPanel() {
               <Button
                 size="sm"
                 variant="outline"
-                onClick={() => setTier('premium', 'canceled')}
+                onClick={() => setTier("premium", "canceled")}
                 className="text-xs"
               >
                 Set Canceled
@@ -173,7 +180,9 @@ export function DebugPanel() {
 
           {/* Usage Controls */}
           <div>
-            <h4 className="font-semibold text-yellow-800 mb-2">Usage Controls</h4>
+            <h4 className="font-semibold text-yellow-800 mb-2">
+              Usage Controls
+            </h4>
             <Button
               size="sm"
               variant="outline"
@@ -189,7 +198,9 @@ export function DebugPanel() {
             <>
               <Separator />
               <div>
-                <h4 className="font-semibold text-yellow-800 mb-2">Debug Info</h4>
+                <h4 className="font-semibold text-yellow-800 mb-2">
+                  Debug Info
+                </h4>
                 <div className="text-xs bg-white p-2 rounded border max-h-40 overflow-auto">
                   <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
                 </div>

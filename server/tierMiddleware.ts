@@ -1,21 +1,21 @@
-import { Request, Response, NextFunction } from 'express';
-import { 
-  canUserGenerateStory, 
-  getUserTier, 
-  canAccessTheme, 
+import { Request, Response, NextFunction } from "express";
+import {
+  canUserGenerateStory,
+  getUserTier,
+  canAccessTheme,
   canAccessLength,
   TIER_LIMITS,
   FREE_TIER_THEMES,
   FREE_TIER_LENGTHS,
-  SubscriptionTier 
-} from './tierManager';
+  SubscriptionTier,
+} from "./tierManager";
 
 // Extend Request type to include tier information
 declare global {
   namespace Express {
     interface Request {
       userTier?: SubscriptionTier;
-      tierLimits?: typeof TIER_LIMITS[SubscriptionTier];
+      tierLimits?: (typeof TIER_LIMITS)[SubscriptionTier];
     }
   }
 }
@@ -24,17 +24,17 @@ declare global {
  * Middleware to check if user can generate a story
  */
 export const checkStoryGenerationPermissions = async (
-  req: any, 
-  res: Response, 
-  next: NextFunction
+  req: any,
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
 
     if (!userId) {
-      res.status(401).json({ 
-        error: 'Authentication required',
-        message: 'Please log in to generate stories' 
+      res.status(401).json({
+        error: "Authentication required",
+        message: "Please log in to generate stories",
       });
       return;
     }
@@ -43,22 +43,24 @@ export const checkStoryGenerationPermissions = async (
     const permissionCheck = await canUserGenerateStory(userId);
 
     if (!permissionCheck.canGenerate) {
-      let message = 'Story generation not allowed';
+      let message = "Story generation not allowed";
       let upgradeRequired = false;
 
-      if (permissionCheck.reason === 'Weekly story limit reached') {
-        message = 'You\'ve reached your weekly limit of 3 stories. Upgrade to Premium for unlimited stories.';
+      if (permissionCheck.reason === "Weekly story limit reached") {
+        message =
+          "You've reached your weekly limit of 3 stories. Upgrade to Premium for unlimited stories.";
         upgradeRequired = true;
-      } else if (permissionCheck.reason === 'Subscription is not active') {
-        message = 'Your subscription is not active. Please check your billing or contact support.';
+      } else if (permissionCheck.reason === "Subscription is not active") {
+        message =
+          "Your subscription is not active. Please check your billing or contact support.";
         upgradeRequired = true;
       }
 
-      res.status(403).json({ 
-        error: 'Generation limit reached',
+      res.status(403).json({
+        error: "Generation limit reached",
         message,
         upgradeRequired,
-        storiesRemaining: permissionCheck.storiesRemaining || 0
+        storiesRemaining: permissionCheck.storiesRemaining || 0,
       });
       return;
     }
@@ -70,10 +72,10 @@ export const checkStoryGenerationPermissions = async (
 
     next();
   } catch (error) {
-    console.error('Error checking story generation permissions:', error);
+    console.error("Error checking story generation permissions:", error);
     // Fallback to free tier on errors but don't block generation
-    req.userTier = 'free';
-    req.tierLimits = TIER_LIMITS['free'];
+    req.userTier = "free";
+    req.tierLimits = TIER_LIMITS["free"];
     next();
   }
 };
@@ -82,17 +84,17 @@ export const checkStoryGenerationPermissions = async (
  * Middleware to validate story parameters based on user tier
  */
 export const validateStoryParameters = async (
-  req: any, 
-  res: Response, 
-  next: NextFunction
+  req: any,
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
 
     if (!userId) {
-      res.status(401).json({ 
-        error: 'Authentication required',
-        message: 'Please log in to generate stories' 
+      res.status(401).json({
+        error: "Authentication required",
+        message: "Please log in to generate stories",
       });
       return;
     }
@@ -101,37 +103,42 @@ export const validateStoryParameters = async (
     const { favoriteThemes, length } = req.body;
 
     // Validate themes for free users
-    if (favoriteThemes && tier === 'free') {
-      const themes = favoriteThemes.split(',').map((t: string) => t.trim().toLowerCase());
-      const invalidThemes = themes.filter((theme: string) => !canAccessTheme(tier, theme));
+    if (favoriteThemes && tier === "free") {
+      const themes = favoriteThemes
+        .split(",")
+        .map((t: string) => t.trim().toLowerCase());
+      const invalidThemes = themes.filter(
+        (theme: string) => !canAccessTheme(tier, theme),
+      );
 
       if (invalidThemes.length > 0) {
         res.status(403).json({
-          error: 'Theme access restricted',
+          error: "Theme access restricted",
           message: `Free users can only access these themes: bedtime, fantasy, adventure. Upgrade to Premium for access to all themes.`,
           restrictedThemes: invalidThemes,
           allowedThemes: FREE_TIER_THEMES,
-          upgradeRequired: true
+          upgradeRequired: true,
         });
         return;
       }
     }
 
     // Validate story length for free users
-    if (length && tier === 'free' && !canAccessLength(tier, length)) {
+    if (length && tier === "free" && !canAccessLength(tier, length)) {
       res.status(403).json({
-        error: 'Length access restricted',
-        message: 'Free users can only generate short stories. Upgrade to Premium for medium and long stories.',
+        error: "Length access restricted",
+        message:
+          "Free users can only generate short stories. Upgrade to Premium for medium and long stories.",
         requestedLength: length,
         allowedLengths: FREE_TIER_LENGTHS,
-        upgradeRequired: true
+        upgradeRequired: true,
       });
       return;
     }
 
     next();
   } catch (error) {
-    console.error('Error validating story parameters:', error);
+    console.error("Error validating story parameters:", error);
     // Don't block story generation due to validation errors
     next();
   }
@@ -141,9 +148,9 @@ export const validateStoryParameters = async (
  * Middleware to add tier information to response
  */
 export const addTierInfoToResponse = async (
-  req: any, 
-  res: Response, 
-  next: NextFunction
+  req: any,
+  res: Response,
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = req.user?.claims?.sub;
@@ -156,7 +163,7 @@ export const addTierInfoToResponse = async (
 
     next();
   } catch (error) {
-    console.error('Error adding tier information:', error);
+    console.error("Error adding tier information:", error);
     // Don't fail the request, just continue without tier info
     next();
   }

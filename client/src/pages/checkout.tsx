@@ -1,15 +1,26 @@
-import { useStripe, Elements, PaymentElement, useElements } from '@stripe/react-stripe-js';
-import { loadStripe } from '@stripe/stripe-js';
-import { useEffect, useState } from 'react';
+import {
+  useStripe,
+  Elements,
+  PaymentElement,
+  useElements,
+} from "@stripe/react-stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
+import { useEffect, useState } from "react";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 
 // Make sure to call `loadStripe` outside of a component's render to avoid
 // recreating the `Stripe` object on every render.
 if (!import.meta.env.VITE_STRIPE_PUBLIC_KEY) {
-  throw new Error('Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY');
+  throw new Error("Missing required Stripe key: VITE_STRIPE_PUBLIC_KEY");
 }
 const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY);
 
@@ -48,7 +59,7 @@ const CheckoutForm = () => {
       });
     }
     setIsLoading(false);
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -82,7 +93,10 @@ export default function Checkout() {
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
-        <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" aria-label="Loading"/>
+        <div
+          className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
+          aria-label="Loading"
+        />
       </div>
     );
   }
@@ -116,14 +130,16 @@ export default function Checkout() {
                 Generate 5 personalized bedtime stories
               </p>
             </div>
-            
+
             {clientSecret ? (
               <Elements stripe={stripePromise} options={{ clientSecret }}>
                 <CheckoutForm />
               </Elements>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">Unable to load payment form. Please try again later.</p>
+                <p className="text-gray-600">
+                  Unable to load payment form. Please try again later.
+                </p>
               </div>
             )}
           </CardContent>

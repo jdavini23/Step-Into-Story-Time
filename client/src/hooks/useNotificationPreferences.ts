@@ -1,10 +1,11 @@
+import { useState, useEffect } from "react";
 
-import { useState, useEffect } from 'react';
-
-const STORAGE_KEY = 'dismissed_notifications';
+const STORAGE_KEY = "dismissed_notifications";
 
 export function useNotificationPreferences() {
-  const [dismissedNotifications, setDismissedNotifications] = useState<string[]>([]);
+  const [dismissedNotifications, setDismissedNotifications] = useState<
+    string[]
+  >([]);
 
   useEffect(() => {
     try {
@@ -13,18 +14,18 @@ export function useNotificationPreferences() {
         setDismissedNotifications(JSON.parse(stored));
       }
     } catch (error) {
-      console.warn('Failed to load notification preferences:', error);
+      console.warn("Failed to load notification preferences:", error);
     }
   }, []);
 
   const dismissNotification = (id: string) => {
     const updated = [...dismissedNotifications, id];
     setDismissedNotifications(updated);
-    
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
     } catch (error) {
-      console.warn('Failed to save notification preference:', error);
+      console.warn("Failed to save notification preference:", error);
     }
   };
 
@@ -33,7 +34,7 @@ export function useNotificationPreferences() {
     try {
       localStorage.removeItem(STORAGE_KEY);
     } catch (error) {
-      console.warn('Failed to clear notification preferences:', error);
+      console.warn("Failed to clear notification preferences:", error);
     }
   };
 
@@ -43,6 +44,6 @@ export function useNotificationPreferences() {
     dismissedNotifications,
     dismissNotification,
     clearAllDismissed,
-    isDismissed
+    isDismissed,
   };
 }

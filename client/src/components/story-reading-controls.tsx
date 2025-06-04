@@ -1,15 +1,7 @@
-
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { 
-  Sun, 
-  Moon, 
-  ZoomIn, 
-  ZoomOut, 
-  Volume2, 
-  VolumeX 
-} from "lucide-react";
+import { Sun, Moon, ZoomIn, ZoomOut, Volume2, VolumeX } from "lucide-react";
 
 interface StoryReadingControlsProps {
   isDarkMode: boolean;
@@ -41,9 +33,13 @@ export function StoryReadingControls({
           onClick={onToggleDarkMode}
           title={isDarkMode ? "Light mode" : "Dark mode"}
         >
-          {isDarkMode ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          {isDarkMode ? (
+            <Sun className="w-4 h-4" />
+          ) : (
+            <Moon className="w-4 h-4" />
+          )}
         </Button>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -53,7 +49,7 @@ export function StoryReadingControls({
         >
           <ZoomIn className="w-4 h-4" />
         </Button>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -63,7 +59,7 @@ export function StoryReadingControls({
         >
           <ZoomOut className="w-4 h-4" />
         </Button>
-        
+
         <Button
           variant="ghost"
           size="sm"
@@ -71,7 +67,11 @@ export function StoryReadingControls({
           title={isReading ? "Stop reading" : "Read aloud"}
           className={isReading ? "text-green-600" : ""}
         >
-          {isReading ? <VolumeX className="w-4 h-4" /> : <Volume2 className="w-4 h-4" />}
+          {isReading ? (
+            <VolumeX className="w-4 h-4" />
+          ) : (
+            <Volume2 className="w-4 h-4" />
+          )}
         </Button>
       </div>
     </Card>

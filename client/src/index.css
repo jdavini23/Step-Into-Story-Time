@@ -54,7 +54,16 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+    font-family:
+      "Inter",
+      -apple-system,
+      BlinkMacSystemFont,
+      "Segoe UI",
+      "Roboto",
+      "Oxygen",
+      "Ubuntu",
+      "Cantarell",
+      sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     text-size-adjust: 100%;
@@ -67,7 +76,9 @@
   }
 
   /* Better mobile tap targets */
-  button, a, [role="button"] {
+  button,
+  a,
+  [role="button"] {
     min-height: 44px;
     min-width: 44px;
   }
@@ -79,11 +90,13 @@
   }
 
   .story-gradient {
-    background: linear-gradient(135deg, #7C3AED 0%, #3B82F6 50%, #F59E0B 100%);
+    background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 50%, #f59e0b 100%);
   }
 
   .story-shadow {
-    box-shadow: 0 10px 25px -5px rgba(124, 58, 237, 0.1), 0 4px 6px -2px rgba(124, 58, 237, 0.05);
+    box-shadow:
+      0 10px 25px -5px rgba(124, 58, 237, 0.1),
+      0 4px 6px -2px rgba(124, 58, 237, 0.05);
   }
 
   .line-clamp-1 {
@@ -102,8 +115,13 @@
 
   /* Custom animations for magical feel */
   @keyframes float {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
   }
 
   .animate-float {
@@ -121,7 +139,10 @@
     line-height: 1.8;
   }
 
-  .prose h1, .prose h2, .prose h3, .prose h4 {
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
     color: hsl(var(--foreground));
     font-weight: 600;
   }

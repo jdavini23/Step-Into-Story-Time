@@ -1,5 +1,4 @@
-
-import React from 'react';
+import React from "react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -8,15 +7,15 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { 
-  MoreVertical, 
-  Heart, 
-  HeartOff, 
-  Download, 
-  Share2, 
+import {
+  MoreVertical,
+  Heart,
+  HeartOff,
+  Download,
+  Share2,
   Trash2,
   Edit,
-  Crown
+  Crown,
 } from "lucide-react";
 import { useLocation } from "wouter";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -29,7 +28,10 @@ interface StoryActionsMenuProps {
   isFavorited: boolean;
 }
 
-export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) {
+export function StoryActionsMenu({
+  story,
+  isFavorited,
+}: StoryActionsMenuProps) {
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -37,16 +39,16 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
 
   const favoriteMutation = useMutation({
     mutationFn: async () => {
-      const method = isFavorited ? 'DELETE' : 'POST';
+      const method = isFavorited ? "DELETE" : "POST";
       const response = await fetch(`/api/favorites/${story.id}`, { method });
-      if (!response.ok) throw new Error('Failed to update favorite');
+      if (!response.ok) throw new Error("Failed to update favorite");
       return response.json();
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
         title: isFavorited ? "Removed from favorites" : "Added to favorites",
-        description: `"${story.title}" has been ${isFavorited ? 'removed from' : 'added to'} your favorites.`,
+        description: `"${story.title}" has been ${isFavorited ? "removed from" : "added to"} your favorites.`,
       });
     },
     onError: () => {
@@ -60,12 +62,14 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
 
   const deleteMutation = useMutation({
     mutationFn: async () => {
-      const response = await fetch(`/api/stories/${story.id}`, { method: 'DELETE' });
-      if (!response.ok) throw new Error('Failed to delete story');
+      const response = await fetch(`/api/stories/${story.id}`, {
+        method: "DELETE",
+      });
+      if (!response.ok) throw new Error("Failed to delete story");
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['/api/stories'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/favorites'] });
+      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/favorites"] });
       toast({
         title: "Story deleted",
         description: `"${story.title}" has been deleted successfully.`,
@@ -84,7 +88,8 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
     if (!tierInfo?.limits.canDownloadPdf) {
       toast({
         title: "Premium Feature",
-        description: "PDF downloads are available for Premium subscribers only.",
+        description:
+          "PDF downloads are available for Premium subscribers only.",
         action: (
           <Button onClick={() => setLocation("/pricing")} size="sm">
             Upgrade <Crown className="w-3 h-3 ml-1" />
@@ -96,14 +101,14 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
 
     try {
       const response = await fetch(`/api/stories/${story.id}/pdf`);
-      if (!response.ok) throw new Error('Failed to download PDF');
-      
+      if (!response.ok) throw new Error("Failed to download PDF");
+
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.style.display = 'none';
+      const a = document.createElement("a");
+      a.style.display = "none";
       a.href = url;
-      a.download = `${story.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}.pdf`;
+      a.download = `${story.title.replace(/[^a-z0-9]/gi, "_").toLowerCase()}.pdf`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -136,7 +141,9 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
     } else {
       // Fallback: copy to clipboard
       try {
-        await navigator.clipboard.writeText(window.location.origin + `/story/${story.id}`);
+        await navigator.clipboard.writeText(
+          window.location.origin + `/story/${story.id}`,
+        );
         toast({
           title: "Link Copied",
           description: "Story link has been copied to your clipboard.",
@@ -164,7 +171,7 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
           <Edit className="mr-2 h-4 w-4" />
           Read Story
         </DropdownMenuItem>
-        
+
         <DropdownMenuItem onClick={() => favoriteMutation.mutate()}>
           {isFavorited ? (
             <>
@@ -193,8 +200,8 @@ export function StoryActionsMenu({ story, isFavorited }: StoryActionsMenuProps) 
         </DropdownMenuItem>
 
         <DropdownMenuSeparator />
-        
-        <DropdownMenuItem 
+
+        <DropdownMenuItem
           onClick={() => deleteMutation.mutate()}
           className="text-red-600 focus:text-red-600"
         >

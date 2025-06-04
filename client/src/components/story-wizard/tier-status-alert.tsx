@@ -1,4 +1,3 @@
-
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Star, Crown } from "lucide-react";
@@ -9,15 +8,19 @@ interface TierStatusAlertProps {
   onUpgradeClick: () => void;
 }
 
-export function TierStatusAlert({ tierInfo, onUpgradeClick }: TierStatusAlertProps) {
-  if (tierInfo.tier === 'free') {
+export function TierStatusAlert({
+  tierInfo,
+  onUpgradeClick,
+}: TierStatusAlertProps) {
+  if (tierInfo.tier === "free") {
     return (
       <Alert className="border-yellow-200 bg-yellow-50">
         <Star className="h-4 w-4 text-yellow-600" />
         <AlertDescription className="text-yellow-800">
           <div className="flex items-center justify-between">
             <span>
-              Free Plan: {tierInfo.storiesRemaining || 0} stories remaining this week
+              Free Plan: {tierInfo.storiesRemaining || 0} stories remaining this
+              week
             </span>
             <Button
               variant="outline"
@@ -34,7 +37,7 @@ export function TierStatusAlert({ tierInfo, onUpgradeClick }: TierStatusAlertPro
     );
   }
 
-  if (tierInfo.tier === 'premium') {
+  if (tierInfo.tier === "premium") {
     return (
       <Alert className="border-purple-200 bg-purple-50">
         <Crown className="h-4 w-4 text-purple-600" />
@@ -45,7 +48,7 @@ export function TierStatusAlert({ tierInfo, onUpgradeClick }: TierStatusAlertPro
     );
   }
 
-  if (tierInfo.tier === 'family') {
+  if (tierInfo.tier === "family") {
     return (
       <Alert className="border-emerald-200 bg-emerald-50">
         <Crown className="h-4 w-4 text-emerald-600" />

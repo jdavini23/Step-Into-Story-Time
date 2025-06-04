@@ -47,7 +47,7 @@ export const queryClient = new QueryClient({
     queries: {
       retry: (failureCount, error) => {
         // Don't retry on 401/403 errors
-        if (error && typeof error === 'object' && 'status' in error) {
+        if (error && typeof error === "object" && "status" in error) {
           const status = (error as any).status;
           if (status === 401 || status === 403) {
             return false;

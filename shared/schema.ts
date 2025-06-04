@@ -42,7 +42,9 @@ export const users = pgTable("users", {
 // Stories table
 export const stories = pgTable("stories", {
   id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
   childName: varchar("child_name").notNull(),
@@ -70,15 +72,23 @@ export type InsertStory = z.infer<typeof insertStorySchema>;
 export type Story = typeof stories.$inferSelect;
 
 // Favorites table
-export const favorites = pgTable("favorites", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  storyId: integer("story_id").notNull().references(() => stories.id),
-  createdAt: timestamp("created_at").defaultNow(),
-}, (table) => [
-  // Ensure a user can only favorite a story once
-  index("unique_user_story_favorite").on(table.userId, table.storyId),
-]);
+export const favorites = pgTable(
+  "favorites",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    storyId: integer("story_id")
+      .notNull()
+      .references(() => stories.id),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    // Ensure a user can only favorite a story once
+    index("unique_user_story_favorite").on(table.userId, table.storyId),
+  ],
+);
 
 export const insertFavoriteSchema = createInsertSchema(favorites).omit({
   id: true,
@@ -89,23 +99,31 @@ export type InsertFavorite = z.infer<typeof insertFavoriteSchema>;
 export type Favorite = typeof favorites.$inferSelect;
 
 // Usage tracking table for monitoring weekly limits
-export const usageTracking = pgTable("usage_tracking", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").notNull().references(() => users.id),
-  weekStart: timestamp("week_start").notNull(), // Monday 00:00:00 of the week
-  storiesGenerated: integer("stories_generated").default(0),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-}, (table) => [
-  // Ensure unique tracking per user per week
-  index("unique_user_week").on(table.userId, table.weekStart),
-]);
+export const usageTracking = pgTable(
+  "usage_tracking",
+  {
+    id: serial("id").primaryKey(),
+    userId: varchar("user_id")
+      .notNull()
+      .references(() => users.id),
+    weekStart: timestamp("week_start").notNull(), // Monday 00:00:00 of the week
+    storiesGenerated: integer("stories_generated").default(0),
+    createdAt: timestamp("created_at").defaultNow(),
+    updatedAt: timestamp("updated_at").defaultNow(),
+  },
+  (table) => [
+    // Ensure unique tracking per user per week
+    index("unique_user_week").on(table.userId, table.weekStart),
+  ],
+);
 
-export const insertUsageTrackingSchema = createInsertSchema(usageTracking).omit({
-  id: true,
-  createdAt: true,
-  updatedAt: true,
-});
+export const insertUsageTrackingSchema = createInsertSchema(usageTracking).omit(
+  {
+    id: true,
+    createdAt: true,
+    updatedAt: true,
+  },
+);
 
 export type InsertUsageTracking = z.infer<typeof insertUsageTrackingSchema>;
 export type UsageTracking = typeof usageTracking.$inferSelect;

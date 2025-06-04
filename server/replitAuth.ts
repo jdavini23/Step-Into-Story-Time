@@ -16,10 +16,10 @@ const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
-      process.env.REPL_ID!
+      process.env.REPL_ID!,
     );
   },
-  { maxAge: 3600 * 1000 }
+  { maxAge: 3600 * 1000 },
 );
 
 export function getSession() {
@@ -46,7 +46,7 @@ export function getSession() {
 
 function updateUserSession(
   user: any,
-  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers
+  tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
 ) {
   user.claims = tokens.claims();
   user.access_token = tokens.access_token;
@@ -54,9 +54,7 @@ function updateUserSession(
   user.expires_at = user.claims?.exp;
 }
 
-async function upsertUser(
-  claims: any,
-) {
+async function upsertUser(claims: any) {
   await storage.upsertUser({
     id: claims["sub"],
     email: claims["email"],
@@ -76,7 +74,7 @@ export async function setupAuth(app: Express) {
 
   const verify: VerifyFunction = async (
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
-    verified: passport.AuthenticateCallback
+    verified: passport.AuthenticateCallback,
   ) => {
     const user = {};
     updateUserSession(user, tokens);
@@ -84,8 +82,7 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env
-    .REPLIT_DOMAINS!.split(",")) {
+  for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -103,13 +100,13 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/login", (req, res, next) => {
     // Store signup intent and return URL in session if present
-    if (req.query.signup === 'true') {
+    if (req.query.signup === "true") {
       req.session.isSignup = true;
     }
     if (req.query.returnTo) {
       req.session.returnTo = req.query.returnTo;
     }
-    
+
     passport.authenticate(`replitauth:${req.hostname}`, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
@@ -124,17 +121,17 @@ export async function setupAuth(app: Express) {
       if (!user) {
         return res.redirect("/api/login");
       }
-      
+
       req.logIn(user, (err) => {
         if (err) {
           return next(err);
         }
-        
+
         // Redirect to stored returnTo URL or default to dashboard
         const returnTo = req.session.returnTo || "/";
         delete req.session.returnTo; // Clean up
         delete req.session.isSignup; // Clean up
-        
+
         return res.redirect(returnTo);
       });
     })(req, res, next);
@@ -146,7 +143,7 @@ export async function setupAuth(app: Express) {
         client.buildEndSessionUrl(config, {
           client_id: process.env.REPL_ID!,
           post_logout_redirect_uri: `${req.protocol}://${req.hostname}`,
-        }).href
+        }).href,
       );
     });
   });

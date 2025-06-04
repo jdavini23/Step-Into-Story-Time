@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 
 export default function CTASection() {
@@ -9,10 +8,11 @@ export default function CTASection() {
           Turn Tonight Into a Story They'll Remember
         </h3>
         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">
-          Join parents using Step Into Storytime to end each day with connection and creativity.
+          Join parents using Step Into Storytime to end each day with connection
+          and creativity.
         </p>
-        <Button 
-          onClick={() => window.location.href = "/api/login?signup=true"}
+        <Button
+          onClick={() => (window.location.href = "/api/login?signup=true")}
           className="bg-white text-purple-600 hover:bg-gray-100 px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200 group relative overflow-hidden"
         >
           <span className="relative z-10 flex items-center group-hover:opacity-0 transition-opacity duration-300">

@@ -1,14 +1,23 @@
-
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Crown, Sparkles } from "lucide-react";
 
 interface PremiumStatusCardProps {
-  subscriptionStatus: { hasActiveSubscription: boolean; status?: string } | undefined;
+  subscriptionStatus:
+    | { hasActiveSubscription: boolean; status?: string }
+    | undefined;
 }
 
-export function PremiumStatusCard({ subscriptionStatus }: PremiumStatusCardProps) {
+export function PremiumStatusCard({
+  subscriptionStatus,
+}: PremiumStatusCardProps) {
   if (!subscriptionStatus) return null;
 
   if (subscriptionStatus.hasActiveSubscription) {

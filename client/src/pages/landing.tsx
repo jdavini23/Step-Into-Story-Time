@@ -19,15 +19,27 @@ export default function Landing() {
 
   useEffect(() => {
     const stepTimer = setInterval(() => {
-      setCurrentStep(prev => (prev + 1) % 3);
+      setCurrentStep((prev) => (prev + 1) % 3);
     }, 3000);
     return () => clearInterval(stepTimer);
   }, []);
 
   const steps = [
-    { icon: "👶", title: "Tell us about your child", description: "Name, age, favorite themes" },
-    { icon: "🎭", title: "Choose story style", description: "Adventure, calming, silly, or educational" },
-    { icon: "✨", title: "Get your story", description: "Ready in under 2 minutes" }
+    {
+      icon: "👶",
+      title: "Tell us about your child",
+      description: "Name, age, favorite themes",
+    },
+    {
+      icon: "🎭",
+      title: "Choose story style",
+      description: "Adventure, calming, silly, or educational",
+    },
+    {
+      icon: "✨",
+      title: "Get your story",
+      description: "Ready in under 2 minutes",
+    },
   ];
 
   return (
