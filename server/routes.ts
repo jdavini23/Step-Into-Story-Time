@@ -629,27 +629,47 @@ export async function registerRoutes(app: Express): Promise<Server> {
     isAuthenticated,
     async (req: any, res) => {
       try {
-        const userId = req.user.claims.sub;
+        console.log("=== SUBSCRIPTION STATUS DEBUG ===");
+        const userId = req.user?.claims?.sub;
+        console.log("User ID from claims:", userId);
+
+        if (!userId) {
+          console.log("No user ID found in claims");
+          return res.status(400).json({ 
+            error: "No user ID found", 
+            hasActiveSubscription: false 
+          });
+        }
+
         const user = await storage.getUser(userId);
+        console.log("User from storage:", user ? "Found" : "Not found");
+        console.log("User stripe subscription ID:", user?.stripeSubscriptionId);
 
         if (!user || !user.stripeSubscriptionId) {
+          console.log("No user or no subscription ID");
           return res.json({ hasActiveSubscription: false });
         }
 
+        console.log("Retrieving Stripe subscription:", user.stripeSubscriptionId);
         const subscription = await stripe.subscriptions.retrieve(
           user.stripeSubscriptionId,
         );
+        console.log("Stripe subscription status:", subscription.status);
 
         res.json({
           hasActiveSubscription: subscription.status === "active",
           status: subscription.status,
           subscriptionId: subscription.id,
         });
+        console.log("=== END SUBSCRIPTION STATUS DEBUG ===");
       } catch (error: any) {
         console.error("Error checking subscription status:", error);
-        res
-          .status(500)
-          .json({ message: "Failed to check subscription status" });
+        console.error("Error stack:", error.stack);
+        res.status(500).json({ 
+          message: "Failed to check subscription status",
+          error: error.message,
+          stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+        });
       }
     },
   );
@@ -789,8 +809,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug endpoints for testing (remove in production)
-  const { registerDebugRoutes } = await import("./debugRoutes");
+  const { registerDebugRoutes, setupDebugRoutes } = await import("./debugRoutes");
   registerDebugRoutes(app);
+  setupDebugRoutes(app);
 
   const httpServer = createServer(app);
   return httpServer;
