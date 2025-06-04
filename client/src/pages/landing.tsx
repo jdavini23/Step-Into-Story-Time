@@ -32,12 +32,11 @@ export default function Landing() {
         <div className="grid lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
             <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-700 leading-tight mb-6">
-              Create 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 ml-3">magical</span>
-              <br />bedtime stories in minutes
+              Tuck in. Tap a button.
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 ml-3">Start the magic.</span>
             </h2>
             <p className="text-xl text-gray-600 mb-8 leading-relaxed">
-              Transform bedtime into an adventure with AI-powered personalized stories that feature your child as the hero.
+              Create personalized bedtime stories in minutes — starring your child.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
@@ -45,7 +44,7 @@ export default function Landing() {
                 onClick={() => window.location.href = "/api/login?signup=true"}
                 className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
               >
-                ✨ Start Your Story
+                ✨ Tell Tonight's Story
               </Button>
               <Button 
                 variant="outline" 
