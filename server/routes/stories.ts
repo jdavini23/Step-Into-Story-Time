@@ -28,7 +28,7 @@ import { z } from "zod";
 const storyGenerationLimiter = new RateLimiter(5, 60000); // 5 requests per minute
 const generalLimiter = new RateLimiter(30, 60000); // 30 requests per minute
 
-export function storyRoutes(app: Express) {
+export function storiesRoutes(app: Express) {
   // Story generation endpoint
   app.post(
     "/api/stories/generate",
