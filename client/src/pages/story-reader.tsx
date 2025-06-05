@@ -32,6 +32,15 @@ export default function StoryReader() {
   const params = useParams();
   const [, setLocation] = useLocation();
   const { user, isLoading } = useAuth();
+  
+  // Early return for unauthenticated users to prevent React hook errors
+  if (!isLoading && !user) {
+    // Store the current URL to redirect back after login
+    const currentUrl = window.location.pathname + window.location.search;
+    window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
+    return null;
+  }
+  
   const { data: tierInfo } = useTierInfo();
   const { toast } = useToast();
   const storyId = params.id;
@@ -121,15 +130,7 @@ export default function StoryReader() {
     setFontSize((prev) => Math.max(14, prev - 2));
   }, []);
 
-  useEffect(() => {
-    if (!isLoading && !user) {
-      console.log("Story reader: User not authenticated, redirecting to login");
-      // Store the current URL to redirect back after login
-      const currentUrl = window.location.pathname + window.location.search;
-      window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
-      return;
-    }
-  }, [user, isLoading]);
+  
 
   useEffect(() => {
     if (error) {
@@ -261,10 +262,7 @@ export default function StoryReader() {
     });
   }, [story, fontSize]);
 
-  // Early return for unauthenticated users to prevent React hook errors
-  if (!isLoading && !user) {
-    return null; // Component will redirect via useEffect
-  }
+  
 
   if (isLoading || storyLoading) {
     return (
