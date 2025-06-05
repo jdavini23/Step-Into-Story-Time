@@ -508,9 +508,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
           console.log("Existing subscription status:", subscription.status);
 
-          // If subscription is expired, cancel it and create a new one
-          if (subscription.status === "incomplete_expired") {
-            console.log("Subscription expired, canceling and creating new one");
+          // If subscription is expired or incomplete for too long, cancel it and create a new one
+          if (subscription.status === "incomplete_expired" || 
+              (subscription.status === "incomplete" && 
+               new Date(subscription.created * 1000) < new Date(Date.now() - 24 * 60 * 60 * 1000))) {
+            console.log("Subscription expired or incomplete too long, canceling and creating new one");
             try {
               await stripe.subscriptions.cancel(subscription.id);
             } catch (cancelError: any) {
@@ -550,19 +552,38 @@ export async function registerRoutes(app: Express): Promise<Server> {
                   clientSecret = invoice.payment_intent.client_secret;
                 }
               }
+
+              // If no client secret found, try to create a new payment intent
+              if (!clientSecret) {
+                console.log("No client secret found for incomplete subscription, creating new one");
+                try {
+                  await stripe.subscriptions.cancel(subscription.id);
+                  user = await storage.updateUserStripeInfo(
+                    userId,
+                    user.stripeCustomerId!,
+                    null,
+                  );
+                  // Continue to create new subscription below
+                } catch (error) {
+                  console.error("Error canceling incomplete subscription:", error);
+                  throw error;
+                }
+              }
             }
 
-            console.log(
-              "Existing subscription client secret:",
-              clientSecret ? "Yes" : "No",
-            );
+            if (clientSecret) {
+              console.log(
+                "Existing subscription client secret:",
+                clientSecret ? "Yes" : "No",
+              );
 
-            res.send({
-              subscriptionId: subscription.id,
-              clientSecret,
-              status: subscription.status,
-            });
-            return;
+              res.send({
+                subscriptionId: subscription.id,
+                clientSecret,
+                status: subscription.status,
+              });
+              return;
+            }
           }
         }
 
@@ -649,11 +670,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Product ID:", product.id);
         console.log("Price ID:", price.id);
         console.log(
-          "Latest invoice payment intent:",
-          subscription.latest_invoice
-            ? typeof subscription.latest_invoice.payment_intent
-            : "No invoice",
+          "Latest invoice:",
+          subscription.latest_invoice ? "exists" : "missing",
         );
+        if (subscription.latest_invoice && typeof subscription.latest_invoice === "object") {
+          console.log("Payment intent exists:", subscription.latest_invoice.payment_intent ? "Yes" : "No");
+          if (subscription.latest_invoice.payment_intent && typeof subscription.latest_invoice.payment_intent === "object") {
+            console.log("Payment intent status:", subscription.latest_invoice.payment_intent.status);
+          }
+        }
         console.log("=== END DEBUG INFO ===");
 
         if (!clientSecret) {
@@ -662,12 +687,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
             {
               id: subscription.id,
               status: subscription.status,
-              latest_invoice: subscription.latest_invoice
-                ? "exists"
-                : "missing",
+              latest_invoice: subscription.latest_invoice ? "exists" : "missing",
+              latest_invoice_details: subscription.latest_invoice && typeof subscription.latest_invoice === "object" 
+                ? {
+                    payment_intent: subscription.latest_invoice.payment_intent ? "exists" : "missing",
+                    payment_intent_type: typeof subscription.latest_invoice.payment_intent
+                  }
+                : "N/A"
             },
           );
-          throw new Error("Failed to create payment intent for subscription");
+          throw new Error("Failed to create payment intent for subscription. No client secret available.");
         }
 
         res.send({

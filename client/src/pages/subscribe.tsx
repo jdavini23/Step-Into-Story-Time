@@ -177,6 +177,7 @@ export default function Subscribe() {
         .catch((error) => {
           console.error("Error creating subscription:", error);
           setIsLoading(false);
+          // You could also show a toast notification here
         });
     }
   }, [user]);
@@ -324,16 +325,24 @@ export default function Subscribe() {
                 </Elements>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-600">
-                    Unable to load payment form. No client secret received.
+                  <p className="text-gray-600 mb-4">
+                    Unable to load payment form. There was an issue setting up your subscription.
                   </p>
-                  <Button
-                    onClick={() => window.location.reload()}
-                    variant="outline"
-                    className="mt-4"
-                  >
-                    Retry
-                  </Button>
+                  <div className="space-y-2">
+                    <Button
+                      onClick={() => window.location.reload()}
+                      variant="outline"
+                      className="mr-2"
+                    >
+                      Retry
+                    </Button>
+                    <Button
+                      onClick={() => window.location.href = "/pricing"}
+                      variant="ghost"
+                    >
+                      Back to Pricing
+                    </Button>
+                  </div>
                 </div>
               )}
             </CardContent>
