@@ -15,16 +15,46 @@ app.use((req, res, next) => {
   // Prevent clickjacking
   res.setHeader('X-Frame-Options', 'DENY');
   
+  // Referrer Policy - control referrer information
+  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+  
+  // Permissions Policy - control browser features
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  
+  // Cross-Origin Embedder Policy
+  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+  
+  // Cross-Origin Opener Policy
+  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+  
+  // Cross-Origin Resource Policy
+  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
+  
   // Strict Transport Security (only for HTTPS)
-  if (req.secure) {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
   }
   
-  // Content Security Policy
-  res.setHeader(
-    'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
-  );
+  // Enhanced Content Security Policy
+  const cspDirectives = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://auth.util.repl.co",
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+    "font-src 'self' https://fonts.gstatic.com",
+    "img-src 'self' data: https: blob:",
+    "connect-src 'self' https://api.stripe.com https://replit.com https://*.replit.com wss:",
+    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://auth.util.repl.co",
+    "frame-ancestors 'none'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "upgrade-insecure-requests"
+  ];
+  
+  res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
+  
+  // Remove server information
+  res.removeHeader('X-Powered-By');
   
   next();
 });
