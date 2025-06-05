@@ -428,7 +428,15 @@ export default function StoryReader() {
             </div>
 
             <div className={isDarkMode ? "text-gray-100" : "text-gray-700"}>
-              {formatStoryContent}
+              {paragraphs.map((paragraph, index) => (
+                <p
+                  key={index}
+                  className="leading-8 mb-6"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  {paragraph}
+                </p>
+              ))}
 
               {story.bedtimeMessage && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
