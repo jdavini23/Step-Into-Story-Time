@@ -74,11 +74,25 @@ export default function StoryWizard() {
       const response = await apiRequest("POST", "/api/stories/generate", data);
       return await response.json();
     },
-    onSuccess: (story) => {
-      setLoadingMessage("Story complete! Taking you there...");
-      setTimeout(() => {
-        setLocation(`/story/${story.id}`);
-      }, 1000);
+    onSuccess: (response) => {
+      console.log("Story generation response:", response);
+      const story = response.data || response;
+      if (story && story.id) {
+        setLoadingMessage("Story complete! Taking you there...");
+        setTimeout(() => {
+          setLocation(`/story/${story.id}`);
+        }, 1000);
+      } else {
+        console.error("Invalid story response:", response);
+        toast({
+          title: "Error",
+          description: "Story was created but navigation failed. Please check your stories in the dashboard.",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          setLocation("/dashboard");
+        }, 1000);
+      }
     },
     onError: async (error: any) => {
       setLoadingMessage("Creating your magical story...");
@@ -180,7 +194,13 @@ export default function StoryWizard() {
       return;
     }
 
-    generateStoryMutation.mutate(formData as InsertStory);
+    // Ensure favoriteThemes is included even if empty
+    const storyData = {
+      ...formData,
+      favoriteThemes: formData.favoriteThemes || "",
+    };
+
+    generateStoryMutation.mutate(storyData as InsertStory);
   };
 
   if (isLoading) {
