@@ -21,14 +21,8 @@ app.use((req, res, next) => {
   // Permissions Policy - control browser features
   res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
   
-  // Cross-Origin Embedder Policy
-  res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
-  
   // Cross-Origin Opener Policy
   res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  
-  // Cross-Origin Resource Policy
-  res.setHeader('Cross-Origin-Resource-Policy', 'same-origin');
   
   // Strict Transport Security (only for HTTPS)
   if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
@@ -38,7 +32,7 @@ app.use((req, res, next) => {
   // Enhanced Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.network https://auth.util.repl.co",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.network https://auth.util.repl.co https://replit.com",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
@@ -47,8 +41,7 @@ app.use((req, res, next) => {
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'",
-    "upgrade-insecure-requests"
+    "form-action 'self'"
   ];
   
   res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
