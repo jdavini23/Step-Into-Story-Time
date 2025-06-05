@@ -98,3 +98,40 @@ export function authRoutes(app: Express) {
     }
   );
 }
+import type { Express } from "express";
+import { isAuthenticated } from "../replitAuth";
+import { storage } from "../storage";
+import { generateCSRFToken } from "../inputValidation";
+
+export function authRoutes(app: Express) {
+  // Get current user endpoint
+  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user?.claims?.sub;
+      if (!userId) {
+        return res.status(401).json({ message: "Not authenticated" });
+      }
+
+      const user = await storage.getUser(userId);
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      res.json(user);
+    } catch (error: any) {
+      console.error("Error fetching user:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+
+  // CSRF token endpoint
+  app.get("/api/csrf-token", (req: any, res) => {
+    try {
+      const token = generateCSRFToken(req);
+      res.json({ csrfToken: token });
+    } catch (error: any) {
+      console.error("Error generating CSRF token:", error);
+      res.status(500).json({ message: "Internal server error" });
+    }
+  });
+}

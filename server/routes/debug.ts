@@ -94,3 +94,28 @@ export function debugRoutes(app: Express) {
     }
   });
 }
+import type { Express } from "express";
+
+export function debugRoutes(app: Express) {
+  // Debug endpoint for development
+  app.get("/api/debug/health", (req, res) => {
+    res.json({
+      status: "ok",
+      timestamp: new Date().toISOString(),
+      env: process.env.NODE_ENV,
+    });
+  });
+
+  // Debug endpoint to check session
+  app.get("/api/debug/session", (req: any, res) => {
+    if (process.env.NODE_ENV !== "development") {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    res.json({
+      isAuthenticated: req.isAuthenticated ? req.isAuthenticated() : false,
+      user: req.user || null,
+      session: req.session || null,
+    });
+  });
+}

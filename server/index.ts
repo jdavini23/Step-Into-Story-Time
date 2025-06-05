@@ -97,7 +97,13 @@ import {
   setupProcessErrorHandlers,
 } from "./errorHandler";
 
+// Import authentication setup
+import { setupAuth } from "./replitAuth";
+
 (async () => {
+  // Setup authentication BEFORE registering routes
+  await setupAuth(app);
+  
   const server = await registerRoutes(app);
 
   // importantly only setup vite in development and after
