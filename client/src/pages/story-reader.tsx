@@ -494,6 +494,7 @@ export default function StoryReader() {
             </div>
           </article>
         </Card>
+      
 
         {/* Story actions */}
         <StoryActions
