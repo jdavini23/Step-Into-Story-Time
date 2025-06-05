@@ -133,49 +133,23 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
 
-    const result = story[0];
-
     // Debug logging for content issues
     console.log(`Storage getStory ${id} debug:`, {
-      hasContent: !!result.content,
-      contentType: typeof result.content,
-      contentLength: result.content?.length || 0,
-      rawContentPreview: result.content ? String(result.content).substring(0, 50) + '...' : 'No content',
-      dbResultKeys: Object.keys(result),
+      hasContent: !!story.content,
+      contentType: typeof story.content,
+      contentLength: story.content?.length || 0,
+      rawContentPreview: story.content ? String(story.content).substring(0, 50) + '...' : 'No content',
+      dbResultKeys: Object.keys(story),
       allFieldsPresent: {
-        id: !!result.id,
-        title: !!result.title,
-        content: !!result.content,
-        childName: !!result.childName
+        id: !!story.id,
+        title: !!story.title,
+        content: !!story.content,
+        childName: !!story.childName
       }
     });
 
-    // Create the formatted story object
-    const formattedStory = {
-      id: result.id,
-      userId: result.userId,
-      title: result.title,
-      content: result.content,
-      childName: result.childName,
-      childAge: result.childAge,
-      childGender: result.childGender,
-      favoriteThemes: result.favoriteThemes,
-      tone: result.tone,
-      length: result.length,
-      bedtimeMessage: result.bedtimeMessage,
-      createdAt: result.createdAt,
-      updatedAt: result.updatedAt,
-    };
-
-    // Debug the formatted story object
-    console.log(`Storage getStory ${id} formatted object debug:`, {
-      hasFormattedContent: !!formattedStory.content,
-      formattedContentType: typeof formattedStory.content,
-      formattedContentLength: formattedStory.content?.length || 0,
-      formattedKeys: Object.keys(formattedStory)
-    });
-
-    return formattedStory;
+    // Return the story directly - it's already properly formatted from the database
+    return story;
   }
 
   async updateStory(
