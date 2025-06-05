@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 
 export default function Pricing() {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, user } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
@@ -24,20 +24,25 @@ export default function Pricing() {
       return;
     }
 
-    if (!isAuthenticated) {
-      // Store the intended destination and redirect to login
+    // Always redirect to login for non-authenticated users, regardless of what isAuthenticated says
+    // This ensures we don't hit any authorization issues
+    if (!isAuthenticated || !user) {
+      // Store the intended destination and redirect to login with signup flag
       const returnUrl =
         tier === "free"
           ? "/"
           : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
+      
+      console.log("Redirecting non-authenticated user to login with returnUrl:", returnUrl);
       window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
+      return;
+    }
+
+    // User is authenticated, proceed to subscription
+    if (tier === "free") {
+      window.location.href = "/";
     } else {
-      // User is authenticated, proceed to subscription
-      if (tier === "free") {
-        window.location.href = "/";
-      } else {
-        window.location.href = `/subscribe?tier=${tier}&billing=${billingPeriod}`;
-      }
+      window.location.href = `/subscribe?tier=${tier}&billing=${billingPeriod}`;
     }
   };
 

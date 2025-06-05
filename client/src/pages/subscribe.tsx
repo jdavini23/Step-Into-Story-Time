@@ -151,6 +151,7 @@ export default function Subscribe() {
     if (!authLoading && !user) {
       // Store the current URL to redirect back after login
       const currentUrl = window.location.pathname + window.location.search;
+      console.log("Subscribe page: User not authenticated, redirecting to login with returnTo:", currentUrl);
       window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
       return;
     }
