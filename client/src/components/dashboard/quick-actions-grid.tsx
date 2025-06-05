@@ -34,7 +34,7 @@ export function QuickActionsGrid({
         : "Your beloved stories",
       icon: Heart,
       color: "from-red-500 to-pink-500",
-      count: showFavorites ? stories.length : favoriteStories.length,
+      count: showFavorites ? (Array.isArray(stories) ? stories.length : 0) : (Array.isArray(favoriteStories) ? favoriteStories.length : 0),
       onClick: onToggleFavorites,
     },
     {
@@ -42,20 +42,20 @@ export function QuickActionsGrid({
       description: "Stories created recently",
       icon: Calendar,
       color: "from-blue-500 to-cyan-500",
-      count: stories.filter((story) => {
+      count: Array.isArray(stories) ? stories.filter((story) => {
         if (!story.createdAt) return false;
         const storyDate = new Date(story.createdAt);
         const weekAgo = new Date();
         weekAgo.setDate(weekAgo.getDate() - 7);
         return storyDate > weekAgo;
-      }).length,
+      }).length : 0,
     },
     {
       title: "Story Library",
       description: "Total stories created",
       icon: TrendingUp,
       color: "from-green-500 to-emerald-500",
-      count: stories.length,
+      count: Array.isArray(stories) ? stories.length : 0,
     },
   ];
 
