@@ -58,15 +58,15 @@ export const childNameSchema = z
 export const themesSchema = z
   .string()
   .max(200, "Themes must be 200 characters or less")
-  .regex(/^[a-zA-Z\s,\-']+$/, "Themes can only contain letters, spaces, commas, hyphens, and apostrophes")
-  .transform(sanitizeText)
+  .refine((val) => val === "" || /^[a-zA-Z\s,\-']+$/.test(val), "Themes can only contain letters, spaces, commas, hyphens, and apostrophes")
+  .transform((val) => val === "" ? undefined : sanitizeText(val))
   .optional();
 
 // Validate and sanitize bedtime message
 export const bedtimeMessageSchema = z
   .string()
   .max(500, "Bedtime message must be 500 characters or less")
-  .transform(sanitizeText)
+  .transform((val) => val === "" ? undefined : sanitizeText(val))
   .optional();
 
 // Validate story title
