@@ -86,7 +86,8 @@ export default function StoryWizard() {
         console.error("Invalid story response:", response);
         toast({
           title: "Error",
-          description: "Story was created but navigation failed. Please check your stories in the dashboard.",
+          description:
+            "Story was created but navigation failed. Please check your stories in the dashboard.",
           variant: "destructive",
         });
         setTimeout(() => {

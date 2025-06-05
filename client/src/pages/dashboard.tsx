@@ -41,7 +41,9 @@ export default function Dashboard() {
     refetch: refetchStories,
   } = useQuery<{ success: boolean; data: Story[]; meta?: any }>({
     queryKey: ["/api/stories"],
-    queryFn: getQueryFn<{ success: boolean; data: Story[]; meta?: any }>({ on401: "throw" }),
+    queryFn: getQueryFn<{ success: boolean; data: Story[]; meta?: any }>({
+      on401: "throw",
+    }),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
@@ -443,7 +445,9 @@ export default function Dashboard() {
       <FloatingActionButton />
 
       {/* Debug Panel - only show in development */}
-      {(import.meta.env.DEV || import.meta.env.MODE === 'development') && <DebugPanel />}
+      {(import.meta.env.DEV || import.meta.env.MODE === "development") && (
+        <DebugPanel />
+      )}
     </div>
   );
 }

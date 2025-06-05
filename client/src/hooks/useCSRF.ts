@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 
 interface CSRFState {
@@ -16,8 +15,8 @@ export function useCSRF() {
 
   const fetchCSRFToken = async () => {
     try {
-      setState(prev => ({ ...prev, loading: true, error: null }));
-      
+      setState((prev) => ({ ...prev, loading: true, error: null }));
+
       const response = await fetch("/api/csrf-token", {
         credentials: "include",
       });

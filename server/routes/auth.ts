@@ -1,15 +1,15 @@
 import type { Express } from "express";
 import { isAuthenticated } from "../replitAuth";
-import { 
-  validateCSRFToken, 
+import {
+  validateCSRFToken,
   generateCSRFToken,
-  sanitizeText 
+  sanitizeText,
 } from "../inputValidation";
 import { storage } from "../storage";
-import { 
-  getUserTier, 
-  canUserGenerateStory, 
-  getUserWeeklyUsage 
+import {
+  getUserTier,
+  canUserGenerateStory,
+  getUserWeeklyUsage,
 } from "../tierManager";
 import { addTierInfoToResponse } from "../tierMiddleware";
 
@@ -19,9 +19,9 @@ export function authRoutes(app: Express) {
     try {
       if (!req.session) {
         console.warn("No session found when requesting CSRF token");
-        return res.status(500).json({ 
+        return res.status(500).json({
           error: "Session not initialized",
-          message: "Please refresh the page and try again" 
+          message: "Please refresh the page and try again",
         });
       }
 
@@ -31,18 +31,18 @@ export function authRoutes(app: Express) {
       req.session.save((err: any) => {
         if (err) {
           console.error("Failed to save session with CSRF token:", err);
-          return res.status(500).json({ 
+          return res.status(500).json({
             error: "Failed to save security token",
-            message: "Please try again" 
+            message: "Please try again",
           });
         }
         res.json({ csrfToken: token });
       });
     } catch (error) {
       console.error("CSRF token generation error:", error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: "Failed to generate CSRF token",
-        message: "Internal server error" 
+        message: "Internal server error",
       });
     }
   });
@@ -94,6 +94,6 @@ export function authRoutes(app: Express) {
         console.error("Error fetching tier info:", error);
         res.status(500).json({ message: "Failed to fetch tier information" });
       }
-    }
+    },
   );
 }

@@ -7,28 +7,34 @@ const app = express();
 // Security headers middleware
 app.use((req, res, next) => {
   // Prevent XSS attacks
-  res.setHeader('X-XSS-Protection', '1; mode=block');
-  
+  res.setHeader("X-XSS-Protection", "1; mode=block");
+
   // Prevent MIME type sniffing
-  res.setHeader('X-Content-Type-Options', 'nosniff');
-  
+  res.setHeader("X-Content-Type-Options", "nosniff");
+
   // Prevent clickjacking
-  res.setHeader('X-Frame-Options', 'DENY');
-  
+  res.setHeader("X-Frame-Options", "DENY");
+
   // Referrer Policy - control referrer information
-  res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-  
+  res.setHeader("Referrer-Policy", "strict-origin-when-cross-origin");
+
   // Permissions Policy - control browser features
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
-  
+  res.setHeader(
+    "Permissions-Policy",
+    "camera=(), microphone=(), geolocation=(), payment=()",
+  );
+
   // Cross-Origin Opener Policy
-  res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
-  
+  res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
+
   // Strict Transport Security (only for HTTPS)
-  if (req.secure || req.headers['x-forwarded-proto'] === 'https') {
-    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains; preload');
+  if (req.secure || req.headers["x-forwarded-proto"] === "https") {
+    res.setHeader(
+      "Strict-Transport-Security",
+      "max-age=31536000; includeSubDomains; preload",
+    );
   }
-  
+
   // Enhanced Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
@@ -41,22 +47,22 @@ app.use((req, res, next) => {
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",
-    "form-action 'self'"
+    "form-action 'self'",
   ];
-  
-  res.setHeader('Content-Security-Policy', cspDirectives.join('; '));
-  
+
+  res.setHeader("Content-Security-Policy", cspDirectives.join("; "));
+
   // Remove server information
-  res.removeHeader('X-Powered-By');
-  
+  res.removeHeader("X-Powered-By");
+
   next();
 });
 
-app.use(express.json({ limit: '10mb' })); // Limit request size
-app.use(express.urlencoded({ extended: false, limit: '10mb' }));
+app.use(express.json({ limit: "10mb" })); // Limit request size
+app.use(express.urlencoded({ extended: false, limit: "10mb" }));
 
 // Import validation functions
-import { validateCSRFToken, generateCSRFToken } from './inputValidation';
+import { validateCSRFToken, generateCSRFToken } from "./inputValidation";
 
 // CSRF token endpoint will be handled in routes.ts after auth setup
 
@@ -103,7 +109,7 @@ import { setupAuth } from "./replitAuth";
 (async () => {
   // Setup authentication BEFORE registering routes
   await setupAuth(app);
-  
+
   const server = await registerRoutes(app);
 
   // importantly only setup vite in development and after

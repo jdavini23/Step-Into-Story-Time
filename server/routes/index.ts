@@ -1,4 +1,3 @@
-
 import type { Express } from "express";
 import { authRoutes } from "./auth";
 import { favoriteRoutes } from "./favorites";
@@ -13,6 +12,6 @@ export function registerRoutes(app: Express) {
   storiesRoutes(app);
   paymentsRoutes(app);
   debugRoutes(app);
-  
+
   return app;
 }

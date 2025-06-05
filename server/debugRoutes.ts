@@ -18,22 +18,22 @@ export function registerDebugRoutes(app: Express) {
 
   // Debug auth configuration
   app.get("/api/debug/auth-config", (req, res) => {
-    const passport = require('passport');
+    const passport = require("passport");
     res.json({
       hostname: req.hostname,
       headers: {
         host: req.headers.host,
-        'x-forwarded-host': req.headers['x-forwarded-host']
+        "x-forwarded-host": req.headers["x-forwarded-host"],
       },
       environment: {
         REPL_ID: process.env.REPL_ID,
         REPL_OWNER: process.env.REPL_OWNER,
         REPLIT_DOMAINS: process.env.REPLIT_DOMAINS,
         REPLIT_DEV_DOMAIN: process.env.REPLIT_DEV_DOMAIN,
-        NODE_ENV: process.env.NODE_ENV
+        NODE_ENV: process.env.NODE_ENV,
       },
       availableStrategies: Object.keys(passport._strategies || {}),
-      targetStrategy: `replitauth:${req.hostname}`
+      targetStrategy: `replitauth:${req.hostname}`,
     });
   });
 

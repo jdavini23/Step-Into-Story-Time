@@ -17,7 +17,7 @@ async function getCSRFToken(): Promise<string> {
   csrfTokenPromise = (async () => {
     try {
       const response = await fetch(`${API_BASE_URL}/api/csrf-token`, {
-        credentials: 'include'
+        credentials: "include",
       });
 
       if (!response.ok) {
@@ -28,8 +28,8 @@ async function getCSRFToken(): Promise<string> {
       csrfToken = data.csrfToken;
       return csrfToken;
     } catch (error) {
-      console.error('Failed to get CSRF token:', error);
-      throw new Error('Failed to get CSRF token');
+      console.error("Failed to get CSRF token:", error);
+      throw new Error("Failed to get CSRF token");
     } finally {
       csrfTokenPromise = null;
     }
@@ -49,7 +49,9 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const needsCSRF = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+  const needsCSRF = ["POST", "PUT", "PATCH", "DELETE"].includes(
+    method.toUpperCase(),
+  );
 
   const makeRequest = async (retryOnCSRFFailure = true): Promise<Response> => {
     const headers: Record<string, string> = {};
@@ -61,11 +63,11 @@ export async function apiRequest(
     if (needsCSRF) {
       try {
         const token = await getCSRFToken();
-        headers['X-CSRF-Token'] = token;
+        headers["X-CSRF-Token"] = token;
       } catch (error) {
-        console.error('Failed to get CSRF token:', error);
+        console.error("Failed to get CSRF token:", error);
         // For now, continue without CSRF token to avoid blocking all requests
-        console.warn('Proceeding without CSRF token due to error');
+        console.warn("Proceeding without CSRF token due to error");
       }
     }
 
@@ -73,15 +75,19 @@ export async function apiRequest(
       method: method.toUpperCase(),
       headers,
       body: data ? JSON.stringify(data) : undefined,
-      credentials: 'include'
+      credentials: "include",
     });
 
     // If we get a CSRF error and we can retry, clear token and try again
     if (response.status === 403 && retryOnCSRFFailure) {
       try {
         const errorData = await response.json();
-        if (errorData.code && (errorData.code.includes('CSRF') || errorData.code === 'CSRF_SESSION_REFRESH_REQUIRED')) {
-          console.log('CSRF error detected, clearing token and retrying...');
+        if (
+          errorData.code &&
+          (errorData.code.includes("CSRF") ||
+            errorData.code === "CSRF_SESSION_REFRESH_REQUIRED")
+        ) {
+          console.log("CSRF error detected, clearing token and retrying...");
           clearCSRFToken();
           return makeRequest(false); // Retry once without further retries
         }

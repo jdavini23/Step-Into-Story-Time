@@ -1,7 +1,13 @@
-
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Edit, Trash2, Download, Heart, HeartOff } from "lucide-react";
+import {
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Download,
+  Heart,
+  HeartOff,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -30,11 +36,11 @@ interface StoryManagementMenuProps {
   onEdit?: () => void;
 }
 
-export function StoryManagementMenu({ 
-  storyId, 
-  isFavorited, 
-  canDownloadPDF = true, 
-  onEdit 
+export function StoryManagementMenu({
+  storyId,
+  isFavorited,
+  canDownloadPDF = true,
+  onEdit,
 }: StoryManagementMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
@@ -71,7 +77,7 @@ export function StoryManagementMenu({
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
       toast({
         title: isFavorited ? "Removed from favorites" : "Added to favorites",
-        description: isFavorited 
+        description: isFavorited
           ? "Story removed from your favorites."
           : "Story added to your favorites.",
       });
@@ -128,7 +134,7 @@ export function StoryManagementMenu({
               Edit Story
             </DropdownMenuItem>
           )}
-          
+
           <DropdownMenuItem
             onClick={() => favoriteMutation.mutate("")}
             disabled={favoriteMutation.isPending}
@@ -168,7 +174,8 @@ export function StoryManagementMenu({
           <AlertDialogHeader>
             <AlertDialogTitle>Delete Story</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to delete this story? This action cannot be undone.
+              Are you sure you want to delete this story? This action cannot be
+              undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

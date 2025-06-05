@@ -38,7 +38,7 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: process.env.NODE_ENV === "production",
       maxAge: sessionTtl,
     },
   });
@@ -82,24 +82,27 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  const domains = process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(",") : [];
-  
+  const domains = process.env.REPLIT_DOMAINS
+    ? process.env.REPLIT_DOMAINS.split(",")
+    : [];
+
   // Add development domains
-  if (process.env.NODE_ENV === 'development') {
-    domains.push('localhost:5000', 'localhost');
+  if (process.env.NODE_ENV === "development") {
+    domains.push("localhost:5000", "localhost");
   }
-  
+
   // Always add current Replit workspace domain if available
   if (process.env.REPL_ID) {
     // Get the current domain from various possible environment variables
-    const currentDomain = process.env.REPLIT_DEV_DOMAIN || 
-                         process.env.REPL_SLUG || 
-                         `${process.env.REPL_ID}.${process.env.REPL_OWNER || 'unknown'}.replit.dev`;
-    
+    const currentDomain =
+      process.env.REPLIT_DEV_DOMAIN ||
+      process.env.REPL_SLUG ||
+      `${process.env.REPL_ID}.${process.env.REPL_OWNER || "unknown"}.replit.dev`;
+
     if (currentDomain && !domains.includes(currentDomain)) {
       domains.push(currentDomain);
     }
-    
+
     // Also try to construct the full replit.dev domain
     if (process.env.REPL_OWNER) {
       const replitDomain = `${process.env.REPL_ID}.${process.env.REPL_OWNER}.replit.dev`;
@@ -108,13 +111,13 @@ export async function setupAuth(app: Express) {
       }
     }
   }
-  
-  console.log('Registering authentication strategies for domains:', domains);
-  
+
+  console.log("Registering authentication strategies for domains:", domains);
+
   for (const domain of domains) {
-    const isLocalhost = domain.includes('localhost');
-    const protocol = isLocalhost ? 'http' : 'https';
-    
+    const isLocalhost = domain.includes("localhost");
+    const protocol = isLocalhost ? "http" : "https";
+
     const strategy = new Strategy(
       {
         name: `replitauth:${domain}`,
@@ -140,23 +143,28 @@ export async function setupAuth(app: Express) {
     }
 
     const strategyName = `replitauth:${req.hostname}`;
-    
+
     // Check if strategy exists, if not try to find a matching one
     const availableStrategies = Object.keys(passport._strategies || {});
     let targetStrategy = strategyName;
-    
+
     if (!availableStrategies.includes(strategyName)) {
-      console.log(`Strategy ${strategyName} not found. Available strategies:`, availableStrategies);
-      
+      console.log(
+        `Strategy ${strategyName} not found. Available strategies:`,
+        availableStrategies,
+      );
+
       // Try to find a similar strategy
-      const replitStrategies = availableStrategies.filter(s => s.startsWith('replitauth:'));
+      const replitStrategies = availableStrategies.filter((s) =>
+        s.startsWith("replitauth:"),
+      );
       if (replitStrategies.length > 0) {
         targetStrategy = replitStrategies[0];
         console.log(`Using fallback strategy: ${targetStrategy}`);
       } else {
-        return res.status(500).json({ 
-          error: 'Authentication not configured properly',
-          message: 'No authentication strategies available'
+        return res.status(500).json({
+          error: "Authentication not configured properly",
+          message: "No authentication strategies available",
         });
       }
     }
@@ -169,18 +177,20 @@ export async function setupAuth(app: Express) {
 
   app.get("/api/callback", (req, res, next) => {
     const strategyName = `replitauth:${req.hostname}`;
-    
+
     // Check if strategy exists, if not try to find a matching one
     const availableStrategies = Object.keys(passport._strategies || {});
     let targetStrategy = strategyName;
-    
+
     if (!availableStrategies.includes(strategyName)) {
-      const replitStrategies = availableStrategies.filter(s => s.startsWith('replitauth:'));
+      const replitStrategies = availableStrategies.filter((s) =>
+        s.startsWith("replitauth:"),
+      );
       if (replitStrategies.length > 0) {
         targetStrategy = replitStrategies[0];
       }
     }
-    
+
     passport.authenticate(targetStrategy, (err, user) => {
       if (err) {
         return next(err);

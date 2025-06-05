@@ -1,8 +1,14 @@
-
 import React, { Component, ErrorInfo, ReactNode } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, RefreshCw, Wifi, WifiOff, Bug, ExternalLink } from "lucide-react";
+import {
+  AlertTriangle,
+  RefreshCw,
+  Wifi,
+  WifiOff,
+  Bug,
+  ExternalLink,
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 
 interface ErrorBoundaryProps {
@@ -21,14 +27,24 @@ interface ErrorBoundaryState {
 }
 
 interface ErrorCategory {
-  type: 'network' | 'auth' | 'validation' | 'permission' | 'server' | 'client' | 'unknown';
-  severity: 'low' | 'medium' | 'high' | 'critical';
+  type:
+    | "network"
+    | "auth"
+    | "validation"
+    | "permission"
+    | "server"
+    | "client"
+    | "unknown";
+  severity: "low" | "medium" | "high" | "critical";
   recoverable: boolean;
   userMessage: string;
   technicalMessage: string;
 }
 
-export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class EnhancedErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   private retryTimeouts: NodeJS.Timeout[] = [];
 
   constructor(props: ErrorBoundaryProps) {
@@ -54,103 +70,129 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
     this.setState({ errorInfo });
 
     // Log error details
-    console.group('🚨 Error Boundary Caught Error');
-    console.error('Error:', error);
-    console.error('Error Info:', errorInfo);
-    console.error('Component Stack:', errorInfo.componentStack);
+    console.group("🚨 Error Boundary Caught Error");
+    console.error("Error:", error);
+    console.error("Error Info:", errorInfo);
+    console.error("Component Stack:", errorInfo.componentStack);
     console.groupEnd();
 
     // Call custom error handler if provided
     this.props.onError?.(error, errorInfo);
 
     // In production, send to error tracking service
-    if (process.env.NODE_ENV === 'production') {
+    if (process.env.NODE_ENV === "production") {
       this.reportError(error, errorInfo);
     }
   }
 
   componentWillUnmount() {
     // Clear any pending retry timeouts
-    this.retryTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.retryTimeouts.forEach((timeout) => clearTimeout(timeout));
   }
 
   private categorizeError(error: Error): ErrorCategory {
     const message = error.message.toLowerCase();
-    const stack = error.stack?.toLowerCase() || '';
+    const stack = error.stack?.toLowerCase() || "";
 
     // Network errors
-    if (message.includes('fetch') || message.includes('network') || message.includes('connection')) {
+    if (
+      message.includes("fetch") ||
+      message.includes("network") ||
+      message.includes("connection")
+    ) {
       return {
-        type: 'network',
-        severity: 'medium',
+        type: "network",
+        severity: "medium",
         recoverable: true,
-        userMessage: 'Connection problem. Please check your internet and try again.',
-        technicalMessage: 'Network request failed or connection was interrupted.',
+        userMessage:
+          "Connection problem. Please check your internet and try again.",
+        technicalMessage:
+          "Network request failed or connection was interrupted.",
       };
     }
 
     // Authentication errors
-    if (message.includes('unauthorized') || message.includes('auth') || message.includes('401')) {
+    if (
+      message.includes("unauthorized") ||
+      message.includes("auth") ||
+      message.includes("401")
+    ) {
       return {
-        type: 'auth',
-        severity: 'high',
+        type: "auth",
+        severity: "high",
         recoverable: true,
-        userMessage: 'You need to sign in again. Redirecting to login...',
-        technicalMessage: 'Authentication token expired or invalid.',
+        userMessage: "You need to sign in again. Redirecting to login...",
+        technicalMessage: "Authentication token expired or invalid.",
       };
     }
 
     // Validation errors
-    if (message.includes('validation') || message.includes('invalid') || message.includes('400')) {
+    if (
+      message.includes("validation") ||
+      message.includes("invalid") ||
+      message.includes("400")
+    ) {
       return {
-        type: 'validation',
-        severity: 'low',
+        type: "validation",
+        severity: "low",
         recoverable: true,
-        userMessage: 'Please check your input and try again.',
-        technicalMessage: 'Input validation failed or invalid data format.',
+        userMessage: "Please check your input and try again.",
+        technicalMessage: "Input validation failed or invalid data format.",
       };
     }
 
     // Permission errors
-    if (message.includes('forbidden') || message.includes('permission') || message.includes('403')) {
+    if (
+      message.includes("forbidden") ||
+      message.includes("permission") ||
+      message.includes("403")
+    ) {
       return {
-        type: 'permission',
-        severity: 'medium',
+        type: "permission",
+        severity: "medium",
         recoverable: false,
         userMessage: "You don't have permission to perform this action.",
-        technicalMessage: 'Insufficient permissions for requested operation.',
+        technicalMessage: "Insufficient permissions for requested operation.",
       };
     }
 
     // Server errors
-    if (message.includes('500') || message.includes('server') || message.includes('internal')) {
+    if (
+      message.includes("500") ||
+      message.includes("server") ||
+      message.includes("internal")
+    ) {
       return {
-        type: 'server',
-        severity: 'high',
+        type: "server",
+        severity: "high",
         recoverable: true,
-        userMessage: 'Server error. Our team has been notified.',
-        technicalMessage: 'Internal server error or service unavailable.',
+        userMessage: "Server error. Our team has been notified.",
+        technicalMessage: "Internal server error or service unavailable.",
       };
     }
 
     // Client-side React errors
-    if (stack.includes('react') || message.includes('render') || message.includes('component')) {
+    if (
+      stack.includes("react") ||
+      message.includes("render") ||
+      message.includes("component")
+    ) {
       return {
-        type: 'client',
-        severity: 'medium',
+        type: "client",
+        severity: "medium",
         recoverable: true,
-        userMessage: 'Something went wrong with the page display.',
-        technicalMessage: 'React component error or rendering issue.',
+        userMessage: "Something went wrong with the page display.",
+        technicalMessage: "React component error or rendering issue.",
       };
     }
 
     // Unknown errors
     return {
-      type: 'unknown',
-      severity: 'medium',
+      type: "unknown",
+      severity: "medium",
       recoverable: true,
-      userMessage: 'An unexpected error occurred.',
-      technicalMessage: 'Unclassified error type.',
+      userMessage: "An unexpected error occurred.",
+      technicalMessage: "Unclassified error type.",
     };
   }
 
@@ -164,17 +206,17 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
         userAgent: navigator.userAgent,
         timestamp: new Date().toISOString(),
         url: window.location.href,
-        userId: localStorage.getItem('userId') || 'anonymous',
+        userId: localStorage.getItem("userId") || "anonymous",
       };
 
       // Send to error reporting service
-      await fetch('/api/errors/report', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      await fetch("/api/errors/report", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(errorReport),
       });
     } catch (reportingError) {
-      console.error('Failed to report error:', reportingError);
+      console.error("Failed to report error:", reportingError);
     }
   }
 
@@ -213,8 +255,8 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
   private handleReportIssue = () => {
     const { error, errorId } = this.state;
-    const githubUrl = `https://github.com/yourusername/yourrepo/issues/new?title=Error%20Report&body=Error%20ID:%20${errorId}%0AError:%20${encodeURIComponent(error?.message || 'Unknown error')}`;
-    window.open(githubUrl, '_blank');
+    const githubUrl = `https://github.com/yourusername/yourrepo/issues/new?title=Error%20Report&body=Error%20ID:%20${errorId}%0AError:%20${encodeURIComponent(error?.message || "Unknown error")}`;
+    window.open(githubUrl, "_blank");
   };
 
   render() {
@@ -233,11 +275,16 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
 
     const getSeverityColor = (severity: string) => {
       switch (severity) {
-        case 'low': return 'bg-blue-100 text-blue-800 border-blue-200';
-        case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200';
-        case 'high': return 'bg-orange-100 text-orange-800 border-orange-200';
-        case 'critical': return 'bg-red-100 text-red-800 border-red-200';
-        default: return 'bg-gray-100 text-gray-800 border-gray-200';
+        case "low":
+          return "bg-blue-100 text-blue-800 border-blue-200";
+        case "medium":
+          return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        case "high":
+          return "bg-orange-100 text-orange-800 border-orange-200";
+        case "critical":
+          return "bg-red-100 text-red-800 border-red-200";
+        default:
+          return "bg-gray-100 text-gray-800 border-gray-200";
       }
     };
 
@@ -252,7 +299,9 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               Oops! Something went wrong
             </CardTitle>
             <div className="flex justify-center space-x-2">
-              <Badge className={`${getSeverityColor(category.severity)} border`}>
+              <Badge
+                className={`${getSeverityColor(category.severity)} border`}
+              >
                 {category.type} error
               </Badge>
               <Badge variant="outline" className="text-xs">
@@ -260,22 +309,28 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
               </Badge>
             </div>
           </CardHeader>
-          
+
           <CardContent className="space-y-6">
             <div className="text-center">
               <p className="text-red-700 dark:text-red-300 mb-2">
                 {category.userMessage}
               </p>
-              
-              {process.env.NODE_ENV === 'development' && (
+
+              {process.env.NODE_ENV === "development" && (
                 <details className="mt-4 text-left">
                   <summary className="cursor-pointer text-sm font-medium text-red-600 hover:text-red-700">
                     🔧 Developer Details
                   </summary>
                   <div className="mt-2 p-3 bg-red-100 dark:bg-red-900 rounded text-xs">
-                    <p><strong>Technical:</strong> {category.technicalMessage}</p>
-                    <p><strong>Error ID:</strong> {errorId}</p>
-                    <p><strong>Message:</strong> {error?.message}</p>
+                    <p>
+                      <strong>Technical:</strong> {category.technicalMessage}
+                    </p>
+                    <p>
+                      <strong>Error ID:</strong> {errorId}
+                    </p>
+                    <p>
+                      <strong>Message:</strong> {error?.message}
+                    </p>
                     {error?.stack && (
                       <div className="mt-2">
                         <strong>Stack:</strong>
@@ -297,7 +352,10 @@ export class EnhancedErrorBoundary extends Component<ErrorBoundaryProps, ErrorBo
                   variant="default"
                 >
                   <RefreshCw className="h-4 w-4" />
-                  <span>Try Again {retryCount > 0 && `(${retryCount}/${maxRetries})`}</span>
+                  <span>
+                    Try Again{" "}
+                    {retryCount > 0 && `(${retryCount}/${maxRetries})`}
+                  </span>
                 </Button>
               )}
 
@@ -351,7 +409,7 @@ export function withEnhancedErrorBoundary<P extends object>(
     fallback?: ReactNode;
     onError?: (error: Error, errorInfo: ErrorInfo) => void;
     showReportButton?: boolean;
-  }
+  },
 ) {
   return function WrappedComponent(props: P) {
     return (

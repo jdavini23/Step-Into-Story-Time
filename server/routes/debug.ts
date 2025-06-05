@@ -1,7 +1,10 @@
-
 import type { Express } from "express";
 import { isAuthenticated } from "../replitAuth";
-import { updateUserSubscription, getUserTier, getUserWeeklyUsage } from "../tierManager";
+import {
+  updateUserSubscription,
+  getUserTier,
+  getUserWeeklyUsage,
+} from "../tierManager";
 import { storage } from "../storage";
 import { db } from "../db";
 import { usageTracking } from "../../shared/schema";
@@ -10,22 +13,22 @@ import { eq, and } from "drizzle-orm";
 export function debugRoutes(app: Express) {
   // Debug auth configuration
   app.get("/api/debug/auth-config", (req, res) => {
-    const passport = require('passport');
+    const passport = require("passport");
     res.json({
       hostname: req.hostname,
       headers: {
         host: req.headers.host,
-        'x-forwarded-host': req.headers['x-forwarded-host']
+        "x-forwarded-host": req.headers["x-forwarded-host"],
       },
       environment: {
         REPL_ID: process.env.REPL_ID,
         REPL_OWNER: process.env.REPL_OWNER,
         REPLIT_DOMAINS: process.env.REPLIT_DOMAINS,
         REPLIT_DEV_DOMAIN: process.env.REPLIT_DEV_DOMAIN,
-        NODE_ENV: process.env.NODE_ENV
+        NODE_ENV: process.env.NODE_ENV,
       },
       availableStrategies: Object.keys(passport._strategies || {}),
-      targetStrategy: `replitauth:${req.hostname}`
+      targetStrategy: `replitauth:${req.hostname}`,
     });
   });
 
@@ -83,9 +86,7 @@ export function debugRoutes(app: Express) {
     try {
       const userId = req.user.claims.sub;
 
-      await db
-        .delete(usageTracking)
-        .where(eq(usageTracking.userId, userId));
+      await db.delete(usageTracking).where(eq(usageTracking.userId, userId));
 
       res.json({ message: "Weekly usage reset successfully" });
     } catch (error) {

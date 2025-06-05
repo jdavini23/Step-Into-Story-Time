@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { InsertStory } from "@shared/schema";
 
 interface ChildInfoStepProps {
@@ -10,7 +16,10 @@ interface ChildInfoStepProps {
   updateFormData: (field: keyof InsertStory, value: any) => void;
 }
 
-export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) {
+export function ChildInfoStep({
+  formData,
+  updateFormData,
+}: ChildInfoStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
 
@@ -24,11 +33,15 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
       } else if (formData.childName.length > 50) {
         newErrors.childName = "Child name must be 50 characters or less";
       } else if (!/^[a-zA-Z\s\-']+$/.test(formData.childName)) {
-        newErrors.childName = "Child name can only contain letters, spaces, hyphens, and apostrophes";
+        newErrors.childName =
+          "Child name can only contain letters, spaces, hyphens, and apostrophes";
       }
     }
 
-    if (touched.childAge && (!formData.childAge || formData.childAge < 2 || formData.childAge > 8)) {
+    if (
+      touched.childAge &&
+      (!formData.childAge || formData.childAge < 2 || formData.childAge > 8)
+    ) {
       newErrors.childAge = "Please select a valid age between 2 and 8";
     }
 
@@ -40,13 +53,16 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
   }, [formData, touched]);
 
   const handleFieldTouch = (field: string) => {
-    setTouched(prev => ({ ...prev, [field]: true }));
+    setTouched((prev) => ({ ...prev, [field]: true }));
   };
 
   return (
     <div className="space-y-6">
       <div>
-        <Label htmlFor="childName" className="block text-sm font-medium text-gray-700 mb-2">
+        <Label
+          htmlFor="childName"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           Child's Name *
         </Label>
         <Input
@@ -65,7 +81,10 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
       </div>
 
       <div>
-        <Label htmlFor="childAge" className="block text-sm font-medium text-gray-700 mb-2">
+        <Label
+          htmlFor="childAge"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           Child's Age *
         </Label>
         <Select
@@ -75,7 +94,9 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
             handleFieldTouch("childAge");
           }}
         >
-          <SelectTrigger className={`w-full ${errors.childAge ? "border-red-500" : ""}`}>
+          <SelectTrigger
+            className={`w-full ${errors.childAge ? "border-red-500" : ""}`}
+          >
             <SelectValue placeholder="Select age" />
           </SelectTrigger>
           <SelectContent>

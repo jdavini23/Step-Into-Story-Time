@@ -138,14 +138,16 @@ export class DatabaseStorage implements IStorage {
       hasContent: !!story.content,
       contentType: typeof story.content,
       contentLength: story.content?.length || 0,
-      rawContentPreview: story.content ? String(story.content).substring(0, 50) + '...' : 'No content',
+      rawContentPreview: story.content
+        ? String(story.content).substring(0, 50) + "..."
+        : "No content",
       dbResultKeys: Object.keys(story),
       allFieldsPresent: {
         id: !!story.id,
         title: !!story.title,
         content: !!story.content,
-        childName: !!story.childName
-      }
+        childName: !!story.childName,
+      },
     });
 
     // Return the story directly - it's already properly formatted from the database

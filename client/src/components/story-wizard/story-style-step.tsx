@@ -20,11 +20,15 @@ export function StoryStyleStep({
   return (
     <div className="space-y-6">
       <div className="p-4 border border-gray-200 rounded-xl bg-gray-50">
-        <Label htmlFor="favoriteThemes" className="block text-sm font-medium text-gray-700 mb-2">
+        <Label
+          htmlFor="favoriteThemes"
+          className="block text-sm font-medium text-gray-700 mb-2"
+        >
           Favorite Animals or Characters (Optional)
         </Label>
         <p className="text-sm text-gray-500 mb-4">
-          What animals, characters, or themes does your child love? (e.g., dinosaurs, princesses, dragons)
+          What animals, characters, or themes does your child love? (e.g.,
+          dinosaurs, princesses, dragons)
         </p>
         <Input
           id="favoriteThemes"
