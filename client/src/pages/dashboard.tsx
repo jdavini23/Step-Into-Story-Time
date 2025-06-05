@@ -428,7 +428,7 @@ export default function Dashboard() {
       <FloatingActionButton />
 
       {/* Debug Panel - only show in development */}
-      {import.meta.env.DEV && <DebugPanel />}
+      {(import.meta.env.DEV || import.meta.env.MODE === 'development') && <DebugPanel />}
     </div>
   );
 }
