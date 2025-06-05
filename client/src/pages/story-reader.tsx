@@ -253,44 +253,13 @@ export default function StoryReader() {
 
   // Split content into paragraphs for better reading
   const paragraphs = useMemo(() => {
-    // Enhanced debugging
-    console.log('Story content debug in useMemo:', {
-      story: !!story,
-      hasContent: !!story?.content,
-      contentType: typeof story?.content,
-      contentValue: story?.content,
-      rawContent: JSON.stringify(story?.content)
-    });
-
-    if (!story || !story.content) {
-      console.warn('No story or content found:', { story: !!story, content: story?.content });
+    if (!story?.content) {
       return [];
     }
     
-    // Handle different types of content and ensure it's properly formatted
-    let content = story.content;
+    let content = String(story.content).trim();
     
-    // Handle cases where content might be an object, null, or needs conversion
-    if (content === null || content === undefined) {
-      console.error('Content is null or undefined');
-      return [];
-    }
-    
-    if (typeof content !== 'string') {
-      try {
-        content = String(content);
-        console.log('Converted content to string:', typeof content);
-      } catch (e) {
-        console.error('Error converting content to string:', e);
-        return [];
-      }
-    }
-    
-    // Remove any potential null bytes or problematic characters
-    content = content.replace(/\0/g, '').trim();
-    
-    if (!content || content === 'undefined' || content === 'null') {
-      console.error('Content is empty, "undefined", or "null" string');
+    if (!content) {
       return [];
     }
     
@@ -300,17 +269,10 @@ export default function StoryReader() {
       splits = content.split('\n');
     }
     
-    // If still only one paragraph, split by periods for very long content
-    if (splits.length === 1 && content.length > 500) {
-      splits = content.split('. ').map(s => s.trim() + (s.endsWith('.') ? '' : '.'));
-    }
-    
-    // Filter out empty paragraphs and trim whitespace
+    // Filter out empty paragraphs
     const validParagraphs = splits
       .map(p => p.trim())
-      .filter(p => p.length > 0 && p !== '.' && p !== 'undefined' && p !== 'null');
-    
-    console.log('Final paragraphs:', { count: validParagraphs.length, firstParagraph: validParagraphs[0]?.substring(0, 50) });
+      .filter(p => p.length > 0);
     
     return validParagraphs;
   }, [story]);
@@ -457,7 +419,7 @@ export default function StoryReader() {
           </p>
           <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
             <span>
-              📅 {new Date(story.createdAt || "").toLocaleDateString()}
+              📅 {story.createdAt ? new Date(story.createdAt).toLocaleDateString() : "Just now"}
             </span>
             <span>
               ⏱️{" "}
