@@ -75,22 +75,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // CSRF token endpoint
   app.get("/api/csrf-token", isAuthenticated, (req: any, res) => {
     try {
-      // Ensure session exists
+      // Ensure session exists, create if needed
       if (!req.session) {
+        console.warn("No session found when requesting CSRF token");
         return res.status(500).json({ 
           error: "Session not initialized",
-          message: "Session middleware not properly configured" 
+          message: "Please refresh the page and try again" 
         });
       }
 
-      // Generate new token if none exists or reuse existing one
-      let token = req.session.csrfToken;
-      if (!token) {
-        token = generateCSRFToken();
-        req.session.csrfToken = token;
-      }
+      // Always generate a fresh token to avoid stale token issues
+      const token = generateCSRFToken();
+      req.session.csrfToken = token;
       
-      res.json({ csrfToken: token });
+      // Save session to ensure token persists
+      req.session.save((err: any) => {
+        if (err) {
+          console.error("Failed to save session with CSRF token:", err);
+          return res.status(500).json({ 
+            error: "Failed to save security token",
+            message: "Please try again" 
+          });
+        }
+        res.json({ csrfToken: token });
+      });
     } catch (error) {
       console.error("CSRF token generation error:", error);
       res.status(500).json({ 
@@ -346,7 +354,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.patch(
     "/api/stories/:id", 
     isAuthenticated,
-    validateCSRFToken,
     (req: any, res, next) => {
       // Rate limiting for updates
       const userId = req.user.claims.sub;
@@ -357,6 +364,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       }
       next();
     },
+    validateCSRFToken,
     validateInput(sanitizedStorySchema.partial()),
     async (req: any, res) => {
     try {

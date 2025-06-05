@@ -23,7 +23,14 @@ export function useCSRF() {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch CSRF token");
+        // For non-critical errors, still allow the app to function
+        console.warn(`CSRF token fetch failed with status ${response.status}`);
+        setState({
+          token: null,
+          loading: false,
+          error: `HTTP ${response.status}`,
+        });
+        return;
       }
 
       const data = await response.json();
@@ -33,6 +40,7 @@ export function useCSRF() {
         error: null,
       });
     } catch (error) {
+      console.error("CSRF token fetch error:", error);
       setState({
         token: null,
         loading: false,
