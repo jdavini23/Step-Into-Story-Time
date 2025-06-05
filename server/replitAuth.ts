@@ -107,18 +107,27 @@ export async function setupAuth(app: Express) {
       req.session.returnTo = req.query.returnTo;
     }
 
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const strategyName = `replitauth:${req.hostname}`;
+    console.log(`Attempting authentication with strategy: ${strategyName}`);
+    console.log(`Available domains: ${process.env.REPLIT_DOMAINS}`);
+
+    passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, (err, user) => {
+    const strategyName = `replitauth:${req.hostname}`;
+    console.log(`Callback authentication with strategy: ${strategyName}`);
+    
+    passport.authenticate(strategyName, (err, user) => {
       if (err) {
+        console.error("Authentication error:", err);
         return next(err);
       }
       if (!user) {
+        console.log("No user returned from authentication");
         return res.redirect("/api/login");
       }
 
