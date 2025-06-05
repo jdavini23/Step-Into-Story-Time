@@ -263,24 +263,36 @@ export default function StoryReader() {
       return [];
     }
     
-    // Split by double newlines first, then single newlines if no double newlines found
-    let splits = content.split('\n\n');
-    if (splits.length === 1) {
+    // Try different splitting strategies
+    let splits = [];
+    
+    // First try splitting by double newlines
+    if (content.includes('\n\n')) {
+      splits = content.split('\n\n');
+    }
+    // Then try splitting by single newlines
+    else if (content.includes('\n')) {
       splits = content.split('\n');
     }
+    // If no newlines, split by sentences
+    else if (content.includes('. ')) {
+      splits = content.split('. ').map((sentence, index, array) => 
+        index < array.length - 1 ? sentence + '.' : sentence
+      );
+    }
+    // As a last resort, use the entire content as one paragraph
+    else {
+      splits = [content];
+    }
     
-    // Filter out empty paragraphs and ensure we have at least one paragraph
+    // Filter out empty paragraphs and clean up
     const validParagraphs = splits
       .map(p => p.trim())
       .filter(p => p.length > 0);
     
-    // If no valid paragraphs found, return the entire content as one paragraph
-    if (validParagraphs.length === 0) {
-      return [content];
-    }
-    
-    return validParagraphs;
-  }, [story]);
+    // Ensure we always have at least the original content
+    return validParagraphs.length > 0 ? validParagraphs : [content];
+  }, [story?.content]);
 
   if (isLoading || storyLoading) {
     return (
@@ -459,10 +471,12 @@ export default function StoryReader() {
                   Debug: Content type: {typeof story?.content}, Length: {story?.content?.length || 0}, Paragraphs: {paragraphs.length}
                   <br />
                   Raw content preview: {story?.content ? String(story.content).substring(0, 100) + '...' : 'No content'}
+                  <br />
+                  First paragraph: {paragraphs[0] ? paragraphs[0].substring(0, 50) + '...' : 'None'}
                 </div>
               )}
               
-              {story?.content ? (
+              {paragraphs.length > 0 ? (
                 paragraphs.map((paragraph, index) => (
                   <p
                     key={index}
@@ -472,6 +486,10 @@ export default function StoryReader() {
                     {paragraph}
                   </p>
                 ))
+              ) : story?.content ? (
+                <div className="leading-8 mb-6" style={{ fontSize: `${fontSize}px` }}>
+                  {String(story.content)}
+                </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-500 italic mb-4">No story content available.</p>
