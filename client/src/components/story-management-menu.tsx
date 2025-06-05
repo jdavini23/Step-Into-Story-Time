@@ -1,78 +1,8 @@
-import { Button } from "@/components/ui/button";
-import { Card, CardContent } from "@/components/ui/card";
-import { Download, Share2, Plus, Lock } from "lucide-react";
-import type { Story } from "@shared/schema";
-import type { TierInfo } from "@/hooks/useTierInfo";
 
-interface StoryActionsProps {
-  story: Story;
-  onDownloadPDF: () => void;
-  onShare: () => void;
-  onCreateAnother: () => void;
-  tierInfo?: TierInfo;
-  cardClasses?: string;
-}
-
-export function StoryActions({
-  story,
-  onDownloadPDF,
-  onShare,
-  onCreateAnother,
-  tierInfo,
-  cardClasses = "",
-}: StoryActionsProps) {
-  const canDownloadPdf = tierInfo?.limits.canDownloadPdf ?? false;
-
-  return (
-    <Card className={`shadow-2xl p-6 ${cardClasses}`}>
-      <div className="flex flex-col sm:flex-row gap-4">
-        <Button
-          onClick={canDownloadPdf ? onDownloadPDF : undefined}
-          variant="outline"
-          disabled={!canDownloadPdf}
-          className={`flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all ${
-            !canDownloadPdf ? "opacity-50 cursor-not-allowed" : ""
-          }`}
-          title={
-            !canDownloadPdf
-              ? "PDF downloads available for Premium and Family subscribers"
-              : ""
-          }
-        >
-          {canDownloadPdf ? (
-            <Download className="w-5 h-5" />
-          ) : (
-            <Lock className="w-5 h-5" />
-          )}
-          <span>Download PDF</span>
-          {!canDownloadPdf && <span className="text-xs ml-1">(Premium)</span>}
-        </Button>
-
-        <Button
-          onClick={onShare}
-          variant="outline"
-          className="flex-1 px-6 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 transition-all"
-        >
-          <Share2 className="w-5 h-5" />
-          <span>Share</span>
-        </Button>
-      </div>
-
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <Button
-          onClick={onCreateAnother}
-          className="w-full bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
-        >
-          <Plus className="w-5 h-5 mr-2" />
-          Create Another Story
-        </Button>
-      </div>
-    </Card>
-  );
-}
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { MoreHorizontal, Edit, Trash2, Download, Heart, HeartOff } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,19 +23,19 @@ import { CSRFForm } from "@/components/ui/csrf-form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-interface StoryDropdownActionsProps {
+interface StoryManagementMenuProps {
   storyId: number;
   isFavorited?: boolean;
   canDownloadPDF?: boolean;
   onEdit?: () => void;
 }
 
-export function StoryDropdownActions({
-  storyId,
-  isFavorited,
-  canDownloadPDF = true,
-  onEdit
-}: StoryDropdownActionsProps) {
+export function StoryManagementMenu({ 
+  storyId, 
+  isFavorited, 
+  canDownloadPDF = true, 
+  onEdit 
+}: StoryManagementMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -141,7 +71,7 @@ export function StoryDropdownActions({
       queryClient.invalidateQueries({ queryKey: ["favorites"] });
       toast({
         title: isFavorited ? "Removed from favorites" : "Added to favorites",
-        description: isFavorited
+        description: isFavorited 
           ? "Story removed from your favorites."
           : "Story added to your favorites.",
       });
@@ -198,7 +128,7 @@ export function StoryDropdownActions({
               Edit Story
             </DropdownMenuItem>
           )}
-
+          
           <DropdownMenuItem
             onClick={() => favoriteMutation.mutate("")}
             disabled={favoriteMutation.isPending}
