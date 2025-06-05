@@ -35,17 +35,20 @@ export default function Dashboard() {
   const { showActionToast } = useEnhancedToast();
 
   const {
-    data: stories = [],
+    data: storiesResponse,
     isLoading: storiesLoading,
     error,
     refetch: refetchStories,
-  } = useQuery<Story[]>({
+  } = useQuery<{ success: boolean; data: Story[]; meta?: any }>({
     queryKey: ["/api/stories"],
-    queryFn: getQueryFn<Story[]>({ on401: "throw" }),
+    queryFn: getQueryFn<{ success: boolean; data: Story[]; meta?: any }>({ on401: "throw" }),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
   });
+
+  // Extract stories array from API response
+  const stories = storiesResponse?.data || [];
 
   const { data: favoriteStories = [], refetch: refetchFavorites } = useQuery<
     Story[]
@@ -102,7 +105,17 @@ export default function Dashboard() {
       // Error handling is done in the EnhancedErrorState component below
     }
 
-    // Debug logging removed - use DebugPanel component instead if needed
+    // Debug logging for story data
+    if (import.meta.env.DEV) {
+      console.log("=== DASHBOARD DEBUG ===");
+      console.log("Stories response:", storiesResponse);
+      console.log("Extracted stories:", stories);
+      console.log("Stories count:", stories.length);
+      console.log("Stories loading:", storiesLoading);
+      console.log("Error:", error);
+      console.log("User:", user?.id);
+      console.log("=== END DASHBOARD DEBUG ===");
+    }
   }, [
     user,
     isLoading,
@@ -112,6 +125,8 @@ export default function Dashboard() {
     favoriteStories,
     showFavorites,
     tierInfo,
+    storiesResponse,
+    storiesLoading,
   ]);
 
   if (isLoading) {
