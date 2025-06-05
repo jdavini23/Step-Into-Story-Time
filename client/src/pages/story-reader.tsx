@@ -479,19 +479,19 @@ export default function StoryReader() {
                     Reload Story
                   </Button>
                 </div>
-              )}</div>
-
-              {story?.bedtimeMessage && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
-                  <p
-                    className="text-lg italic text-purple-700 dark:text-purple-300"
-                    style={{ fontSize: `${fontSize}px` }}
-                  >
-                    {story.bedtimeMessage}
-                  </p>
-                </div>
               )}
             </div>
+
+            {story?.bedtimeMessage && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
+                <p
+                  className="text-lg italic text-purple-700 dark:text-purple-300"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  {story.bedtimeMessage}
+                </p>
+              </div>
+            )}
           </article>
         </Card>
       
