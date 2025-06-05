@@ -96,7 +96,7 @@ export const sanitizedStorySchema = z.object({
   content: storyContentSchema.optional(),
 });
 
-// Rate limiting helper
+// Enhanced rate limiting helper
 export class RateLimiter {
   private requests: Map<string, number[]> = new Map();
   
@@ -105,7 +105,7 @@ export class RateLimiter {
     private windowMs: number = 60000 // 1 minute
   ) {}
 
-  isAllowed(identifier: string): boolean {
+  isAllowed(identifier: string): { allowed: boolean; resetTime?: number; remaining?: number } {
     const now = Date.now();
     const requests = this.requests.get(identifier) || [];
     
@@ -113,12 +113,38 @@ export class RateLimiter {
     const validRequests = requests.filter(time => now - time < this.windowMs);
     
     if (validRequests.length >= this.maxRequests) {
-      return false;
+      const oldestRequest = Math.min(...validRequests);
+      const resetTime = oldestRequest + this.windowMs;
+      
+      return {
+        allowed: false,
+        resetTime,
+        remaining: 0,
+      };
     }
     
     validRequests.push(now);
     this.requests.set(identifier, validRequests);
-    return true;
+    
+    return {
+      allowed: true,
+      remaining: this.maxRequests - validRequests.length,
+    };
+  }
+
+  // Get current status without consuming a request
+  getStatus(identifier: string): { remaining: number; resetTime?: number } {
+    const now = Date.now();
+    const requests = this.requests.get(identifier) || [];
+    const validRequests = requests.filter(time => now - time < this.windowMs);
+    
+    if (validRequests.length >= this.maxRequests) {
+      const oldestRequest = Math.min(...validRequests);
+      const resetTime = oldestRequest + this.windowMs;
+      return { remaining: 0, resetTime };
+    }
+    
+    return { remaining: this.maxRequests - validRequests.length };
   }
 }
 

@@ -12,6 +12,9 @@ import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import Pricing from "@/pages/pricing";
 import Header from "@/components/header";
+import React from 'react';
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { EnhancedErrorBoundary } from './components/enhanced-error-boundary';
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -53,10 +56,20 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <Router />
-      </TooltipProvider>
+      <EnhancedErrorBoundary 
+        showReportButton={process.env.NODE_ENV === 'development'}
+        onError={(error, errorInfo) => {
+          // Send error to monitoring service in production
+          if (process.env.NODE_ENV === 'production') {
+            console.error('App Error:', error, errorInfo);
+          }
+        }}
+      >
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </EnhancedErrorBoundary>
     </QueryClientProvider>
   );
 }

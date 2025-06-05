@@ -20,6 +20,15 @@ import {
   sanitizeStoryContent,
 } from "./inputValidation";
 import {
+  AppError,
+  ValidationError,
+  AuthenticationError,
+  NotFoundError,
+  RateLimitError,
+  DatabaseError,
+  asyncHandler,
+} from "./errorHandler";
+import {
   incrementWeeklyUsage,
   getCurrentWeekStart,
   updateUserSubscription,
@@ -130,23 +139,20 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Rate limiting for story generation
       const userId = req.user.claims.sub;
       if (!storyGenerationLimiter.isAllowed(userId)) {
-        return res.status(429).json({ 
-          message: "Too many story generation requests. Please wait a moment.",
-          retryAfter: 60
-        });
+        throw new RateLimitError("Too many story generation requests. Please wait a moment.");
       }
       next();
     },
     checkStoryGenerationPermissions,
     validateStoryParameters,
     validateInput(sanitizedStorySchema.omit({ title: true, content: true })),
-    async (req: any, res) => {
+    asyncHandler(async (req: any, res) => {
+      const userId = req.user.claims.sub;
+
+      // Use validated and sanitized data
+      const storyData = req.validatedBody;
+
       try {
-        const userId = req.user.claims.sub;
-
-        // Use validated and sanitized data
-        const storyData = req.validatedBody;
-
         // Generate story using OpenAI
         const generatedStory = await generateBedtimeStory({
           childName: storyData.childName,
@@ -171,28 +177,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         res.json({
-          ...story,
-          userTier: req.userTier,
-          tierLimits: req.tierLimits,
+          success: true,
+          data: {
+            ...story,
+            userTier: req.userTier,
+            tierLimits: req.tierLimits,
+          },
         });
-      } catch (error) {
-        console.error("Error generating story:", error);
-        if (error instanceof z.ZodError) {
-          res.status(400).json({
-            message: "Invalid story parameters",
-            errors: error.errors,
-          });
-        } else {
-          res.status(500).json({ message: "Failed to generate story" });
+      } catch (error: any) {
+        if (error.message?.includes('OpenAI')) {
+          throw new AppError('Story generation service is temporarily unavailable', 503, 'SERVICE_UNAVAILABLE');
         }
+        if (error.message?.includes('database') || error.message?.includes('storage')) {
+          throw new DatabaseError('Failed to save story');
+        }
+        throw new AppError('Failed to generate story', 500, 'GENERATION_ERROR');
       }
-    },
+    }),
   );
 
   // Get user's stories with tier-based restrictions
-  app.get("/api/stories", isAuthenticated, async (req: any, res) => {
+  app.get("/api/stories", isAuthenticated, asyncHandler(async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    
     try {
-      const userId = req.user.claims.sub;
       const { tier } = await getUserTier(userId);
       let stories = await storage.getUserStories(userId);
 
@@ -208,40 +216,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
           .slice(0, 3);
       }
 
-      res.json(stories);
-    } catch (error) {
-      console.error("Error fetching stories:", error);
-      res.status(500).json({ message: "Failed to fetch stories" });
+      res.json({
+        success: true,
+        data: stories,
+        meta: {
+          count: stories.length,
+          tier,
+          hasMore: tier === "free" && stories.length === 3
+        }
+      });
+    } catch (error: any) {
+      if (error.message?.includes('database')) {
+        throw new DatabaseError('Failed to retrieve stories');
+      }
+      throw new AppError('Failed to fetch stories', 500, 'FETCH_ERROR');
     }
-  });
+  }));
 
   // Get specific story
-  app.get("/api/stories/:id", isAuthenticated, async (req: any, res) => {
+  app.get("/api/stories/:id", isAuthenticated, asyncHandler(async (req: any, res) => {
+    const userId = req.user.claims.sub;
+    const storyId = parseInt(req.params.id);
+
+    if (isNaN(storyId) || storyId <= 0) {
+      throw new ValidationError("Invalid story ID provided");
+    }
+
     try {
-      const userId = req.user.claims.sub;
-      const storyId = parseInt(req.params.id);
-
-      console.log(`Fetching story ${storyId} for user ${userId}`);
-
-      if (isNaN(storyId)) {
-        console.log(`Invalid story ID provided: ${req.params.id}`);
-        return res.status(400).json({ message: "Invalid story ID" });
-      }
-
       const story = await storage.getStory(storyId, userId);
 
       if (!story) {
-        console.log(`Story ${storyId} not found for user ${userId}`);
-        return res.status(404).json({ message: "Story not found" });
+        throw new NotFoundError("Story");
       }
 
-      console.log(`Successfully fetched story ${storyId} for user ${userId}`);
-      res.json(story);
-    } catch (error) {
-      console.error("Error fetching story:", error);
-      res.status(500).json({ message: "Failed to fetch story" });
+      res.json({
+        success: true,
+        data: story
+      });
+    } catch (error: any) {
+      if (error instanceof NotFoundError) {
+        throw error;
+      }
+      if (error.message?.includes('database')) {
+        throw new DatabaseError('Failed to retrieve story');
+      }
+      throw new AppError('Failed to fetch story', 500, 'FETCH_ERROR');
     }
-  });
+  }));
 
   // Download story as PDF (Premium feature)
   app.get("/api/stories/:id/pdf", isAuthenticated, async (req: any, res) => {
