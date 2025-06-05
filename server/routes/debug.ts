@@ -93,10 +93,7 @@ export function debugRoutes(app: Express) {
       res.status(500).json({ message: "Failed to reset usage" });
     }
   });
-}
-import type { Express } from "express";
 
-export function debugRoutes(app: Express) {
   // Debug endpoint for development
   app.get("/api/debug/health", (req, res) => {
     res.json({
