@@ -38,12 +38,12 @@ app.use((req, res, next) => {
   // Enhanced Content Security Policy
   const cspDirectives = [
     "default-src 'self'",
-    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://auth.util.repl.co",
+    "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://js.stripe.com https://m.stripe.network https://auth.util.repl.co",
     "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
     "font-src 'self' https://fonts.gstatic.com",
     "img-src 'self' data: https: blob:",
-    "connect-src 'self' https://api.stripe.com https://replit.com https://*.replit.com wss:",
-    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://auth.util.repl.co",
+    "connect-src 'self' https://api.stripe.com https://m.stripe.network https://r.stripe.com https://replit.com https://*.replit.com wss:",
+    "frame-src 'self' https://js.stripe.com https://hooks.stripe.com https://checkout.stripe.com https://auth.util.repl.co",
     "frame-ancestors 'none'",
     "object-src 'none'",
     "base-uri 'self'",
