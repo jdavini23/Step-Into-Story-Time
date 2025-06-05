@@ -4,6 +4,7 @@ import { useTierInfo } from "@/hooks/useTierInfo";
 import { useLocation } from "wouter";
 import { useMutation } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
+import { CSRFForm } from "@/components/ui/csrf-form";
 import { useToast } from "@/hooks/use-toast";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import type { InsertStory } from "@shared/schema";

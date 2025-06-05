@@ -4,25 +4,44 @@ const API_BASE_URL = import.meta.env.DEV ? "" : "";
 
 // CSRF token management
 let csrfToken: string | null = null;
+let csrfTokenPromise: Promise<string> | null = null;
 
 async function getCSRFToken(): Promise<string> {
+  // If we already have a token, return it
   if (csrfToken) return csrfToken;
 
-  try {
-    const response = await fetch(`${API_BASE_URL}/api/csrf-token`, {
-      credentials: 'include'
-    });
+  // If we're already fetching a token, wait for that request
+  if (csrfTokenPromise) return csrfTokenPromise;
 
-    if (response.ok) {
+  // Start a new request
+  csrfTokenPromise = (async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/csrf-token`, {
+        credentials: 'include'
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      }
+
       const data = await response.json();
       csrfToken = data.csrfToken;
       return csrfToken;
+    } catch (error) {
+      console.error('Failed to get CSRF token:', error);
+      throw new Error('Failed to get CSRF token');
+    } finally {
+      csrfTokenPromise = null;
     }
-  } catch (error) {
-    console.error('Failed to get CSRF token:', error);
-  }
+  })();
 
-  throw new Error('Failed to get CSRF token');
+  return csrfTokenPromise;
+}
+
+// Function to clear cached token (useful for logout or token expiry)
+export function clearCSRFToken() {
+  csrfToken = null;
+  csrfTokenPromise = null;
 }
 
 export async function apiRequest(
@@ -30,30 +49,47 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  // Add CSRF token for state-changing requests
   const needsCSRF = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
+  
+  const makeRequest = async (retryOnCSRFFailure = true): Promise<Response> => {
+    const headers: Record<string, string> = {};
+    
+    if (data) {
+      headers["Content-Type"] = "application/json";
+    }
+
+    if (needsCSRF) {
+      try {
+        const token = await getCSRFToken();
+        headers['X-CSRF-Token'] = token;
+      } catch (error) {
+        console.error('Failed to add CSRF token:', error);
+        throw new Error('CSRF token required but unavailable');
+      }
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers,
+      body: data ? JSON.stringify(data) : undefined,
+      credentials: "include",
+    });
+
+    // If we get a 403 CSRF error and haven't retried yet, clear token and retry
+    if (res.status === 403 && needsCSRF && retryOnCSRFFailure) {
+      const responseText = await res.text();
+      if (responseText.includes('CSRF') || responseText.includes('csrf')) {
+        console.warn('CSRF token invalid, clearing cache and retrying...');
+        clearCSRFToken();
+        return makeRequest(false); // Retry without further retries
+      }
+    }
+
+    await throwIfResNotOk(res);
+    return res;
   };
 
-  if (needsCSRF) {
-    try {
-      const token = await getCSRFToken();
-      headers['X-CSRF-Token'] = token;
-    } catch (error) {
-      console.error('Failed to add CSRF token:', error);
-      // Continue without CSRF token, server will reject if required
-    }
-  }
-  const res = await fetch(url, {
-    method,
-    headers: data ? headers : {},
-    body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
-  });
-
-  await throwIfResNotOk(res);
-  return res;
+  return makeRequest();
 }
 
 async function throwIfResNotOk(res: Response) {

@@ -148,8 +148,25 @@ export function validateCSRFToken(req: any, res: any, next: any) {
   const token = req.headers['x-csrf-token'] || req.body._csrf;
   const sessionToken = req.session?.csrfToken;
   
-  if (!token || !sessionToken || token !== sessionToken) {
-    return res.status(403).json({ message: "Invalid CSRF token" });
+  if (!token) {
+    return res.status(403).json({ 
+      message: "CSRF token required",
+      code: "CSRF_TOKEN_MISSING"
+    });
+  }
+  
+  if (!sessionToken) {
+    return res.status(403).json({ 
+      message: "Invalid session - CSRF token not found",
+      code: "CSRF_SESSION_INVALID"
+    });
+  }
+  
+  if (token !== sessionToken) {
+    return res.status(403).json({ 
+      message: "Invalid CSRF token",
+      code: "CSRF_TOKEN_INVALID"
+    });
   }
   
   next();

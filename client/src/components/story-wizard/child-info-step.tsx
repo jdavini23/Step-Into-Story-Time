@@ -1,85 +1,86 @@
-import { useState } from "react";
-import { Input } from "@/components/ui/input";
+import { useState, useEffect } from "react";
 import { Label } from "@/components/ui/label";
+import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { validateChildName, sanitizeInput } from "@/lib/inputValidation";
-import type { InsertStory } from "@shared/schema";
 
 interface ChildInfoStepProps {
-  formData: Partial<InsertStory>;
-  updateFormData: (field: keyof InsertStory, value: any) => void;
+  formData: {
+    childName: string;
+    childAge: number;
+    childGender: "boy" | "girl";
+  };
+  updateFormData: (field: string, value: any) => void;
 }
 
 export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) {
-  const [nameError, setNameError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
-  const handleNameChange = (value: string) => {
-    const sanitized = sanitizeInput(value);
-    const validation = validateChildName(sanitized);
+  // Validate form data
+  useEffect(() => {
+    const newErrors: Record<string, string> = {};
 
-    if (!validation.isValid) {
-      setNameError(validation.error || "Invalid name");
-    } else {
-      setNameError(null);
+    if (!formData.childName.trim()) {
+      newErrors.childName = "Child name is required";
+    } else if (formData.childName.length > 50) {
+      newErrors.childName = "Child name must be 50 characters or less";
+    } else if (!/^[a-zA-Z\s\-']+$/.test(formData.childName)) {
+      newErrors.childName = "Child name can only contain letters, spaces, hyphens, and apostrophes";
     }
 
-    updateFormData("childName", sanitized);
-  };
+    if (!formData.childAge || formData.childAge < 2 || formData.childAge > 8) {
+      newErrors.childAge = "Please select a valid age between 2 and 8";
+    }
+
+    if (!formData.childGender) {
+      newErrors.childGender = "Please select a gender";
+    }
+
+    setErrors(newErrors);
+  }, [formData]);
 
   return (
     <div className="space-y-6">
       <div>
-        <Label
-          htmlFor="childName"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <Label htmlFor="childName" className="block text-sm font-medium text-gray-700 mb-2">
           Child's Name *
         </Label>
         <Input
           id="childName"
           type="text"
-          value={formData.childName || ""}
-          onChange={(e) => handleNameChange(e.target.value)}
           placeholder="Enter your child's name"
+          value={formData.childName}
+          onChange={(e) => updateFormData("childName", e.target.value)}
+          className={`w-full ${errors.childName ? "border-red-500" : ""}`}
           maxLength={50}
-          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
-            nameError ? "border-red-500" : "border-gray-300"
-          }`}
-          aria-invalid={!!nameError}
-          aria-describedby={nameError ? "name-error" : undefined}
         />
-        {nameError && (
-          <p id="name-error" className="mt-1 text-sm text-red-600" role="alert">
-            {nameError}
-          </p>
+        {errors.childName && (
+          <p className="text-sm text-red-500 mt-1">{errors.childName}</p>
         )}
       </div>
 
       <div>
-        <Label
-          htmlFor="childAge"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
+        <Label className="block text-sm font-medium text-gray-700 mb-2">
           Age *
         </Label>
         <Select
-          value={formData.childAge?.toString()}
+          value={formData.childAge?.toString() || ""}
           onValueChange={(value) => updateFormData("childAge", parseInt(value))}
         >
-          <SelectTrigger className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent">
+          <SelectTrigger className={`w-full ${errors.childAge ? "border-red-500" : ""}`}>
             <SelectValue placeholder="Select age" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="2">2 years old</SelectItem>
-            <SelectItem value="3">3 years old</SelectItem>
-            <SelectItem value="4">4 years old</SelectItem>
-            <SelectItem value="5">5 years old</SelectItem>
-            <SelectItem value="6">6 years old</SelectItem>
-            <SelectItem value="7">7 years old</SelectItem>
-            <SelectItem value="8">8 years old</SelectItem>
+            {Array.from({ length: 7 }, (_, i) => i + 2).map((age) => (
+              <SelectItem key={age} value={age.toString()}>
+                {age} years old
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
+        {errors.childAge && (
+          <p className="text-sm text-red-500 mt-1">{errors.childAge}</p>
+        )}
       </div>
 
       <div>
@@ -111,6 +112,9 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
             </Label>
           </div>
         </RadioGroup>
+        {errors.childGender && (
+          <p className="text-sm text-red-500 mt-1">{errors.childGender}</p>
+        )}
       </div>
     </div>
   );
