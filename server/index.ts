@@ -103,15 +103,15 @@ app.use((req, res, next) => {
   next();
 });
 
+// Import error handling utilities
+import {
+  globalErrorHandler,
+  notFoundHandler,
+  setupProcessErrorHandlers,
+} from "./errorHandler";
+
 (async () => {
   const server = await registerRoutes(app);
-
-  // Import error handling utilities
-  import {
-    globalErrorHandler,
-    notFoundHandler,
-    setupProcessErrorHandlers,
-  } from "./errorHandler";
 
   // Setup process-level error handlers
   setupProcessErrorHandlers();
