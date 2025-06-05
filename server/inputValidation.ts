@@ -152,19 +152,32 @@ export class RateLimiter {
 export function validateInput<T>(schema: z.ZodSchema<T>) {
   return (req: any, res: any, next: any) => {
     try {
+      console.log('=== VALIDATION DEBUG ===');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      
       req.validatedBody = schema.parse(req.body);
+      console.log('Validation successful');
+      console.log('=== END VALIDATION DEBUG ===');
       next();
     } catch (error) {
+      console.log('=== VALIDATION ERROR DEBUG ===');
+      console.log('Request body:', JSON.stringify(req.body, null, 2));
+      console.log('Error details:', error);
+      console.log('=== END VALIDATION ERROR DEBUG ===');
+      
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           message: "Input validation failed",
           errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
+            received: err.received,
+            code: err.code
           })),
+          receivedData: req.body
         });
       }
-      return res.status(400).json({ message: "Invalid input" });
+      return res.status(400).json({ message: "Invalid input", error: error.message });
     }
   };
 }
