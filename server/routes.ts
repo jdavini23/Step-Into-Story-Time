@@ -38,6 +38,15 @@ const storyGenerationRequestSchema = insertStorySchema.omit({
 });
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Health check endpoint for deployments
+  app.get("/health", (req, res) => {
+    res.status(200).json({ 
+      status: "healthy", 
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV 
+    });
+  });
+
   // Auth middleware
   await setupAuth(app);
 
