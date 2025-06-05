@@ -254,7 +254,20 @@ export default function StoryReader() {
   // Split content into paragraphs for better reading
   const paragraphs = useMemo(() => {
     if (!story?.content) return [];
-    return story.content.split('\n\n').filter(p => p.trim());
+    
+    // Handle different paragraph separators and ensure content is properly formatted
+    const content = story.content.toString(); // Ensure it's a string
+    
+    // Split by double newlines first, then single newlines if no double newlines found
+    let splits = content.split('\n\n');
+    if (splits.length === 1) {
+      splits = content.split('\n');
+    }
+    
+    // Filter out empty paragraphs and trim whitespace
+    return splits
+      .map(p => p.trim())
+      .filter(p => p.length > 0);
   }, [story?.content]);
 
   if (isLoading || storyLoading) {
@@ -428,17 +441,31 @@ export default function StoryReader() {
             </div>
 
             <div className={isDarkMode ? "text-gray-100" : "text-gray-700"}>
-              {paragraphs.map((paragraph, index) => (
-                <p
-                  key={index}
-                  className="leading-8 mb-6"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  {paragraph}
-                </p>
-              ))}
+              {paragraphs.length > 0 ? (
+                paragraphs.map((paragraph, index) => (
+                  <p
+                    key={index}
+                    className="leading-8 mb-6"
+                    style={{ fontSize: `${fontSize}px` }}
+                  >
+                    {paragraph}
+                  </p>
+                ))
+              ) : (
+                // Fallback: display raw content if paragraph processing fails
+                story?.content ? (
+                  <div
+                    className="leading-8 mb-6 whitespace-pre-wrap"
+                    style={{ fontSize: `${fontSize}px` }}
+                  >
+                    {story.content}
+                  </div>
+                ) : (
+                  <p className="text-gray-500 italic">No story content available.</p>
+                )
+              )}
 
-              {story.bedtimeMessage && (
+              {story?.bedtimeMessage && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
                   <p
                     className="text-lg italic text-purple-700 dark:text-purple-300"
