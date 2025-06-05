@@ -58,13 +58,7 @@ app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 // Import validation functions
 import { validateCSRFToken, generateCSRFToken } from './inputValidation';
 
-// CSRF token endpoint
-app.get('/api/csrf-token', (req, res) => {
-  if (!req.session.csrfToken) {
-    req.session.csrfToken = generateCSRFToken();
-  }
-  res.json({ csrfToken: req.session.csrfToken });
-});
+// CSRF token endpoint will be handled in routes.ts after auth setup
 
 app.use((req, res, next) => {
   const start = Date.now();

@@ -74,9 +74,30 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   // CSRF token endpoint
   app.get("/api/csrf-token", isAuthenticated, (req: any, res) => {
-    const token = generateCSRFToken();
-    req.session.csrfToken = token;
-    res.json({ csrfToken: token });
+    try {
+      // Ensure session exists
+      if (!req.session) {
+        return res.status(500).json({ 
+          error: "Session not initialized",
+          message: "Session middleware not properly configured" 
+        });
+      }
+
+      // Generate new token if none exists or reuse existing one
+      let token = req.session.csrfToken;
+      if (!token) {
+        token = generateCSRFToken();
+        req.session.csrfToken = token;
+      }
+      
+      res.json({ csrfToken: token });
+    } catch (error) {
+      console.error("CSRF token generation error:", error);
+      res.status(500).json({ 
+        error: "Failed to generate CSRF token",
+        message: "Internal server error" 
+      });
+    }
   });
 
   // Auth routes
