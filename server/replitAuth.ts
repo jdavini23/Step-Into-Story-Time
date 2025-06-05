@@ -82,10 +82,15 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  for (const domain of process.env.REPLIT_DOMAINS!.split(",")) {
+  const registeredStrategies: string[] = [];
+  for (const domainEntry of process.env.REPLIT_DOMAINS!.split(",")) {
+    // Clean up domain entry - remove protocol and trailing slash
+    const domain = domainEntry.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
+    const strategyName = `replitauth:${domain}`;
+    
     const strategy = new Strategy(
       {
-        name: `replitauth:${domain}`,
+        name: strategyName,
         config,
         scope: "openid email profile offline_access",
         callbackURL: `https://${domain}/api/callback`,
@@ -93,7 +98,10 @@ export async function setupAuth(app: Express) {
       verify,
     );
     passport.use(strategy);
+    registeredStrategies.push(strategyName);
   }
+  
+  console.log("Registered authentication strategies:", registeredStrategies);
 
   passport.serializeUser((user: Express.User, cb) => cb(null, user));
   passport.deserializeUser((user: Express.User, cb) => cb(null, user));
@@ -101,14 +109,15 @@ export async function setupAuth(app: Express) {
   app.get("/api/login", (req, res, next) => {
     // Store signup intent and return URL in session if present
     if (req.query.signup === "true") {
-      req.session.isSignup = true;
+      (req.session as any).isSignup = true;
     }
     if (req.query.returnTo) {
-      req.session.returnTo = req.query.returnTo;
+      (req.session as any).returnTo = req.query.returnTo;
     }
 
     const strategyName = `replitauth:${req.hostname}`;
     console.log(`Attempting authentication with strategy: ${strategyName}`);
+    console.log(`Request hostname: ${req.hostname}`);
     console.log(`Available domains: ${process.env.REPLIT_DOMAINS}`);
 
     passport.authenticate(strategyName, {
@@ -121,7 +130,7 @@ export async function setupAuth(app: Express) {
     const strategyName = `replitauth:${req.hostname}`;
     console.log(`Callback authentication with strategy: ${strategyName}`);
     
-    passport.authenticate(strategyName, (err, user) => {
+    passport.authenticate(strategyName, (err: any, user: any) => {
       if (err) {
         console.error("Authentication error:", err);
         return next(err);
@@ -137,9 +146,9 @@ export async function setupAuth(app: Express) {
         }
 
         // Redirect to stored returnTo URL or default to dashboard
-        const returnTo = req.session.returnTo || "/";
-        delete req.session.returnTo; // Clean up
-        delete req.session.isSignup; // Clean up
+        const returnTo = (req.session as any).returnTo || "/";
+        delete (req.session as any).returnTo; // Clean up
+        delete (req.session as any).isSignup; // Clean up
 
         return res.redirect(returnTo);
       });
