@@ -222,11 +222,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
     const userId = req.user.claims.sub;
     
     try {
-      const { tier } = await getUserTier(userId);
+      const { tier, status } = await getUserTier(userId);
       let stories = await storage.getUserStories(userId);
 
-      // Apply story library restrictions for free users
-      if (tier === "free") {
+      // Only apply story library restrictions for truly free users
+      // If user has premium/family tier but subscription issues, still show all stories
+      if (tier === "free" && status !== "active") {
         // Sort by creation date (newest first) and limit to 3 most recent
         stories = stories
           .sort((a, b) => {
@@ -235,6 +236,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
             return dateB - dateA;
           })
           .slice(0, 3);
+      } else {
+        // For premium/family users or users with active subscriptions, show all stories
+        stories = stories.sort((a, b) => {
+          const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+          const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+          return dateB - dateA;
+        });
       }
 
       res.json({
@@ -243,7 +251,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         meta: {
           count: stories.length,
           tier,
-          hasMore: tier === "free" && stories.length === 3
+          status,
+          hasMore: tier === "free" && status !== "active" && stories.length === 3
         }
       });
     } catch (error: any) {

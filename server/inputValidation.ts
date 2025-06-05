@@ -1,6 +1,6 @@
-
 import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
+import { randomBytes } from 'crypto';
 
 // HTML sanitization configuration
 const sanitizeConfig = {
@@ -17,10 +17,10 @@ export function sanitizeText(input: string): string {
   if (typeof input !== 'string') {
     throw new Error('Input must be a string');
   }
-  
+
   // Remove all HTML tags and decode entities
   const sanitized = DOMPurify.sanitize(input, sanitizeConfig);
-  
+
   // Additional cleaning: remove potential script content
   return sanitized
     .replace(/javascript:/gi, '')
@@ -99,7 +99,7 @@ export const sanitizedStorySchema = z.object({
 // Enhanced rate limiting helper
 export class RateLimiter {
   private requests: Map<string, number[]> = new Map();
-  
+
   constructor(
     private maxRequests: number = 10,
     private windowMs: number = 60000 // 1 minute
@@ -108,24 +108,24 @@ export class RateLimiter {
   isAllowed(identifier: string): { allowed: boolean; resetTime?: number; remaining?: number } {
     const now = Date.now();
     const requests = this.requests.get(identifier) || [];
-    
+
     // Remove old requests outside the window
     const validRequests = requests.filter(time => now - time < this.windowMs);
-    
+
     if (validRequests.length >= this.maxRequests) {
       const oldestRequest = Math.min(...validRequests);
       const resetTime = oldestRequest + this.windowMs;
-      
+
       return {
         allowed: false,
         resetTime,
         remaining: 0,
       };
     }
-    
+
     validRequests.push(now);
     this.requests.set(identifier, validRequests);
-    
+
     return {
       allowed: true,
       remaining: this.maxRequests - validRequests.length,
@@ -137,13 +137,13 @@ export class RateLimiter {
     const now = Date.now();
     const requests = this.requests.get(identifier) || [];
     const validRequests = requests.filter(time => now - time < this.windowMs);
-    
+
     if (validRequests.length >= this.maxRequests) {
       const oldestRequest = Math.min(...validRequests);
       const resetTime = oldestRequest + this.windowMs;
       return { remaining: 0, resetTime };
     }
-    
+
     return { remaining: this.maxRequests - validRequests.length };
   }
 }
@@ -173,32 +173,32 @@ export function validateInput<T>(schema: z.ZodSchema<T>) {
 export function validateCSRFToken(req: any, res: any, next: any) {
   const token = req.headers['x-csrf-token'] || req.body._csrf;
   const sessionToken = req.session?.csrfToken;
-  
+
   if (!token) {
     return res.status(403).json({ 
       message: "CSRF token required",
       code: "CSRF_TOKEN_MISSING"
     });
   }
-  
+
   if (!sessionToken) {
     return res.status(403).json({ 
       message: "Invalid session - CSRF token not found",
       code: "CSRF_SESSION_INVALID"
     });
   }
-  
+
   if (token !== sessionToken) {
     return res.status(403).json({ 
       message: "Invalid CSRF token",
       code: "CSRF_TOKEN_INVALID"
     });
   }
-  
+
   next();
 }
 
 // Generate CSRF token
 export function generateCSRFToken(): string {
-  return require('crypto').randomBytes(32).toString('hex');
+  return randomBytes(32).toString('hex');
 }
