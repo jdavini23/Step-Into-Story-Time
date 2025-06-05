@@ -202,7 +202,12 @@ export function DebugPanel() {
                   Debug Info
                 </h4>
                 <div className="text-xs bg-white p-2 rounded border max-h-40 overflow-auto">
-                  <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
+                  <pre>{JSON.stringify({
+              id: debugInfo?.id,
+              email: debugInfo?.email ? '***@***.com' : null,
+              firstName: debugInfo?.firstName,
+              isAuthenticated: !!debugInfo
+            }, null, 2)}</pre>
                 </div>
               </div>
             </>

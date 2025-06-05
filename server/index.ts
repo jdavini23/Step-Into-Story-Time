@@ -32,6 +32,17 @@ app.use((req, res, next) => {
 app.use(express.json({ limit: '10mb' })); // Limit request size
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
+// Import validation functions
+import { validateCSRFToken, generateCSRFToken } from './inputValidation';
+
+// CSRF token endpoint
+app.get('/api/csrf-token', (req, res) => {
+  if (!req.session.csrfToken) {
+    req.session.csrfToken = generateCSRFToken();
+  }
+  res.json({ csrfToken: req.session.csrfToken });
+});
+
 app.use((req, res, next) => {
   const start = Date.now();
   const path = req.path;
