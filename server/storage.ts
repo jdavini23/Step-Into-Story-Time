@@ -133,19 +133,49 @@ export class DatabaseStorage implements IStorage {
       return undefined;
     }
 
-    // Debug logging for content retrieval
+    const result = story[0];
+
+    // Debug logging for content issues
     console.log(`Storage getStory ${id} debug:`, {
-      hasContent: !!story.content,
-      contentType: typeof story.content,
-      contentLength: story.content?.length || 0,
-      rawContentPreview: story.content ? String(story.content).substring(0, 50) + '...' : 'No content'
+      hasContent: !!result.content,
+      contentType: typeof result.content,
+      contentLength: result.content?.length || 0,
+      rawContentPreview: result.content ? String(result.content).substring(0, 50) + '...' : 'No content',
+      dbResultKeys: Object.keys(result),
+      allFieldsPresent: {
+        id: !!result.id,
+        title: !!result.title,
+        content: !!result.content,
+        childName: !!result.childName
+      }
     });
 
-    // Ensure content is properly formatted as string
-    if (story.content && typeof story.content !== 'string') {
-      story.content = String(story.content);
-    }
-    return story;
+    // Create the formatted story object
+    const formattedStory = {
+      id: result.id,
+      userId: result.userId,
+      title: result.title,
+      content: result.content,
+      childName: result.childName,
+      childAge: result.childAge,
+      childGender: result.childGender,
+      favoriteThemes: result.favoriteThemes,
+      tone: result.tone,
+      length: result.length,
+      bedtimeMessage: result.bedtimeMessage,
+      createdAt: result.createdAt,
+      updatedAt: result.updatedAt,
+    };
+
+    // Debug the formatted story object
+    console.log(`Storage getStory ${id} formatted object debug:`, {
+      hasFormattedContent: !!formattedStory.content,
+      formattedContentType: typeof formattedStory.content,
+      formattedContentLength: formattedStory.content?.length || 0,
+      formattedKeys: Object.keys(formattedStory)
+    });
+
+    return formattedStory;
   }
 
   async updateStory(

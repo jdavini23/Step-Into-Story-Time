@@ -170,10 +170,22 @@ export function storiesRoutes(app: Express) {
         console.warn(`Story ${storyId} has empty or missing content!`);
       }
 
-      res.json({
+      // Create response object and debug it before sending
+      const responseData = {
         success: true,
         data: story
+      };
+
+      console.log(`Story ${storyId} response debug:`, {
+        hasResponseData: !!responseData.data,
+        responseContentExists: !!responseData.data?.content,
+        responseContentType: typeof responseData.data?.content,
+        responseContentLength: responseData.data?.content?.length || 0,
+        responseKeys: Object.keys(responseData.data || {}),
+        fullResponseSize: JSON.stringify(responseData).length
       });
+
+      res.json(responseData);
     } catch (error: any) {
       if (error instanceof NotFoundError) {
         throw error;
