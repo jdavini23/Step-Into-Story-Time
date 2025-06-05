@@ -94,7 +94,7 @@ export const sanitizedStorySchema = z.object({
   bedtimeMessage: bedtimeMessageSchema,
   title: storyTitleSchema.optional(),
   content: storyContentSchema.optional(),
-});
+}).strict();
 
 // Rate limiting helper
 export class RateLimiter {
@@ -126,18 +126,23 @@ export class RateLimiter {
 export function validateInput<T>(schema: z.ZodSchema<T>) {
   return (req: any, res: any, next: any) => {
     try {
+      console.log("Validating request body:", JSON.stringify(req.body, null, 2));
       req.validatedBody = schema.parse(req.body);
       next();
     } catch (error) {
       if (error instanceof z.ZodError) {
+        console.error("Validation failed:", error.errors);
         return res.status(400).json({
           message: "Input validation failed",
           errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
+            received: err.received,
           })),
+          requestBody: req.body,
         });
       }
+      console.error("Validation error:", error);
       return res.status(400).json({ message: "Invalid input" });
     }
   };
