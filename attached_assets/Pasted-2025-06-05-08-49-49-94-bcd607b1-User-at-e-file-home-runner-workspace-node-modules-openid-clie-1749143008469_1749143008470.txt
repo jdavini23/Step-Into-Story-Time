@@ -1,0 +1,184 @@
+2025-06-05 08:49:49.94
+bcd607b1
+User
+at e (file:///home/runner/workspace/node_modules/openid-client/build/index.js:116:12)
+2025-06-05 08:49:49.94
+bcd607b1
+User
+at errorHandler (file:///home/runner/workspace/node_modules/openid-client/build/index.js:135:23)
+2025-06-05 08:49:49.94
+bcd607b1
+User
+at Module.authorizationCodeGrant (file:///home/runner/workspace/node_modules/openid-client/build/index.js:953:9)
+2025-06-05 08:49:49.94
+bcd607b1
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-06-05 08:49:49.94
+bcd607b1
+User
+at async Strategy.authorizationCodeGrant (file:///home/runner/workspace/node_modules/openid-client/build/passport.js:135:28)
+2025-06-05 08:49:49.95
+bcd607b1
+System
+system: received signal terminated
+2025-06-05 08:49:53.68
+bcd607b1
+System
+starting up user application
+2025-06-05 08:49:54.04
+bcd607b1
+System
+forwarding local port 5000 to external port 80 (mapped as 1104)
+2025-06-05 08:49:54.05
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.05
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.06
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.12
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.20
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.25
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:54.31
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:55.02
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:55.43
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:56.05
+bcd607b1
+User
+> rest-express@1.0.0 start
+2025-06-05 08:49:56.05
+bcd607b1
+User
+> NODE_ENV=production node dist/index.js
+2025-06-05 08:49:57.10
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 08:49:57.71
+bcd607b1
+User
+3:49:57 PM [express] serving on port 5000
+2025-06-05 09:14:59.44
+bcd607b1
+User
+4:14:59 PM [express] GET /api/5572214/envelope/ 200 in 2ms
+2025-06-05 09:17:12.38
+bcd607b1
+User
+Thu, 05 Jun 2025 16:17:12 GMT express deprecated req.host: Use req.hostname instead at file:/home/runner/workspace/node_modules/openid-client/build/passport.js:165:49
+2025-06-05 09:17:12.55
+bcd607b1
+User
+ResponseBodyError: server responded with an error in the response body
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at checkOAuthBodyError (file:///home/runner/workspace/node_modules/oauth4webapi/build/index.js:865:19)
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at process.processTicksAndRejections (node:internal/process/task_queues:95:5)
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at async processGenericAccessTokenResponse (file:///home/runner/workspace/node_modules/oauth4webapi/build/index.js:1141:5)
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at async processAuthorizationCodeOAuth2Response (file:///home/runner/workspace/node_modules/oauth4webapi/build/index.js:1373:20)
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at async Module.authorizationCodeGrant (file:///home/runner/workspace/node_modules/openid-client/build/index.js:942:18)
+2025-06-05 09:17:12.55
+bcd607b1
+User
+at async Strategy.authorizationCodeGrant (file:///home/runner/workspace/node_modules/openid-client/build/passport.js:135:28)
+2025-06-05 09:17:12.55
+bcd607b1
+System
+system: received signal terminated
+2025-06-05 09:17:15.57
+bcd607b1
+System
+starting up user application
+2025-06-05 09:17:15.86
+bcd607b1
+System
+forwarding local port 5000 to external port 80 (mapped as 1104)
+2025-06-05 09:17:15.87
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:15.88
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:15.88
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:15.91
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:16.03
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:16.19
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:16.22
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:17.13
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:17.66
+bcd607b1
+User
+> rest-express@1.0.0 start
+2025-06-05 09:17:17.66
+bcd607b1
+User
+> NODE_ENV=production node dist/index.js
+2025-06-05 09:17:18.80
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:18.81
+bcd607b1
+System
+error proxying request error=dial tcp 127.0.0.1:5000: connect: connection refused
+2025-06-05 09:17:19.16
+bcd607b1
+User
+4:17:19 PM [express] serving on port 5000

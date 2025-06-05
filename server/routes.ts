@@ -133,12 +133,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error) {
         console.error("Error generating story:", error);
         if (error instanceof z.ZodError) {
-          res
-            .status(400)
-            .json({
-              message: "Invalid story parameters",
-              errors: error.errors,
-            });
+          res.status(400).json({
+            message: "Invalid story parameters",
+            errors: error.errors,
+          });
         } else {
           res.status(500).json({ message: "Failed to generate story" });
         }
@@ -635,9 +633,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
         if (!userId) {
           console.log("No user ID found in claims");
-          return res.status(400).json({ 
-            error: "No user ID found", 
-            hasActiveSubscription: false 
+          return res.status(400).json({
+            error: "No user ID found",
+            hasActiveSubscription: false,
           });
         }
 
@@ -650,7 +648,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json({ hasActiveSubscription: false });
         }
 
-        console.log("Retrieving Stripe subscription:", user.stripeSubscriptionId);
+        console.log(
+          "Retrieving Stripe subscription:",
+          user.stripeSubscriptionId,
+        );
         const subscription = await stripe.subscriptions.retrieve(
           user.stripeSubscriptionId,
         );
@@ -665,10 +666,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
       } catch (error: any) {
         console.error("Error checking subscription status:", error);
         console.error("Error stack:", error.stack);
-        res.status(500).json({ 
+        res.status(500).json({
           message: "Failed to check subscription status",
           error: error.message,
-          stack: process.env.NODE_ENV === "development" ? error.stack : undefined
+          stack:
+            process.env.NODE_ENV === "development" ? error.stack : undefined,
         });
       }
     },
@@ -809,7 +811,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Debug endpoints for testing (remove in production)
-  const { registerDebugRoutes, setupDebugRoutes } = await import("./debugRoutes");
+  const { registerDebugRoutes, setupDebugRoutes } = await import(
+    "./debugRoutes"
+  );
   registerDebugRoutes(app);
   setupDebugRoutes(app);
 

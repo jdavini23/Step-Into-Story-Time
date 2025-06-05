@@ -160,12 +160,12 @@ export function setupDebugRoutes(app: Express) {
         environment: {
           NODE_ENV: process.env.NODE_ENV,
           DATABASE_URL: process.env.DATABASE_URL ? "SET" : "NOT SET",
-        }
+        },
       });
     } catch (error) {
-      res.status(500).json({ 
+      res.status(500).json({
         error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined
+        stack: error instanceof Error ? error.stack : undefined,
       });
     }
   });
