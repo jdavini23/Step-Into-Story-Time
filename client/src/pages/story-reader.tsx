@@ -251,23 +251,11 @@ export default function StoryReader() {
       });
   }, [toast]);
 
-  const formatStoryContent = useMemo(() => {
-    if (!story) return [];
-    return story.content.split("\n\n").map((paragraph, index) => {
-      if (paragraph.trim()) {
-        return (
-          <p
-            key={index}
-            className="leading-8 mb-6"
-            style={{ fontSize: `${fontSize}px` }}
-          >
-            {paragraph.trim()}
-          </p>
-        );
-      }
-      return null;
-    });
-  }, [story, fontSize]);
+  // Split content into paragraphs for better reading
+  const paragraphs = useMemo(() => {
+    if (!story?.content) return [];
+    return story.content.split('\n\n').filter(p => p.trim());
+  }, [story?.content]);
 
   if (isLoading || storyLoading) {
     return (
