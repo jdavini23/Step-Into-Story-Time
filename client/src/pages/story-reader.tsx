@@ -124,16 +124,12 @@ export default function StoryReader() {
   useEffect(() => {
     if (!isLoading && !user) {
       console.log("Story reader: User not authenticated, redirecting to login");
-      toast({
-        title: "Unauthorized",
-        description: "You are logged out. Logging in again...",
-        variant: "destructive",
-      });
-      setTimeout(() => {
-        window.location.href = "/api/login";
-      }, 500);
+      // Store the current URL to redirect back after login
+      const currentUrl = window.location.pathname + window.location.search;
+      window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
+      return;
     }
-  }, [user, isLoading, toast]);
+  }, [user, isLoading]);
 
   useEffect(() => {
     if (error) {
@@ -146,17 +142,12 @@ export default function StoryReader() {
       });
 
       if (isUnauthorizedError(error as Error)) {
-        toast({
-          title: "Unauthorized",
-          description: "You are logged out. Logging in again...",
-          variant: "destructive",
-        });
-        setTimeout(() => {
-          window.location.href = "/api/login";
-        }, 500);
+        // Store the current URL to redirect back after login
+        const currentUrl = window.location.pathname + window.location.search;
+        window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
       }
     }
-  }, [error, toast, storyId, user?.id]);
+  }, [error, storyId, user?.id]);
 
   const downloadPDF = useCallback(async () => {
     if (!story) return;
@@ -269,6 +260,11 @@ export default function StoryReader() {
       return null;
     });
   }, [story, fontSize]);
+
+  // Early return for unauthenticated users to prevent React hook errors
+  if (!isLoading && !user) {
+    return null; // Component will redirect via useEffect
+  }
 
   if (isLoading || storyLoading) {
     return (
