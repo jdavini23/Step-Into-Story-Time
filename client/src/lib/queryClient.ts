@@ -1,10 +1,28 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
 
-async function throwIfResNotOk(res: Response) {
-  if (!res.ok) {
-    const text = (await res.text()) || res.statusText;
-    throw new Error(`${res.status}: ${text}`);
+const API_BASE_URL = import.meta.env.DEV ? "" : "";
+
+// CSRF token management
+let csrfToken: string | null = null;
+
+async function getCSRFToken(): Promise<string> {
+  if (csrfToken) return csrfToken;
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/csrf-token`, {
+      credentials: 'include'
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      csrfToken = data.csrfToken;
+      return csrfToken;
+    }
+  } catch (error) {
+    console.error('Failed to get CSRF token:', error);
   }
+
+  throw new Error('Failed to get CSRF token');
 }
 
 export async function apiRequest(
@@ -12,9 +30,24 @@ export async function apiRequest(
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
+  // Add CSRF token for state-changing requests
+  const needsCSRF = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method.toUpperCase());
+  const headers: Record<string, string> = {
+    "Content-Type": "application/json",
+  };
+
+  if (needsCSRF) {
+    try {
+      const token = await getCSRFToken();
+      headers['X-CSRF-Token'] = token;
+    } catch (error) {
+      console.error('Failed to add CSRF token:', error);
+      // Continue without CSRF token, server will reject if required
+    }
+  }
   const res = await fetch(url, {
     method,
-    headers: data ? { "Content-Type": "application/json" } : {},
+    headers: data ? headers : {},
     body: data ? JSON.stringify(data) : undefined,
     credentials: "include",
   });
@@ -23,6 +56,12 @@ export async function apiRequest(
   return res;
 }
 
+async function throwIfResNotOk(res: Response) {
+  if (!res.ok) {
+    const text = (await res.text()) || res.statusText;
+    throw new Error(`${res.status}: ${text}`);
+  }
+}
 type UnauthorizedBehavior = "returnNull" | "throw";
 export const getQueryFn: <T>(options: {
   on401: UnauthorizedBehavior;

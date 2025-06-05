@@ -11,6 +11,15 @@ import {
   addTierInfoToResponse,
 } from "./tierMiddleware";
 import {
+  sanitizedStorySchema,
+  validateInput,
+  validateCSRFToken,
+  generateCSRFToken,
+  RateLimiter,
+  sanitizeText,
+  sanitizeStoryContent,
+} from "./inputValidation";
+import {
   incrementWeeklyUsage,
   getCurrentWeekStart,
   updateUserSubscription,
@@ -31,6 +40,10 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2023-10-16",
 });
 
+// Rate limiters for different endpoints
+const storyGenerationLimiter = new RateLimiter(5, 60000); // 5 requests per minute
+const generalLimiter = new RateLimiter(30, 60000); // 30 requests per minute
+
 // Create a schema for story generation requests (without title and content)
 const storyGenerationRequestSchema = insertStorySchema.omit({
   title: true,
@@ -50,12 +63,28 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Auth middleware
   await setupAuth(app);
 
+  // CSRF token endpoint
+  app.get("/api/csrf-token", isAuthenticated, (req: any, res) => {
+    const token = generateCSRFToken();
+    req.session.csrfToken = token;
+    res.json({ csrfToken: token });
+  });
+
   // Auth routes
   app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      res.json(user);
+      
+      // Sanitize user data before sending
+      const sanitizedUser = {
+        ...user,
+        firstName: user.firstName ? sanitizeText(user.firstName) : null,
+        lastName: user.lastName ? sanitizeText(user.lastName) : null,
+        email: user.email ? sanitizeText(user.email) : null,
+      };
+      
+      res.json(sanitizedUser);
     } catch (error) {
       console.error("Error fetching user:", error);
       res.status(500).json({ message: "Failed to fetch user" });
@@ -96,20 +125,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post(
     "/api/stories/generate",
     isAuthenticated,
+    validateCSRFToken,
+    (req: any, res, next) => {
+      // Rate limiting for story generation
+      const userId = req.user.claims.sub;
+      if (!storyGenerationLimiter.isAllowed(userId)) {
+        return res.status(429).json({ 
+          message: "Too many story generation requests. Please wait a moment.",
+          retryAfter: 60
+        });
+      }
+      next();
+    },
     checkStoryGenerationPermissions,
     validateStoryParameters,
+    validateInput(sanitizedStorySchema.omit({ title: true, content: true })),
     async (req: any, res) => {
       try {
         const userId = req.user.claims.sub;
-
-        console.log("Request body:", req.body);
-        console.log(
-          "Request schema fields:",
-          Object.keys(storyGenerationRequestSchema.shape),
-        );
-
-        // Validate request body (excluding title and content which are generated)
-        const storyData = storyGenerationRequestSchema.parse(req.body);
+        
+        // Use validated and sanitized data
+        const storyData = req.validatedBody;
 
         // Generate story using OpenAI
         const generatedStory = await generateBedtimeStory({
@@ -256,7 +292,22 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
 
   // Update story
-  app.patch("/api/stories/:id", isAuthenticated, async (req: any, res) => {
+  app.patch(
+    "/api/stories/:id", 
+    isAuthenticated,
+    validateCSRFToken,
+    (req: any, res, next) => {
+      // Rate limiting for updates
+      const userId = req.user.claims.sub;
+      if (!generalLimiter.isAllowed(`update_${userId}`)) {
+        return res.status(429).json({ 
+          message: "Too many update requests. Please wait a moment." 
+        });
+      }
+      next();
+    },
+    validateInput(sanitizedStorySchema.partial()),
+    async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const storyId = parseInt(req.params.id);
@@ -265,8 +316,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(400).json({ message: "Invalid story ID" });
       }
 
-      // Validate partial update data
-      const updateData = insertStorySchema.partial().parse(req.body);
+      // Use validated and sanitized data
+      const updateData = req.validatedBody;
 
       const story = await storage.updateStory(storyId, userId, updateData);
 

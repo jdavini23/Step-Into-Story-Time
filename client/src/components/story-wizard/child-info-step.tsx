@@ -1,13 +1,9 @@
-import { Label } from "@/components/ui/label";
+import { useState } from "react";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { validateChildName, sanitizeInput } from "@/lib/inputValidation";
 import type { InsertStory } from "@shared/schema";
 
 interface ChildInfoStepProps {
@@ -15,10 +11,22 @@ interface ChildInfoStepProps {
   updateFormData: (field: keyof InsertStory, value: any) => void;
 }
 
-export function ChildInfoStep({
-  formData,
-  updateFormData,
-}: ChildInfoStepProps) {
+export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) {
+  const [nameError, setNameError] = useState<string | null>(null);
+
+  const handleNameChange = (value: string) => {
+    const sanitized = sanitizeInput(value);
+    const validation = validateChildName(sanitized);
+
+    if (!validation.isValid) {
+      setNameError(validation.error || "Invalid name");
+    } else {
+      setNameError(null);
+    }
+
+    updateFormData("childName", sanitized);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -30,11 +38,22 @@ export function ChildInfoStep({
         </Label>
         <Input
           id="childName"
-          placeholder="e.g., Emma"
+          type="text"
           value={formData.childName || ""}
-          onChange={(e) => updateFormData("childName", e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+          onChange={(e) => handleNameChange(e.target.value)}
+          placeholder="Enter your child's name"
+          maxLength={50}
+          className={`w-full px-4 py-3 border rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent ${
+            nameError ? "border-red-500" : "border-gray-300"
+          }`}
+          aria-invalid={!!nameError}
+          aria-describedby={nameError ? "name-error" : undefined}
         />
+        {nameError && (
+          <p id="name-error" className="mt-1 text-sm text-red-600" role="alert">
+            {nameError}
+          </p>
+        )}
       </div>
 
       <div>
@@ -92,22 +111,6 @@ export function ChildInfoStep({
             </Label>
           </div>
         </RadioGroup>
-      </div>
-
-      <div>
-        <Label
-          htmlFor="favoriteThemes"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Favorite Animals or Characters
-        </Label>
-        <Input
-          id="favoriteThemes"
-          placeholder="e.g., dragons, unicorns, puppies"
-          value={formData.favoriteThemes || ""}
-          onChange={(e) => updateFormData("favoriteThemes", e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-        />
       </div>
     </div>
   );

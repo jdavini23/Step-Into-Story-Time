@@ -1,0 +1,161 @@
+
+import { z } from "zod";
+import DOMPurify from "isomorphic-dompurify";
+
+// HTML sanitization configuration
+const sanitizeConfig = {
+  ALLOWED_TAGS: [], // No HTML tags allowed by default
+  ALLOWED_ATTR: [],
+  KEEP_CONTENT: true, // Keep text content, remove HTML tags
+  RETURN_DOM: false,
+  RETURN_DOM_FRAGMENT: false,
+  RETURN_DOM_IMPORT: false,
+};
+
+// Strict sanitization for user inputs (removes all HTML)
+export function sanitizeText(input: string): string {
+  if (typeof input !== 'string') {
+    throw new Error('Input must be a string');
+  }
+  
+  // Remove all HTML tags and decode entities
+  const sanitized = DOMPurify.sanitize(input, sanitizeConfig);
+  
+  // Additional cleaning: remove potential script content
+  return sanitized
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/on\w+=/gi, '')
+    .trim();
+}
+
+// Sanitize story content (allows some safe formatting)
+export function sanitizeStoryContent(content: string): string {
+  if (typeof content !== 'string') {
+    throw new Error('Content must be a string');
+  }
+
+  const storyConfig = {
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'i', 'b'],
+    ALLOWED_ATTR: [],
+    KEEP_CONTENT: true,
+    RETURN_DOM: false,
+  };
+
+  return DOMPurify.sanitize(content, storyConfig);
+}
+
+// Validate and sanitize child name
+export const childNameSchema = z
+  .string()
+  .min(1, "Child name is required")
+  .max(50, "Child name must be 50 characters or less")
+  .regex(/^[a-zA-Z\s\-']+$/, "Child name can only contain letters, spaces, hyphens, and apostrophes")
+  .transform(sanitizeText);
+
+// Validate and sanitize themes
+export const themesSchema = z
+  .string()
+  .max(200, "Themes must be 200 characters or less")
+  .regex(/^[a-zA-Z\s,\-']+$/, "Themes can only contain letters, spaces, commas, hyphens, and apostrophes")
+  .transform(sanitizeText)
+  .optional();
+
+// Validate and sanitize bedtime message
+export const bedtimeMessageSchema = z
+  .string()
+  .max(500, "Bedtime message must be 500 characters or less")
+  .transform(sanitizeText)
+  .optional();
+
+// Validate story title
+export const storyTitleSchema = z
+  .string()
+  .min(1, "Title is required")
+  .max(100, "Title must be 100 characters or less")
+  .transform(sanitizeText);
+
+// Validate story content
+export const storyContentSchema = z
+  .string()
+  .min(1, "Story content is required")
+  .max(10000, "Story content must be 10000 characters or less")
+  .transform(sanitizeStoryContent);
+
+// Comprehensive story validation schema
+export const sanitizedStorySchema = z.object({
+  childName: childNameSchema,
+  childAge: z.number().int().min(2).max(8),
+  childGender: z.enum(['boy', 'girl']),
+  favoriteThemes: themesSchema,
+  tone: z.enum(['adventurous', 'silly', 'calming', 'educational']),
+  length: z.enum(['short', 'medium', 'long']),
+  bedtimeMessage: bedtimeMessageSchema,
+  title: storyTitleSchema.optional(),
+  content: storyContentSchema.optional(),
+});
+
+// Rate limiting helper
+export class RateLimiter {
+  private requests: Map<string, number[]> = new Map();
+  
+  constructor(
+    private maxRequests: number = 10,
+    private windowMs: number = 60000 // 1 minute
+  ) {}
+
+  isAllowed(identifier: string): boolean {
+    const now = Date.now();
+    const requests = this.requests.get(identifier) || [];
+    
+    // Remove old requests outside the window
+    const validRequests = requests.filter(time => now - time < this.windowMs);
+    
+    if (validRequests.length >= this.maxRequests) {
+      return false;
+    }
+    
+    validRequests.push(now);
+    this.requests.set(identifier, validRequests);
+    return true;
+  }
+}
+
+// Input validation middleware
+export function validateInput<T>(schema: z.ZodSchema<T>) {
+  return (req: any, res: any, next: any) => {
+    try {
+      req.validatedBody = schema.parse(req.body);
+      next();
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        return res.status(400).json({
+          message: "Input validation failed",
+          errors: error.errors.map(err => ({
+            field: err.path.join('.'),
+            message: err.message,
+          })),
+        });
+      }
+      return res.status(400).json({ message: "Invalid input" });
+    }
+  };
+}
+
+// CSRF protection helper
+export function validateCSRFToken(req: any, res: any, next: any) {
+  const token = req.headers['x-csrf-token'] || req.body._csrf;
+  const sessionToken = req.session?.csrfToken;
+  
+  if (!token || !sessionToken || token !== sessionToken) {
+    return res.status(403).json({ message: "Invalid CSRF token" });
+  }
+  
+  next();
+}
+
+// Generate CSRF token
+export function generateCSRFToken(): string {
+  return require('crypto').randomBytes(32).toString('hex');
+}
