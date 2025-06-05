@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 
 interface CSRFState {
@@ -15,21 +16,14 @@ export function useCSRF() {
 
   const fetchCSRFToken = async () => {
     try {
-      setState((prev) => ({ ...prev, loading: true, error: null }));
-
+      setState(prev => ({ ...prev, loading: true, error: null }));
+      
       const response = await fetch("/api/csrf-token", {
         credentials: "include",
       });
 
       if (!response.ok) {
-        // For non-critical errors, still allow the app to function
-        console.warn(`CSRF token fetch failed with status ${response.status}`);
-        setState({
-          token: null,
-          loading: false,
-          error: `HTTP ${response.status}`,
-        });
-        return;
+        throw new Error("Failed to fetch CSRF token");
       }
 
       const data = await response.json();
@@ -39,7 +33,6 @@ export function useCSRF() {
         error: null,
       });
     } catch (error) {
-      console.error("CSRF token fetch error:", error);
       setState({
         token: null,
         loading: false,

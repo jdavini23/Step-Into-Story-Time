@@ -128,29 +128,6 @@ export class DatabaseStorage implements IStorage {
       .select()
       .from(stories)
       .where(and(eq(stories.id, id), eq(stories.userId, userId)));
-
-    if (!story) {
-      return undefined;
-    }
-
-    // Debug logging for content issues
-    console.log(`Storage getStory ${id} debug:`, {
-      hasContent: !!story.content,
-      contentType: typeof story.content,
-      contentLength: story.content?.length || 0,
-      rawContentPreview: story.content
-        ? String(story.content).substring(0, 50) + "..."
-        : "No content",
-      dbResultKeys: Object.keys(story),
-      allFieldsPresent: {
-        id: !!story.id,
-        title: !!story.title,
-        content: !!story.content,
-        childName: !!story.childName,
-      },
-    });
-
-    // Return the story directly - it's already properly formatted from the database
     return story;
   }
 

@@ -1,5 +1,4 @@
 import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Badge } from "@/components/ui/badge";
 import { Lock } from "lucide-react";
@@ -19,31 +18,6 @@ export function StoryStyleStep({
 }: StoryStyleStepProps) {
   return (
     <div className="space-y-6">
-      <div className="p-4 border border-gray-200 rounded-xl bg-gray-50">
-        <Label
-          htmlFor="favoriteThemes"
-          className="block text-sm font-medium text-gray-700 mb-2"
-        >
-          Favorite Animals or Characters (Optional)
-        </Label>
-        <p className="text-sm text-gray-500 mb-4">
-          What animals, characters, or themes does your child love? (e.g.,
-          dinosaurs, princesses, dragons)
-        </p>
-        <Input
-          id="favoriteThemes"
-          type="text"
-          placeholder="Enter favorite animals, characters, or themes..."
-          value={formData.favoriteThemes || ""}
-          onChange={(e) => updateFormData("favoriteThemes", e.target.value)}
-          className="w-full bg-white"
-          maxLength={100}
-        />
-        <p className="text-xs text-gray-400 mt-2">
-          {formData.favoriteThemes?.length || 0}/100 characters
-        </p>
-      </div>
-
       <div>
         <Label className="block text-sm font-medium text-gray-700 mb-4">
           Story Tone *

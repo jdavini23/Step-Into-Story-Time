@@ -35,22 +35,17 @@ export default function Dashboard() {
   const { showActionToast } = useEnhancedToast();
 
   const {
-    data: storiesResponse,
+    data: stories = [],
     isLoading: storiesLoading,
     error,
     refetch: refetchStories,
-  } = useQuery<{ success: boolean; data: Story[]; meta?: any }>({
+  } = useQuery<Story[]>({
     queryKey: ["/api/stories"],
-    queryFn: getQueryFn<{ success: boolean; data: Story[]; meta?: any }>({
-      on401: "throw",
-    }),
+    queryFn: getQueryFn<Story[]>({ on401: "throw" }),
     enabled: !!user,
     staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: true,
   });
-
-  // Extract stories array from API response
-  const stories = storiesResponse?.data || [];
 
   const { data: favoriteStories = [], refetch: refetchFavorites } = useQuery<
     Story[]
@@ -107,17 +102,7 @@ export default function Dashboard() {
       // Error handling is done in the EnhancedErrorState component below
     }
 
-    // Debug logging for story data
-    if (import.meta.env.DEV) {
-      console.log("=== DASHBOARD DEBUG ===");
-      console.log("Stories response:", storiesResponse);
-      console.log("Extracted stories:", stories);
-      console.log("Stories count:", stories.length);
-      console.log("Stories loading:", storiesLoading);
-      console.log("Error:", error);
-      console.log("User:", user?.id);
-      console.log("=== END DASHBOARD DEBUG ===");
-    }
+    // Debug logging removed - use DebugPanel component instead if needed
   }, [
     user,
     isLoading,
@@ -127,8 +112,6 @@ export default function Dashboard() {
     favoriteStories,
     showFavorites,
     tierInfo,
-    storiesResponse,
-    storiesLoading,
   ]);
 
   if (isLoading) {
@@ -445,9 +428,7 @@ export default function Dashboard() {
       <FloatingActionButton />
 
       {/* Debug Panel - only show in development */}
-      {(import.meta.env.DEV || import.meta.env.MODE === "development") && (
-        <DebugPanel />
-      )}
+      {import.meta.env.DEV && <DebugPanel />}
     </div>
   );
 }

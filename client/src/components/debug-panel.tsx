@@ -18,22 +18,10 @@ export function DebugPanel() {
   const fetchDebugInfo = async () => {
     try {
       const response = await apiRequest("GET", "/api/debug/user-info");
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
       const data = await response.json();
       setDebugInfo(data);
     } catch (error) {
       console.error("Failed to fetch debug info:", error);
-      setDebugInfo({
-        error: error instanceof Error ? error.message : "Unknown error",
-      });
-      toast({
-        title: "Debug Info Error",
-        description:
-          "Failed to fetch debug information. Check console for details.",
-        variant: "destructive",
-      });
     }
   };
 
@@ -214,24 +202,7 @@ export function DebugPanel() {
                   Debug Info
                 </h4>
                 <div className="text-xs bg-white p-2 rounded border max-h-40 overflow-auto">
-                  {debugInfo.error ? (
-                    <div className="text-red-600">
-                      <strong>Error:</strong> {debugInfo.error}
-                    </div>
-                  ) : (
-                    <pre>
-                      {JSON.stringify(
-                        {
-                          id: debugInfo?.id,
-                          email: debugInfo?.email ? "***@***.com" : null,
-                          firstName: debugInfo?.firstName,
-                          isAuthenticated: !!debugInfo,
-                        },
-                        null,
-                        2,
-                      )}
-                    </pre>
-                  )}
+                  <pre>{JSON.stringify(debugInfo, null, 2)}</pre>
                 </div>
               </div>
             </>

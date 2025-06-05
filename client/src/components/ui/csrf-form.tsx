@@ -1,29 +1,22 @@
+
 import React, { FormEvent, ReactNode } from "react";
 import { useCSRF } from "@/hooks/useCSRF";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
 
 interface CSRFFormProps {
-  onSubmit: (
-    event: FormEvent<HTMLFormElement>,
-    csrfToken: string,
-  ) => void | Promise<void>;
+  onSubmit: (event: FormEvent<HTMLFormElement>, csrfToken: string) => void | Promise<void>;
   children: ReactNode;
   className?: string;
   disabled?: boolean;
 }
 
-export function CSRFForm({
-  onSubmit,
-  children,
-  className,
-  disabled,
-}: CSRFFormProps) {
+export function CSRFForm({ onSubmit, children, className, disabled }: CSRFFormProps) {
   const { token, loading, error, refreshToken } = useCSRF();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-
+    
     if (!token) {
       console.error("No CSRF token available");
       return;
@@ -33,7 +26,7 @@ export function CSRFForm({
       await onSubmit(event, token);
     } catch (error) {
       // If submission fails due to CSRF, refresh token
-      if (error instanceof Error && error.message.includes("CSRF")) {
+      if (error instanceof Error && error.message.includes('CSRF')) {
         refreshToken();
       }
       throw error;
@@ -55,7 +48,7 @@ export function CSRFForm({
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
           Security token error: {error}
-          <button
+          <button 
             onClick={refreshToken}
             className="ml-2 underline hover:no-underline"
           >
@@ -70,7 +63,9 @@ export function CSRFForm({
     <form onSubmit={handleSubmit} className={className}>
       {/* Hidden CSRF token input for fallback */}
       <input type="hidden" name="_csrf" value={token || ""} />
-      <fieldset disabled={disabled || !token}>{children}</fieldset>
+      <fieldset disabled={disabled || !token}>
+        {children}
+      </fieldset>
     </form>
   );
 }

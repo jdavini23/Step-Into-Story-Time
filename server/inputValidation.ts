@@ -1,6 +1,6 @@
+
 import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
-import { randomBytes } from "crypto";
 
 // HTML sanitization configuration
 const sanitizeConfig = {
@@ -14,30 +14,30 @@ const sanitizeConfig = {
 
 // Strict sanitization for user inputs (removes all HTML)
 export function sanitizeText(input: string): string {
-  if (typeof input !== "string") {
-    throw new Error("Input must be a string");
+  if (typeof input !== 'string') {
+    throw new Error('Input must be a string');
   }
-
+  
   // Remove all HTML tags and decode entities
   const sanitized = DOMPurify.sanitize(input, sanitizeConfig);
-
+  
   // Additional cleaning: remove potential script content
   return sanitized
-    .replace(/javascript:/gi, "")
-    .replace(/data:/gi, "")
-    .replace(/vbscript:/gi, "")
-    .replace(/on\w+=/gi, "")
+    .replace(/javascript:/gi, '')
+    .replace(/data:/gi, '')
+    .replace(/vbscript:/gi, '')
+    .replace(/on\w+=/gi, '')
     .trim();
 }
 
 // Sanitize story content (allows some safe formatting)
 export function sanitizeStoryContent(content: string): string {
-  if (typeof content !== "string") {
-    throw new Error("Content must be a string");
+  if (typeof content !== 'string') {
+    throw new Error('Content must be a string');
   }
 
   const storyConfig = {
-    ALLOWED_TAGS: ["p", "br", "strong", "em", "i", "b"],
+    ALLOWED_TAGS: ['p', 'br', 'strong', 'em', 'i', 'b'],
     ALLOWED_ATTR: [],
     KEEP_CONTENT: true,
     RETURN_DOM: false,
@@ -51,28 +51,22 @@ export const childNameSchema = z
   .string()
   .min(1, "Child name is required")
   .max(50, "Child name must be 50 characters or less")
-  .regex(
-    /^[a-zA-Z\s\-']+$/,
-    "Child name can only contain letters, spaces, hyphens, and apostrophes",
-  )
+  .regex(/^[a-zA-Z\s\-']+$/, "Child name can only contain letters, spaces, hyphens, and apostrophes")
   .transform(sanitizeText);
 
 // Validate and sanitize themes
 export const themesSchema = z
   .string()
   .max(200, "Themes must be 200 characters or less")
-  .refine(
-    (val) => val === "" || /^[a-zA-Z\s,\-']+$/.test(val),
-    "Themes can only contain letters, spaces, commas, hyphens, and apostrophes",
-  )
-  .transform((val) => (val === "" ? undefined : sanitizeText(val)))
+  .regex(/^[a-zA-Z\s,\-']+$/, "Themes can only contain letters, spaces, commas, hyphens, and apostrophes")
+  .transform(sanitizeText)
   .optional();
 
 // Validate and sanitize bedtime message
 export const bedtimeMessageSchema = z
   .string()
   .max(500, "Bedtime message must be 500 characters or less")
-  .transform((val) => (val === "" ? undefined : sanitizeText(val)))
+  .transform(sanitizeText)
   .optional();
 
 // Validate story title
@@ -93,68 +87,38 @@ export const storyContentSchema = z
 export const sanitizedStorySchema = z.object({
   childName: childNameSchema,
   childAge: z.number().int().min(2).max(8),
-  childGender: z.enum(["boy", "girl"]),
+  childGender: z.enum(['boy', 'girl']),
   favoriteThemes: themesSchema,
-  tone: z.enum(["adventurous", "silly", "calming", "educational"]),
-  length: z.enum(["short", "medium", "long"]),
+  tone: z.enum(['adventurous', 'silly', 'calming', 'educational']),
+  length: z.enum(['short', 'medium', 'long']),
   bedtimeMessage: bedtimeMessageSchema,
   title: storyTitleSchema.optional(),
   content: storyContentSchema.optional(),
 });
 
-// Enhanced rate limiting helper
+// Rate limiting helper
 export class RateLimiter {
   private requests: Map<string, number[]> = new Map();
-
+  
   constructor(
     private maxRequests: number = 10,
-    private windowMs: number = 60000, // 1 minute
+    private windowMs: number = 60000 // 1 minute
   ) {}
 
-  isAllowed(identifier: string): {
-    allowed: boolean;
-    resetTime?: number;
-    remaining?: number;
-  } {
+  isAllowed(identifier: string): boolean {
     const now = Date.now();
     const requests = this.requests.get(identifier) || [];
-
+    
     // Remove old requests outside the window
-    const validRequests = requests.filter((time) => now - time < this.windowMs);
-
+    const validRequests = requests.filter(time => now - time < this.windowMs);
+    
     if (validRequests.length >= this.maxRequests) {
-      const oldestRequest = Math.min(...validRequests);
-      const resetTime = oldestRequest + this.windowMs;
-
-      return {
-        allowed: false,
-        resetTime,
-        remaining: 0,
-      };
+      return false;
     }
-
+    
     validRequests.push(now);
     this.requests.set(identifier, validRequests);
-
-    return {
-      allowed: true,
-      remaining: this.maxRequests - validRequests.length,
-    };
-  }
-
-  // Get current status without consuming a request
-  getStatus(identifier: string): { remaining: number; resetTime?: number } {
-    const now = Date.now();
-    const requests = this.requests.get(identifier) || [];
-    const validRequests = requests.filter((time) => now - time < this.windowMs);
-
-    if (validRequests.length >= this.maxRequests) {
-      const oldestRequest = Math.min(...validRequests);
-      const resetTime = oldestRequest + this.windowMs;
-      return { remaining: 0, resetTime };
-    }
-
-    return { remaining: this.maxRequests - validRequests.length };
+    return true;
   }
 }
 
@@ -162,91 +126,53 @@ export class RateLimiter {
 export function validateInput<T>(schema: z.ZodSchema<T>) {
   return (req: any, res: any, next: any) => {
     try {
-      console.log("=== VALIDATION DEBUG ===");
-      console.log("Request body:", JSON.stringify(req.body, null, 2));
-
       req.validatedBody = schema.parse(req.body);
-      console.log("Validation successful");
-      console.log("=== END VALIDATION DEBUG ===");
       next();
     } catch (error) {
-      console.log("=== VALIDATION ERROR DEBUG ===");
-      console.log("Request body:", JSON.stringify(req.body, null, 2));
-      console.log("Error details:", error);
-      console.log("=== END VALIDATION ERROR DEBUG ===");
-
       if (error instanceof z.ZodError) {
         return res.status(400).json({
           message: "Input validation failed",
-          errors: error.errors.map((err) => ({
-            field: err.path.join("."),
+          errors: error.errors.map(err => ({
+            field: err.path.join('.'),
             message: err.message,
-            received: err.received,
-            code: err.code,
           })),
-          receivedData: req.body,
         });
       }
-      return res
-        .status(400)
-        .json({ message: "Invalid input", error: error.message });
+      return res.status(400).json({ message: "Invalid input" });
     }
   };
 }
 
 // CSRF protection helper
 export function validateCSRFToken(req: any, res: any, next: any) {
-  // Skip CSRF validation for GET requests
-  if (req.method === "GET") {
-    return next();
-  }
-
-  // Temporary bypass for development mode to help with debugging
-  if (
-    process.env.NODE_ENV === "development" &&
-    process.env.BYPASS_CSRF === "true"
-  ) {
-    console.warn("CSRF validation bypassed in development mode");
-    return next();
-  }
-
-  const token = req.headers["x-csrf-token"] || req.body._csrf;
+  const token = req.headers['x-csrf-token'] || req.body._csrf;
   const sessionToken = req.session?.csrfToken;
-
-  // If no session exists, regenerate it and skip CSRF for this request
-  if (!req.session) {
-    console.warn("No session found, skipping CSRF validation");
-    return next();
-  }
-
+  
   if (!token) {
-    return res.status(403).json({
+    return res.status(403).json({ 
       message: "CSRF token required",
-      code: "CSRF_TOKEN_MISSING",
+      code: "CSRF_TOKEN_MISSING"
     });
   }
-
+  
   if (!sessionToken) {
-    // Generate a new token if session exists but no CSRF token
-    req.session.csrfToken = generateCSRFToken();
-    console.warn("Generated new CSRF token for existing session");
-    return res.status(403).json({
-      message: "Session refreshed - please retry with new token",
-      code: "CSRF_SESSION_REFRESH_REQUIRED",
+    return res.status(403).json({ 
+      message: "Invalid session - CSRF token not found",
+      code: "CSRF_SESSION_INVALID"
     });
   }
-
+  
   if (token !== sessionToken) {
-    return res.status(403).json({
+    return res.status(403).json({ 
       message: "Invalid CSRF token",
-      code: "CSRF_TOKEN_INVALID",
+      code: "CSRF_TOKEN_INVALID"
     });
   }
-
+  
   next();
 }
 
 // Generate CSRF token
 export function generateCSRFToken(): string {
-  return randomBytes(32).toString("hex");
+  return require('crypto').randomBytes(32).toString('hex');
 }

@@ -98,11 +98,7 @@ export function StoryCard({ story, isFavorited }: StoryCardProps) {
             {story.favoriteThemes && ` with ${story.favoriteThemes}`}...
           </p>
           <div className="flex items-center justify-between text-xs text-gray-500">
-            <span>
-              {story.createdAt
-                ? new Date(story.createdAt).toLocaleDateString()
-                : "Just now"}
-            </span>
+            <span>{new Date(story.createdAt || "").toLocaleDateString()}</span>
             <span>
               {story.length === "short"
                 ? "2-3"
