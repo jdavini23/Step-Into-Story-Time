@@ -253,15 +253,33 @@ export default function StoryReader() {
 
   // Split content into paragraphs for better reading
   const paragraphs = useMemo(() => {
-    if (!story?.content) return [];
+    // Enhanced debugging
+    console.log('Story content debug in useMemo:', {
+      story: !!story,
+      hasContent: !!story?.content,
+      contentType: typeof story?.content,
+      contentValue: story?.content,
+      rawContent: JSON.stringify(story?.content)
+    });
+
+    if (!story || !story.content) {
+      console.warn('No story or content found:', { story: !!story, content: story?.content });
+      return [];
+    }
     
     // Handle different types of content and ensure it's properly formatted
     let content = story.content;
     
-    // Handle cases where content might be an object or needs conversion
+    // Handle cases where content might be an object, null, or needs conversion
+    if (content === null || content === undefined) {
+      console.error('Content is null or undefined');
+      return [];
+    }
+    
     if (typeof content !== 'string') {
       try {
         content = String(content);
+        console.log('Converted content to string:', typeof content);
       } catch (e) {
         console.error('Error converting content to string:', e);
         return [];
@@ -271,7 +289,10 @@ export default function StoryReader() {
     // Remove any potential null bytes or problematic characters
     content = content.replace(/\0/g, '').trim();
     
-    if (!content) return [];
+    if (!content || content === 'undefined' || content === 'null') {
+      console.error('Content is empty, "undefined", or "null" string');
+      return [];
+    }
     
     // Split by double newlines first, then single newlines if no double newlines found
     let splits = content.split('\n\n');
@@ -285,10 +306,14 @@ export default function StoryReader() {
     }
     
     // Filter out empty paragraphs and trim whitespace
-    return splits
+    const validParagraphs = splits
       .map(p => p.trim())
-      .filter(p => p.length > 0 && p !== '.');
-  }, [story?.content]);
+      .filter(p => p.length > 0 && p !== '.' && p !== 'undefined' && p !== 'null');
+    
+    console.log('Final paragraphs:', { count: validParagraphs.length, firstParagraph: validParagraphs[0]?.substring(0, 50) });
+    
+    return validParagraphs;
+  }, [story]);
 
   if (isLoading || storyLoading) {
     return (
