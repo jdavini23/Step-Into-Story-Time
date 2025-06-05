@@ -1,6 +1,6 @@
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Download, Share2, Plus, Lock } from "lucide-react";
+import { Download, Share2, Plus, Lock, MoreHorizontal, Edit, Trash2, Heart, HeartOff } from "lucide-react";
 import type { Story } from "@shared/schema";
 import type { TierInfo } from "@/hooks/useTierInfo";
 
@@ -72,7 +72,6 @@ export function StoryActions({
 }
 import React, { useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { MoreHorizontal, Edit, Trash2, Download, Heart, HeartOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
