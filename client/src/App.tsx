@@ -13,7 +13,6 @@ import Subscribe from "@/pages/subscribe";
 import Pricing from "@/pages/pricing";
 import Header from "@/components/header";
 import React from 'react';
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { EnhancedErrorBoundary } from './components/enhanced-error-boundary';
 
 function Router() {
