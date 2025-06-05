@@ -255,8 +255,23 @@ export default function StoryReader() {
   const paragraphs = useMemo(() => {
     if (!story?.content) return [];
     
-    // Handle different paragraph separators and ensure content is properly formatted
-    const content = story.content.toString(); // Ensure it's a string
+    // Handle different types of content and ensure it's properly formatted
+    let content = story.content;
+    
+    // Handle cases where content might be an object or needs conversion
+    if (typeof content !== 'string') {
+      try {
+        content = String(content);
+      } catch (e) {
+        console.error('Error converting content to string:', e);
+        return [];
+      }
+    }
+    
+    // Remove any potential null bytes or problematic characters
+    content = content.replace(/\0/g, '').trim();
+    
+    if (!content) return [];
     
     // Split by double newlines first, then single newlines if no double newlines found
     let splits = content.split('\n\n');
@@ -264,10 +279,15 @@ export default function StoryReader() {
       splits = content.split('\n');
     }
     
+    // If still only one paragraph, split by periods for very long content
+    if (splits.length === 1 && content.length > 500) {
+      splits = content.split('. ').map(s => s.trim() + (s.endsWith('.') ? '' : '.'));
+    }
+    
     // Filter out empty paragraphs and trim whitespace
     return splits
       .map(p => p.trim())
-      .filter(p => p.length > 0);
+      .filter(p => p.length > 0 && p !== '.');
   }, [story?.content]);
 
   if (isLoading || storyLoading) {
@@ -441,6 +461,13 @@ export default function StoryReader() {
             </div>
 
             <div className={isDarkMode ? "text-gray-100" : "text-gray-700"}>
+              {/* Debug info for development */}
+              {import.meta.env.DEV && (
+                <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
+                  Debug: Content type: {typeof story?.content}, Length: {story?.content?.length || 0}, Paragraphs: {paragraphs.length}
+                </div>
+              )}
+              
               {paragraphs.length > 0 ? (
                 paragraphs.map((paragraph, index) => (
                   <p
@@ -451,18 +478,21 @@ export default function StoryReader() {
                     {paragraph}
                   </p>
                 ))
+              ) : story?.content ? (
+                // Enhanced fallback: display raw content with better formatting
+                <div
+                  className="leading-8 mb-6 whitespace-pre-wrap"
+                  style={{ fontSize: `${fontSize}px` }}
+                >
+                  {typeof story.content === 'string' ? story.content : String(story.content)}
+                </div>
               ) : (
-                // Fallback: display raw content if paragraph processing fails
-                story?.content ? (
-                  <div
-                    className="leading-8 mb-6 whitespace-pre-wrap"
-                    style={{ fontSize: `${fontSize}px` }}
-                  >
-                    {story.content}
-                  </div>
-                ) : (
-                  <p className="text-gray-500 italic">No story content available.</p>
-                )
+                <div className="text-center py-8">
+                  <p className="text-gray-500 italic mb-4">No story content available.</p>
+                  <Button onClick={() => window.location.reload()} variant="outline">
+                    Reload Story
+                  </Button>
+                </div>
               )}
 
               {story?.bedtimeMessage && (

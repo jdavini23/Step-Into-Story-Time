@@ -147,6 +147,19 @@ export function storyRoutes(app: Express) {
         throw new NotFoundError("Story");
       }
 
+      // Debug logging for content issues
+      console.log(`Story ${storyId} content debug:`, {
+        hasContent: !!story.content,
+        contentType: typeof story.content,
+        contentLength: story.content?.length || 0,
+        contentPreview: story.content ? String(story.content).substring(0, 100) + '...' : 'No content'
+      });
+
+      // Ensure content is properly formatted
+      if (story.content && typeof story.content !== 'string') {
+        story.content = String(story.content);
+      }
+
       res.json({
         success: true,
         data: story
