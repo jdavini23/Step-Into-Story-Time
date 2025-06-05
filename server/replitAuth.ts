@@ -82,17 +82,34 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  const domains = process.env.REPLIT_DOMAINS!.split(",");
+  const domains = process.env.REPLIT_DOMAINS ? process.env.REPLIT_DOMAINS.split(",") : [];
   
   // Add development domains
   if (process.env.NODE_ENV === 'development') {
     domains.push('localhost:5000', 'localhost');
-    // Add current Replit workspace domain if available
-    if (process.env.REPLIT_SLUG && process.env.REPL_OWNER) {
+  }
+  
+  // Always add current Replit workspace domain if available
+  if (process.env.REPL_ID) {
+    // Get the current domain from various possible environment variables
+    const currentDomain = process.env.REPLIT_DEV_DOMAIN || 
+                         process.env.REPL_SLUG || 
+                         `${process.env.REPL_ID}.${process.env.REPL_OWNER || 'unknown'}.replit.dev`;
+    
+    if (currentDomain && !domains.includes(currentDomain)) {
+      domains.push(currentDomain);
+    }
+    
+    // Also try to construct the full replit.dev domain
+    if (process.env.REPL_OWNER) {
       const replitDomain = `${process.env.REPL_ID}.${process.env.REPL_OWNER}.replit.dev`;
-      domains.push(replitDomain);
+      if (!domains.includes(replitDomain)) {
+        domains.push(replitDomain);
+      }
     }
   }
+  
+  console.log('Registering authentication strategies for domains:', domains);
   
   for (const domain of domains) {
     const isLocalhost = domain.includes('localhost');
@@ -122,14 +139,49 @@ export async function setupAuth(app: Express) {
       req.session.returnTo = req.query.returnTo;
     }
 
-    passport.authenticate(`replitauth:${req.hostname}`, {
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    // Check if strategy exists, if not try to find a matching one
+    const availableStrategies = Object.keys(passport._strategies || {});
+    let targetStrategy = strategyName;
+    
+    if (!availableStrategies.includes(strategyName)) {
+      console.log(`Strategy ${strategyName} not found. Available strategies:`, availableStrategies);
+      
+      // Try to find a similar strategy
+      const replitStrategies = availableStrategies.filter(s => s.startsWith('replitauth:'));
+      if (replitStrategies.length > 0) {
+        targetStrategy = replitStrategies[0];
+        console.log(`Using fallback strategy: ${targetStrategy}`);
+      } else {
+        return res.status(500).json({ 
+          error: 'Authentication not configured properly',
+          message: 'No authentication strategies available'
+        });
+      }
+    }
+
+    passport.authenticate(targetStrategy, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
     })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
-    passport.authenticate(`replitauth:${req.hostname}`, (err, user) => {
+    const strategyName = `replitauth:${req.hostname}`;
+    
+    // Check if strategy exists, if not try to find a matching one
+    const availableStrategies = Object.keys(passport._strategies || {});
+    let targetStrategy = strategyName;
+    
+    if (!availableStrategies.includes(strategyName)) {
+      const replitStrategies = availableStrategies.filter(s => s.startsWith('replitauth:'));
+      if (replitStrategies.length > 0) {
+        targetStrategy = replitStrategies[0];
+      }
+    }
+    
+    passport.authenticate(targetStrategy, (err, user) => {
       if (err) {
         return next(err);
       }
