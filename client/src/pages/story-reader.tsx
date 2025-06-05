@@ -269,10 +269,15 @@ export default function StoryReader() {
       splits = content.split('\n');
     }
     
-    // Filter out empty paragraphs
+    // Filter out empty paragraphs and ensure we have at least one paragraph
     const validParagraphs = splits
       .map(p => p.trim())
       .filter(p => p.length > 0);
+    
+    // If no valid paragraphs found, return the entire content as one paragraph
+    if (validParagraphs.length === 0) {
+      return [content];
+    }
     
     return validParagraphs;
   }, [story]);
@@ -452,10 +457,12 @@ export default function StoryReader() {
               {import.meta.env.DEV && (
                 <div className="mb-4 p-2 bg-gray-100 dark:bg-gray-800 rounded text-xs text-gray-600 dark:text-gray-400">
                   Debug: Content type: {typeof story?.content}, Length: {story?.content?.length || 0}, Paragraphs: {paragraphs.length}
+                  <br />
+                  Raw content preview: {story?.content ? String(story.content).substring(0, 100) + '...' : 'No content'}
                 </div>
               )}
               
-              {paragraphs.length > 0 ? (
+              {story?.content ? (
                 paragraphs.map((paragraph, index) => (
                   <p
                     key={index}
@@ -465,14 +472,6 @@ export default function StoryReader() {
                     {paragraph}
                   </p>
                 ))
-              ) : story?.content ? (
-                // Enhanced fallback: display raw content with better formatting
-                <div
-                  className="leading-8 mb-6 whitespace-pre-wrap"
-                  style={{ fontSize: `${fontSize}px` }}
-                >
-                  {typeof story.content === 'string' ? story.content : String(story.content)}
-                </div>
               ) : (
                 <div className="text-center py-8">
                   <p className="text-gray-500 italic mb-4">No story content available.</p>
@@ -480,7 +479,7 @@ export default function StoryReader() {
                     Reload Story
                   </Button>
                 </div>
-              )}
+              )}</div>
 
               {story?.bedtimeMessage && (
                 <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">

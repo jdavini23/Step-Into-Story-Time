@@ -152,12 +152,22 @@ export function storiesRoutes(app: Express) {
         hasContent: !!story.content,
         contentType: typeof story.content,
         contentLength: story.content?.length || 0,
-        contentPreview: story.content ? String(story.content).substring(0, 100) + '...' : 'No content'
+        contentPreview: story.content ? String(story.content).substring(0, 100) + '...' : 'No content',
+        isString: typeof story.content === 'string',
+        isEmptyString: story.content === '',
+        isNull: story.content === null,
+        isUndefined: story.content === undefined
       });
 
-      // Ensure content is properly formatted
+      // Ensure content is properly formatted and not empty
       if (story.content && typeof story.content !== 'string') {
+        console.log(`Converting story ${storyId} content from ${typeof story.content} to string`);
         story.content = String(story.content);
+      }
+      
+      // Additional check for empty content
+      if (!story.content || String(story.content).trim() === '') {
+        console.warn(`Story ${storyId} has empty or missing content!`);
       }
 
       res.json({
