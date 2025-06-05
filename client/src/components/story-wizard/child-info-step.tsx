@@ -15,6 +15,7 @@ interface ChildInfoStepProps {
 
 export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   // Validate form data
   useEffect(() => {
@@ -51,10 +52,11 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
           placeholder="Enter your child's name"
           value={formData.childName}
           onChange={(e) => updateFormData("childName", e.target.value)}
-          className={`w-full ${errors.childName ? "border-red-500" : ""}`}
+          onBlur={() => setTouched(prev => ({ ...prev, childName: true }))}
+          className={`w-full ${errors.childName && touched.childName ? "border-red-500" : ""}`}
           maxLength={50}
         />
-        {errors.childName && (
+        {errors.childName && touched.childName && (
           <p className="text-sm text-red-500 mt-1">{errors.childName}</p>
         )}
       </div>
@@ -65,9 +67,12 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
         </Label>
         <Select
           value={formData.childAge?.toString() || ""}
-          onValueChange={(value) => updateFormData("childAge", parseInt(value))}
+          onValueChange={(value) => {
+            updateFormData("childAge", parseInt(value));
+            setTouched(prev => ({ ...prev, childAge: true }));
+          }}
         >
-          <SelectTrigger className={`w-full ${errors.childAge ? "border-red-500" : ""}`}>
+          <SelectTrigger className={`w-full ${errors.childAge && touched.childAge ? "border-red-500" : ""}`}>
             <SelectValue placeholder="Select age" />
           </SelectTrigger>
           <SelectContent>
@@ -78,7 +83,7 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
             ))}
           </SelectContent>
         </Select>
-        {errors.childAge && (
+        {errors.childAge && touched.childAge && (
           <p className="text-sm text-red-500 mt-1">{errors.childAge}</p>
         )}
       </div>
@@ -96,7 +101,7 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
               htmlFor="boy"
               className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors cursor-pointer"
             >
-              <RadioGroupItem value="boy" id="boy" />
+              <RadioGroupItem value="boy" id="boy" onClick={() => setTouched(prev => ({ ...prev, childGender: true }))}/>
               <div>
                 <span className="font-medium">👦 Boy</span>
               </div>
@@ -105,14 +110,14 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
               htmlFor="girl"
               className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors cursor-pointer"
             >
-              <RadioGroupItem value="girl" id="girl" />
+              <RadioGroupItem value="girl" id="girl" onClick={() => setTouched(prev => ({ ...prev, childGender: true }))}/>
               <div>
                 <span className="font-medium">👧 Girl</span>
               </div>
             </Label>
           </div>
         </RadioGroup>
-        {errors.childGender && (
+        {errors.childGender && touched.childGender && (
           <p className="text-sm text-red-500 mt-1">{errors.childGender}</p>
         )}
       </div>
