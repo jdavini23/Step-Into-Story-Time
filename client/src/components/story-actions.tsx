@@ -94,19 +94,19 @@ import { CSRFForm } from "@/components/ui/csrf-form";
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 
-interface StoryActionsProps {
+interface StoryActionsMenuProps {
   storyId: number;
   isFavorited?: boolean;
   canDownloadPDF?: boolean;
   onEdit?: () => void;
 }
 
-export function StoryActions({ 
+export function StoryActionsMenu({ 
   storyId, 
   isFavorited, 
   canDownloadPDF = true, 
   onEdit 
-}: StoryActionsProps) {
+}: StoryActionsMenuProps) {
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -199,7 +199,7 @@ export function StoryActions({
               Edit Story
             </DropdownMenuItem>
           )}
-          
+
           <DropdownMenuItem
             onClick={() => favoriteMutation.mutate("")}
             disabled={favoriteMutation.isPending}
