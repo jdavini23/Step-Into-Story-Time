@@ -12,6 +12,20 @@ if (!process.env.REPLIT_DOMAINS) {
   throw new Error("Environment variable REPLIT_DOMAINS not provided");
 }
 
+if (!process.env.REPL_ID) {
+  throw new Error("Environment variable REPL_ID not provided");
+}
+
+if (!process.env.SESSION_SECRET) {
+  throw new Error("Environment variable SESSION_SECRET not provided");
+}
+
+console.log("Auth environment check:");
+console.log("- REPL_ID:", process.env.REPL_ID ? "SET" : "NOT SET");
+console.log("- SESSION_SECRET:", process.env.SESSION_SECRET ? "SET" : "NOT SET");
+console.log("- DATABASE_URL:", process.env.DATABASE_URL ? "SET" : "NOT SET");
+console.log("- ISSUER_URL:", process.env.ISSUER_URL || "https://replit.com/oidc (default)");
+
 const getOidcConfig = memoize(
   async () => {
     return await client.discovery(
@@ -60,13 +74,18 @@ function updateUserSession(
 }
 
 async function upsertUser(claims: any) {
-  await storage.upsertUser({
-    id: claims["sub"],
-    email: claims["email"],
-    firstName: claims["first_name"],
-    lastName: claims["last_name"],
-    profileImageUrl: claims["profile_image_url"],
-  });
+  try {
+    await storage.upsertUser({
+      id: claims["sub"],
+      email: claims["email"],
+      firstName: claims["first_name"],
+      lastName: claims["last_name"],
+      profileImageUrl: claims["profile_image_url"],
+    });
+  } catch (error) {
+    console.error("Error upserting user:", error);
+    throw error;
+  }
 }
 
 export async function setupAuth(app: Express) {
@@ -81,10 +100,15 @@ export async function setupAuth(app: Express) {
     tokens: client.TokenEndpointResponse & client.TokenEndpointResponseHelpers,
     verified: passport.AuthenticateCallback,
   ) => {
-    const user = {};
-    updateUserSession(user, tokens);
-    await upsertUser(tokens.claims());
-    verified(null, user);
+    try {
+      const user = {};
+      updateUserSession(user, tokens);
+      await upsertUser(tokens.claims());
+      verified(null, user);
+    } catch (error) {
+      console.error("Verification error:", error);
+      verified(error, null);
+    }
   };
 
   // Store registered strategies in a variable accessible to route handlers
@@ -95,6 +119,7 @@ export async function setupAuth(app: Express) {
     const domain = domainEntry.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
     const strategyName = `replitauth:${domain}`;
     
+    console.log(`Setting up strategy for domain: ${domain}`);
     const strategy = new Strategy(
       {
         name: strategyName,
@@ -146,10 +171,23 @@ export async function setupAuth(app: Express) {
 
     console.log(`Starting authentication with strategy: ${strategyName}`);
 
-    passport.authenticate(strategyName, {
+    // Create the authenticate middleware
+    const authenticateMiddleware = passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    });
+
+    // Execute the middleware with error handling
+    authenticateMiddleware(req, res, (err) => {
+      if (err) {
+        console.error("Authentication middleware error:", err);
+        return res.status(500).json({ 
+          message: "Authentication failed", 
+          error: err.message 
+        });
+      }
+      // If no error, authentication should have handled the response
+    });
   });
 
   app.get("/api/callback", (req, res, next) => {
