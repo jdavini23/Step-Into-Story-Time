@@ -138,10 +138,15 @@ export async function setupAuth(app: Express) {
       return res.status(500).json({ message: "Authentication not configured" });
     }
 
-    passport.authenticate(strategyName, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    try {
+      passport.authenticate(strategyName, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+      })(req, res, next);
+    } catch (error) {
+      console.error("Passport authentication error:", error);
+      res.status(500).json({ message: "Authentication failed", error: error.message });
+    }
   });
 
   app.get("/api/callback", (req, res, next) => {
