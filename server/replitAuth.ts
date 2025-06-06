@@ -31,6 +31,10 @@ export function getSession() {
     ttl: sessionTtl,
     tableName: "sessions",
   });
+  
+  // Determine if we're in development mode
+  const isProduction = process.env.NODE_ENV === 'production';
+  
   return session({
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
@@ -38,8 +42,9 @@ export function getSession() {
     saveUninitialized: false,
     cookie: {
       httpOnly: true,
-      secure: true,
+      secure: isProduction, // Only use secure cookies in production
       maxAge: sessionTtl,
+      sameSite: 'lax', // Allow same-site requests
     },
   });
 }
@@ -139,15 +144,12 @@ export async function setupAuth(app: Express) {
       return res.status(500).json({ message: "Authentication not configured" });
     }
 
-    try {
-      passport.authenticate(strategyName, {
-        prompt: "login consent",
-        scope: ["openid", "email", "profile", "offline_access"],
-      })(req, res, next);
-    } catch (error) {
-      console.error("Passport authentication error:", error);
-      res.status(500).json({ message: "Authentication failed", error: error.message });
-    }
+    console.log(`Starting authentication with strategy: ${strategyName}`);
+
+    passport.authenticate(strategyName, {
+      prompt: "login consent",
+      scope: ["openid", "email", "profile", "offline_access"],
+    })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
