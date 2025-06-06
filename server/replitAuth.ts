@@ -115,10 +115,22 @@ export async function setupAuth(app: Express) {
       (req.session as any).returnTo = req.query.returnTo;
     }
 
-    const strategyName = `replitauth:${req.hostname}`;
+    // Find the correct strategy by checking if it's registered
+    let strategyName = `replitauth:${req.hostname}`;
     console.log(`Attempting authentication with strategy: ${strategyName}`);
     console.log(`Request hostname: ${req.hostname}`);
     console.log(`Available domains: ${process.env.REPLIT_DOMAINS}`);
+
+    // If the exact hostname strategy doesn't exist, use the first registered strategy
+    if (!registeredStrategies.includes(strategyName)) {
+      console.log(`Strategy ${strategyName} not found, using first available: ${registeredStrategies[0]}`);
+      strategyName = registeredStrategies[0];
+    }
+
+    if (!strategyName || !registeredStrategies.includes(strategyName)) {
+      console.error("No valid authentication strategy found");
+      return res.status(500).json({ message: "Authentication not configured" });
+    }
 
     passport.authenticate(strategyName, {
       prompt: "login consent",
@@ -127,8 +139,14 @@ export async function setupAuth(app: Express) {
   });
 
   app.get("/api/callback", (req, res, next) => {
-    const strategyName = `replitauth:${req.hostname}`;
+    let strategyName = `replitauth:${req.hostname}`;
     console.log(`Callback authentication with strategy: ${strategyName}`);
+    
+    // If the exact hostname strategy doesn't exist, use the first registered strategy
+    if (!registeredStrategies.includes(strategyName)) {
+      console.log(`Callback strategy ${strategyName} not found, using first available: ${registeredStrategies[0]}`);
+      strategyName = registeredStrategies[0];
+    }
     
     passport.authenticate(strategyName, (err: any, user: any) => {
       if (err) {
