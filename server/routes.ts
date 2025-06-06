@@ -75,7 +75,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
-      
+
       // Sanitize user data before sending
       const sanitizedUser = {
         ...user,
@@ -83,7 +83,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         lastName: user.lastName ? sanitizeText(user.lastName) : null,
         email: user.email ? sanitizeText(user.email) : null,
       };
-      
+
       res.json(sanitizedUser);
     } catch (error) {
       console.error("Error fetching user:", error);
@@ -143,7 +143,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     async (req: any, res) => {
       try {
         const userId = req.user.claims.sub;
-        
+
         // Use validated and sanitized data
         const storyData = req.validatedBody;
 
