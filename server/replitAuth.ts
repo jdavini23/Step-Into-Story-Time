@@ -115,6 +115,7 @@ export async function setupAuth(app: Express) {
     }
     if (req.query.returnTo) {
       (req.session as any).returnTo = req.query.returnTo;
+      console.log(`Storing returnTo URL in session: ${req.query.returnTo}`);
     }
 
     // Find the correct strategy by checking if it's registered
@@ -159,7 +160,7 @@ export async function setupAuth(app: Express) {
       strategyName = registeredStrategies[0];
     }
     
-    passport.authenticate(strategyName, (err: any, user: any) => {
+    passport.authenticate(strategyName, async (err: any, user: any) => {
       if (err) {
         console.error("Authentication error:", err);
         return next(err);
@@ -169,17 +170,37 @@ export async function setupAuth(app: Express) {
         return res.redirect("/api/login");
       }
 
-      req.logIn(user, (err) => {
+      req.logIn(user, async (err) => {
         if (err) {
           return next(err);
         }
 
-        // Redirect to stored returnTo URL or default to dashboard
-        const returnTo = (req.session as any).returnTo || "/";
-        delete (req.session as any).returnTo; // Clean up
-        delete (req.session as any).isSignup; // Clean up
+        try {
+          // Ensure new users start with free tier
+          const userId = user.claims?.sub;
+          if (userId) {
+            const existingUser = await storage.getUser(userId);
+            if (existingUser && !existingUser.subscriptionTier) {
+              await storage.updateUserSubscription(userId, "free", "active");
+              console.log(`Set new user ${userId} to free tier`);
+            }
+          }
 
-        return res.redirect(returnTo);
+          // Redirect to stored returnTo URL or default to dashboard
+          const returnTo = (req.session as any).returnTo || "/";
+          const isSignup = (req.session as any).isSignup;
+          
+          console.log(`Authentication successful - redirecting to: ${returnTo}`);
+          console.log(`Was signup flow: ${isSignup}`);
+          
+          delete (req.session as any).returnTo; // Clean up
+          delete (req.session as any).isSignup; // Clean up
+
+          return res.redirect(returnTo);
+        } catch (error) {
+          console.error("Error during callback processing:", error);
+          return res.redirect("/");
+        }
       });
     })(req, res, next);
   });
