@@ -82,7 +82,9 @@ export async function setupAuth(app: Express) {
     verified(null, user);
   };
 
-  const registeredStrategies: string[] = [];
+  // Store registered strategies in a variable accessible to route handlers
+  let registeredStrategies: string[] = [];
+  
   for (const domainEntry of process.env.REPLIT_DOMAINS!.split(",")) {
     // Clean up domain entry - remove protocol and trailing slash
     const domain = domainEntry.trim().replace(/^https?:\/\//, '').replace(/\/$/, '');
@@ -120,6 +122,8 @@ export async function setupAuth(app: Express) {
     console.log(`Attempting authentication with strategy: ${strategyName}`);
     console.log(`Request hostname: ${req.hostname}`);
     console.log(`Available domains: ${process.env.REPLIT_DOMAINS}`);
+    console.log(`Registered strategies: ${JSON.stringify(registeredStrategies)}`);
+    console.log(`Strategy exists check: ${registeredStrategies.includes(strategyName)}`);
 
     // If the exact hostname strategy doesn't exist, use the first registered strategy
     if (!registeredStrategies.includes(strategyName)) {
@@ -129,6 +133,8 @@ export async function setupAuth(app: Express) {
 
     if (!strategyName || !registeredStrategies.includes(strategyName)) {
       console.error("No valid authentication strategy found");
+      console.error(`Final strategy name: ${strategyName}`);
+      console.error(`Registered strategies: ${JSON.stringify(registeredStrategies)}`);
       return res.status(500).json({ message: "Authentication not configured" });
     }
 
