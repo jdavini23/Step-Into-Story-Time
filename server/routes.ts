@@ -746,10 +746,42 @@ export async function registerRoutes(app: Express): Promise<Server> {
         );
         console.log("Stripe subscription status:", subscription.status);
 
+        // Synchronize user tier with Stripe subscription status
+        let shouldUpdateUserTier = false;
+        let newTier: string = user.subscriptionTier || "free";
+        let newStatus: string = subscription.status;
+
+        // Determine the correct tier based on subscription
+        if (subscription.status === "active" || subscription.status === "trialing") {
+          // Get the tier from subscription metadata or items
+          const subscriptionTier = subscription.metadata?.tier || 
+            (subscription.items.data[0]?.price.metadata?.tier) || "premium";
+          if (user.subscriptionTier !== subscriptionTier) {
+            newTier = subscriptionTier;
+            shouldUpdateUserTier = true;
+          }
+        } else if (subscription.status === "incomplete" || 
+                  subscription.status === "past_due" || 
+                  subscription.status === "canceled" ||
+                  subscription.status === "incomplete_expired") {
+          // For incomplete or failed subscriptions, keep them on free tier
+          if (user.subscriptionTier !== "free") {
+            newTier = "free";
+            shouldUpdateUserTier = true;
+          }
+        }
+
+        // Update user tier if needed
+        if (shouldUpdateUserTier || user.subscriptionStatus !== subscription.status) {
+          await storage.updateUserSubscription(userId, newTier as any, subscription.status as any);
+          console.log(`Updated user tier from ${user.subscriptionTier} to ${newTier}, status: ${subscription.status}`);
+        }
+
         res.json({
-          hasActiveSubscription: subscription.status === "active",
+          hasActiveSubscription: subscription.status === "active" || subscription.status === "trialing",
           status: subscription.status,
           subscriptionId: subscription.id,
+          tier: newTier,
         });
         console.log("=== END SUBSCRIPTION STATUS DEBUG ===");
       } catch (error: any) {

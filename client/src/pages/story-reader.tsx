@@ -146,7 +146,7 @@ export default function StoryReader() {
       console.error("Story reader error:", {
         error,
         storyId,
-        userId: user?.id,
+        userId: (user as any)?.id,
         status: (error as any)?.status,
         message: (error as any)?.message,
       });
@@ -157,7 +157,7 @@ export default function StoryReader() {
         window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
       }
     }
-  }, [error, storyId, user?.id]);
+  }, [error, storyId, user]);
 
   const downloadPDF = useCallback(async () => {
     if (!story) return;
