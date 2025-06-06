@@ -121,6 +121,15 @@ export default function StoryReader() {
     }
   }, [story, isReading, toast]);
 
+  // Cleanup speech synthesis on unmount
+  useEffect(() => {
+    return () => {
+      if (speechSynthesis.speaking) {
+        speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
   // Font size controls
   const increaseFontSize = useCallback(() => {
     setFontSize((prev) => Math.min(24, prev + 2));
@@ -167,9 +176,7 @@ export default function StoryReader() {
 
       const response = await fetch(`/api/stories/${story.id}/pdf`, {
         method: "GET",
-        headers: {
-          "Content-Type": "application/pdf",
-        },
+        credentials: "include",
       });
 
       if (!response.ok) {

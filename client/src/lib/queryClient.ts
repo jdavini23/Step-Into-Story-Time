@@ -77,11 +77,15 @@ export async function apiRequest(
 
     // If we get a 403 CSRF error and haven't retried yet, clear token and retry
     if (res.status === 403 && needsCSRF && retryOnCSRFFailure) {
-      const responseText = await res.text();
-      if (responseText.includes('CSRF') || responseText.includes('csrf')) {
-        console.warn('CSRF token invalid, clearing cache and retrying...');
-        clearCSRFToken();
-        return makeRequest(false); // Retry without further retries
+      try {
+        const responseText = await res.clone().text();
+        if (responseText.includes('CSRF') || responseText.includes('csrf')) {
+          console.warn('CSRF token invalid, clearing cache and retrying...');
+          clearCSRFToken();
+          return makeRequest(false); // Retry without further retries
+        }
+      } catch (textError) {
+        console.warn('Failed to read response text for CSRF check:', textError);
       }
     }
 
