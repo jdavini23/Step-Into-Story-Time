@@ -586,7 +586,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
             }
           }
         }
-        }
 
         if (!user.email) {
           throw new Error("No user email on file");
