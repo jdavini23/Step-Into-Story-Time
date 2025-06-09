@@ -661,14 +661,18 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         console.log("=== SUBSCRIPTION DEBUG INFO ===");
+        console.log("User ID:", userId);
+        console.log("Tier requested:", tier);
         console.log("Subscription ID:", subscription.id);
         console.log("Subscription status:", subscription.status);
         console.log("Billing period:", billing);
         console.log("Price in cents:", priceInCents);
         console.log("Client secret generated:", clientSecret ? "Yes" : "No");
         console.log("Customer ID:", customer.id);
+        console.log("Customer email:", customer.email);
         console.log("Product ID:", product.id);
         console.log("Price ID:", price.id);
+        console.log("User email:", user.email);
         console.log(
           "Latest invoice:",
           subscription.latest_invoice ? "exists" : "missing",
@@ -677,8 +681,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Payment intent exists:", subscription.latest_invoice.payment_intent ? "Yes" : "No");
           if (subscription.latest_invoice.payment_intent && typeof subscription.latest_invoice.payment_intent === "object") {
             console.log("Payment intent status:", subscription.latest_invoice.payment_intent.status);
+            console.log("Payment intent client secret exists:", subscription.latest_invoice.payment_intent.client_secret ? "Yes" : "No");
           }
         }
+        console.log("Response being sent:", {
+          subscriptionId: subscription.id,
+          clientSecret: clientSecret ? "Present" : "Missing",
+          hasError: false
+        });
         console.log("=== END DEBUG INFO ===");
 
         if (!clientSecret) {
@@ -705,7 +715,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
         });
       } catch (error: any) {
         console.error("Subscription error:", error);
-        return res.status(400).send({ error: { message: error.message } });
+        console.error("Error stack:", error.stack);
+        
+        // Provide more specific error messages
+        let errorMessage = "An unexpected error occurred while setting up your subscription.";
+        let statusCode = 500;
+        
+        if (error.type === "StripeCardError") {
+          errorMessage = "There was an issue with your payment method. Please try a different card.";
+          statusCode = 400;
+        } else if (error.type === "StripeRateLimitError") {
+          errorMessage = "Too many requests. Please wait a moment and try again.";
+          statusCode = 429;
+        } else if (error.type === "StripeInvalidRequestError") {
+          errorMessage = "Invalid subscription request. Please contact support.";
+          statusCode = 400;
+        } else if (error.type === "StripeAPIError") {
+          errorMessage = "Payment service temporarily unavailable. Please try again.";
+          statusCode = 503;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        return res.status(statusCode).json({ 
+          error: { 
+            message: errorMessage,
+            type: error.type || "subscription_error"
+          } 
+        });
       }
     },
   );

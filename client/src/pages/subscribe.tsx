@@ -140,6 +140,8 @@ export default function Subscribe() {
   const { user, isLoading: authLoading } = useAuth();
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
+  const [retryCount, setRetryCount] = useState(0);
+  const [lastError, setLastError] = useState<string | null>(null);
 
   // Get tier and billing period from URL parameters
   const urlParams = new URLSearchParams(window.location.search);
@@ -164,24 +166,51 @@ export default function Subscribe() {
         tier: selectedTier,
         billing: billingPeriod,
       })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then((data) => {
           console.log("Subscription response:", data);
           console.log("Client secret:", data.clientSecret);
+          
+          if (data.error) {
+            throw new Error(data.error.message || "Subscription creation failed");
+          }
+          
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           } else {
-            console.error("No client secret in response");
+            console.error("No client secret in response", data);
+            throw new Error("No payment details received. Please try again.");
           }
           setIsLoading(false);
         })
         .catch((error) => {
           console.error("Error creating subscription:", error);
+          setLastError(error.message || "Unable to set up your subscription. Please try again.");
           setIsLoading(false);
-          // You could also show a toast notification here
+          
+          // Auto-retry logic for temporary failures
+          if (retryCount < 2 && (error.message?.includes("temporarily unavailable") || error.message?.includes("network"))) {
+            setTimeout(() => {
+              setRetryCount(prev => prev + 1);
+              setIsLoading(true);
+              setLastError(null);
+              // This will trigger the useEffect again
+            }, Math.pow(2, retryCount) * 1000); // Exponential backoff: 1s, 2s, 4s
+          } else {
+            toast({
+              title: "Setup Error",
+              description: error.message || "Unable to set up your subscription. Please try again.",
+              variant: "destructive",
+            });
+          }
         });
     }
-  }, [user]);
+  }, [user, toast, retryCount]);
 
   if (authLoading || isLoading) {
     return (
@@ -326,23 +355,45 @@ export default function Subscribe() {
                 </Elements>
               ) : (
                 <div className="text-center py-8">
-                  <p className="text-gray-600 mb-4">
-                    Unable to load payment form. There was an issue setting up your subscription.
-                  </p>
-                  <div className="space-y-2">
+                  <div className="mb-4">
+                    <div className="w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
+                      <span className="text-red-600 text-xl">⚠️</span>
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                      Payment Setup Failed
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      We encountered an issue setting up your subscription payment. This might be temporary.
+                    </p>
+                  </div>
+                  <div className="space-y-3">
                     <Button
-                      onClick={() => window.location.reload()}
-                      variant="outline"
-                      className="mr-2"
+                      onClick={() => {
+                        setIsLoading(true);
+                        setClientSecret("");
+                        // Trigger useEffect to retry
+                        window.location.reload();
+                      }}
+                      className="w-full"
                     >
-                      Retry
+                      Try Again
                     </Button>
-                    <Button
-                      onClick={() => window.location.href = "/pricing"}
-                      variant="ghost"
-                    >
-                      Back to Pricing
-                    </Button>
+                    <div className="flex space-x-2">
+                      <Button
+                        onClick={() => window.location.href = "/pricing"}
+                        variant="outline"
+                        className="flex-1"
+                      >
+                        Back to Pricing
+                      </Button>
+                      <Button
+                        onClick={() => window.location.href = "/dashboard"}
+                        variant="ghost"
+                        className="flex-1"
+                      >
+                        Dashboard
+                      </Button>
+                    </div>
                   </div>
                 </div>
               )}
