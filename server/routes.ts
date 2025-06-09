@@ -491,10 +491,34 @@ export async function registerRoutes(app: Express): Promise<Server> {
       try {
         const userId = req.user.claims.sub;
         let user = await storage.getUser(userId);
-        const { tier, billing = "monthly" } = req.body;
+        const { tier = "premium", billing = "monthly" } = req.body;
+
+        console.log("=== SUBSCRIPTION REQUEST DEBUG ===");
+        console.log("User ID:", userId);
+        console.log("Requested tier:", tier);
+        console.log("Requested billing:", billing);
+        console.log("Request body:", req.body);
 
         if (!user) {
-          return res.status(404).json({ message: "User not found" });
+          console.error("User not found:", userId);
+          return res.status(404).json({ error: { message: "User not found", type: "user_error" } });
+        }
+
+        if (!user.email) {
+          console.error("User email not found:", userId);
+          return res.status(400).json({ error: { message: "User email is required for subscription", type: "user_error" } });
+        }
+
+        // Validate tier parameter
+        if (!["premium", "family"].includes(tier)) {
+          console.error("Invalid tier specified:", tier);
+          return res.status(400).json({ error: { message: "Invalid subscription tier. Must be 'premium' or 'family'", type: "validation_error" } });
+        }
+
+        // Validate billing parameter
+        if (!["monthly", "yearly"].includes(billing)) {
+          console.error("Invalid billing period:", billing);
+          return res.status(400).json({ error: { message: "Invalid billing period. Must be 'monthly' or 'yearly'", type: "validation_error" } });
         }
 
         // If user already has a subscription, retrieve it
@@ -587,19 +611,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        if (!user.email) {
-          throw new Error("No user email on file");
+        // Create new Stripe customer and subscription
+        let customer;
+        
+        try {
+          customer = await stripe.customers.create({
+            email: user.email,
+            name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+            metadata: {
+              userId: userId,
+              tier: tier
+            }
+          });
+          console.log("Created Stripe customer:", customer.id);
+        } catch (error: any) {
+          console.error("Error creating Stripe customer:", error);
+          throw new Error(`Failed to create customer: ${error.message}`);
         }
 
-        // Create new Stripe customer and subscription
-        const customer = await stripe.customers.create({
-          email: user.email,
-          name:
-            `${user.firstName || ""} ${user.lastName || ""}`.trim() ||
-            user.email,
-        });
-
-        user = await storage.updateStripeCustomerId(userId, customer.id);
+        try {
+          user = await storage.updateStripeCustomerId(userId, customer.id);
+          console.log("Updated user with Stripe customer ID");
+        } catch (error: any) {
+          console.error("Error updating user with Stripe customer ID:", error);
+          throw new Error(`Failed to update user: ${error.message}`);
+        }
 
         // Determine pricing based on tier (default to premium if not specified)
         // Determine pricing based on tier and billing period
@@ -613,38 +649,81 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
 
         // Create product first
-        const product = await stripe.products.create({
-          name: tier === "family" ? "Storytime Pro" : "Storytime Plus",
-        });
+        let product;
+        try {
+          product = await stripe.products.create({
+            name: tier === "family" ? "Storytime Pro" : "Storytime Plus",
+            description: tier === "family" 
+              ? "The ultimate storytelling experience for families with multiple children"
+              : "Unlimited personalized bedtime stories for your little one",
+            metadata: {
+              tier: tier,
+              userId: userId
+            }
+          });
+          console.log("Created Stripe product:", product.id);
+        } catch (error: any) {
+          console.error("Error creating Stripe product:", error);
+          throw new Error(`Failed to create product: ${error.message}`);
+        }
 
         // Create price for the product
-        const price = await stripe.prices.create({
-          currency: "usd",
-          product: product.id,
-          unit_amount: priceInCents,
-          recurring: {
-            interval: billing === "yearly" ? "year" : "month",
-          },
-        });
+        let price;
+        try {
+          price = await stripe.prices.create({
+            currency: "usd",
+            product: product.id,
+            unit_amount: priceInCents,
+            recurring: {
+              interval: billing === "yearly" ? "year" : "month",
+            },
+            metadata: {
+              tier: tier,
+              billing: billing
+            }
+          });
+          console.log("Created Stripe price:", price.id);
+        } catch (error: any) {
+          console.error("Error creating Stripe price:", error);
+          throw new Error(`Failed to create price: ${error.message}`);
+        }
 
         // Create subscription for premium stories
-        const subscription = await stripe.subscriptions.create({
-          customer: customer.id,
-          items: [
-            {
-              price: price.id,
-            },
-          ],
-          payment_behavior: "default_incomplete",
-          payment_settings: { save_default_payment_method: "on_subscription" },
-          expand: ["latest_invoice.payment_intent"],
-        });
+        let subscription;
+        try {
+          subscription = await stripe.subscriptions.create({
+            customer: customer.id,
+            items: [
+              {
+                price: price.id,
+              },
+            ],
+            payment_behavior: "default_incomplete",
+            payment_settings: { save_default_payment_method: "on_subscription" },
+            expand: ["latest_invoice.payment_intent"],
+            metadata: {
+              userId: userId,
+              tier: tier,
+              billing: billing
+            }
+          });
+          console.log("Created Stripe subscription:", subscription.id);
+        } catch (error: any) {
+          console.error("Error creating Stripe subscription:", error);
+          throw new Error(`Failed to create subscription: ${error.message}`);
+        }
 
-        await storage.updateUserStripeInfo(
-          userId,
-          customer.id,
-          subscription.id,
-        );
+        try {
+          await storage.updateUserStripeInfo(
+            userId,
+            customer.id,
+            subscription.id,
+          );
+          console.log("Updated user with subscription info");
+        } catch (error: any) {
+          console.error("Error updating user with subscription info:", error);
+          throw new Error(`Failed to update user subscription info: ${error.message}`);
+        }
 
         let clientSecret = null;
         if (

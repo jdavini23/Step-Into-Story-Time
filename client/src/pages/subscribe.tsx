@@ -191,21 +191,50 @@ export default function Subscribe() {
         })
         .catch((error) => {
           console.error("Error creating subscription:", error);
-          setLastError(error.message || "Unable to set up your subscription. Please try again.");
+          
+          let errorMessage = "Unable to set up your subscription. Please try again.";
+          let shouldRetry = false;
+          
+          // Parse error details if available
+          if (error.message) {
+            try {
+              // Check if the error message contains JSON
+              const match = error.message.match(/\{.*\}/);
+              if (match) {
+                const errorData = JSON.parse(match[0]);
+                if (errorData.error && errorData.error.message) {
+                  errorMessage = errorData.error.message;
+                  
+                  // Determine if we should retry based on error type
+                  const errorType = errorData.error.type;
+                  shouldRetry = ["StripeAPIError", "network_error", "rate_limit_error"].includes(errorType);
+                }
+              } else {
+                errorMessage = error.message;
+                shouldRetry = error.message.includes("temporarily unavailable") || 
+                            error.message.includes("network") ||
+                            error.message.includes("timeout");
+              }
+            } catch (parseError) {
+              errorMessage = error.message;
+            }
+          }
+          
+          setLastError(errorMessage);
           setIsLoading(false);
           
           // Auto-retry logic for temporary failures
-          if (retryCount < 2 && (error.message?.includes("temporarily unavailable") || error.message?.includes("network"))) {
+          if (retryCount < 2 && shouldRetry) {
+            console.log(`Retrying subscription setup (attempt ${retryCount + 1})`);
             setTimeout(() => {
               setRetryCount(prev => prev + 1);
               setIsLoading(true);
               setLastError(null);
-              // This will trigger the useEffect again
             }, Math.pow(2, retryCount) * 1000); // Exponential backoff: 1s, 2s, 4s
           } else {
             toast({
               title: "Setup Error",
-              description: error.message || "Unable to set up your subscription. Please try again.",
+              description: errorMessage,
               variant: "destructive",
             });
           }
