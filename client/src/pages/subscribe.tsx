@@ -138,6 +138,7 @@ const SubscribeForm = ({
 
 export default function Subscribe() {
   const { user, isLoading: authLoading } = useAuth();
+  const { toast } = useToast();
   const [clientSecret, setClientSecret] = useState("");
   const [isLoading, setIsLoading] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
@@ -210,7 +211,7 @@ export default function Subscribe() {
           }
         });
     }
-  }, [user, toast, retryCount]);
+  }, [user, selectedTier, billingPeriod, toast, retryCount]);
 
   if (authLoading || isLoading) {
     return (
