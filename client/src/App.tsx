@@ -34,15 +34,13 @@ function Router() {
       <Header />
       <Switch>
         <Route path="/pricing" component={Pricing} />
+        <Route path="/story-wizard" component={StoryWizard} />
+        <Route path="/story/:id" component={StoryReader} />
+        <Route path="/subscribe" component={Subscribe} />
         {!isAuthenticated ? (
           <Route path="/" component={Landing} />
         ) : (
-          <>
-            <Route path="/" component={Dashboard} />
-            <Route path="/story-wizard" component={StoryWizard} />
-            <Route path="/story/:id" component={StoryReader} />
-            <Route path="/subscribe" component={Subscribe} />
-          </>
+          <Route path="/" component={Dashboard} />
         )}
         <Route component={NotFound} />
       </Switch>

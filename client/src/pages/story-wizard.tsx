@@ -38,10 +38,18 @@ const STEPS = [
 ];
 
 export default function StoryWizard() {
-  const { user, isLoading } = useAuth();
+  const { user, isLoading, isAuthenticated } = useAuth();
   const { data: tierInfo, isLoading: tierLoading } = useTierInfo();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
+
+  // Handle authentication redirect
+  if (!isLoading && !isAuthenticated) {
+    // Store the current URL to redirect back after login
+    const currentUrl = window.location.pathname + window.location.search;
+    window.location.href = `/api/login?returnTo=${encodeURIComponent(currentUrl)}`;
+    return null;
+  }
   const [currentStep, setCurrentStep] = useState(1);
   const [formData, setFormData] = useState<Partial<InsertStory>>({
     childName: "",

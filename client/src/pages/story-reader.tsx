@@ -31,16 +31,7 @@ import { StoryActions } from "@/components/story-actions";
 export default function StoryReader() {
   const params = useParams();
   const [, setLocation] = useLocation();
-  const { user, isLoading } = useAuth();
-  
-  // Early return for unauthenticated users to prevent React hook errors
-  if (!isLoading && !user) {
-    // Store the current URL to redirect back after login
-    const currentUrl = window.location.pathname + window.location.search;
-    window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(currentUrl)}`;
-    return null;
-  }
-  
+  const { user, isLoading, isAuthenticated } = useAuth();
   const { data: tierInfo } = useTierInfo();
   const { toast } = useToast();
   const storyId = params.id;
@@ -270,6 +261,14 @@ export default function StoryReader() {
   }, [story, fontSize]);
 
   
+
+  // Handle authentication redirect
+  if (!isLoading && !isAuthenticated) {
+    // Store the current URL to redirect back after login
+    const currentUrl = window.location.pathname + window.location.search;
+    window.location.href = `/api/login?returnTo=${encodeURIComponent(currentUrl)}`;
+    return null;
+  }
 
   if (isLoading || storyLoading) {
     return (
