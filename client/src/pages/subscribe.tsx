@@ -215,7 +215,9 @@ export default function Subscribe() {
                   ].includes(errorType);
                   
                   // Don't retry on validation errors or invalid requests
-                  if (errorType === "StripeInvalidRequestError" || errorType === "validation_error") {
+                  if (errorType === "StripeInvalidRequestError" || 
+                      errorType === "validation_error" ||
+                      errorType === "user_error") {
                     shouldRetry = false;
                   }
                 }
@@ -224,11 +226,12 @@ export default function Subscribe() {
                 shouldRetry = error.message.includes("temporarily unavailable") || 
                             error.message.includes("network") ||
                             error.message.includes("timeout") ||
-                            error.message.includes("connection");
+                            error.message.includes("connection") ||
+                            error.message.includes("service unavailable");
               }
             } catch (parseError) {
               console.error("Error parsing error message:", parseError);
-              errorMessage = error.message;
+              errorMessage = error.message || "An unexpected error occurred";
               shouldRetry = false;
             }
           }
