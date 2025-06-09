@@ -7,16 +7,75 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle, Star, Crown, Sparkles, Heart, Users } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { CheckCircle, Star, Crown, Sparkles, Heart, Users, Info } from "lucide-react";
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
+
+// Feature Modal Component
+function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
+  return (
+    <DialogContent className="max-w-2xl">
+      <DialogHeader>
+        <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
+          <Info className="h-6 w-6 text-purple-600" />
+          {feature.name}
+        </DialogTitle>
+        <DialogDescription className="text-lg text-gray-600 mt-2">
+          {feature.description}
+        </DialogDescription>
+      </DialogHeader>
+      
+      <div className="mt-6 space-y-6">
+        {/* Plan Comparison */}
+        <div className="grid grid-cols-3 gap-4">
+          <div className="text-center p-4 bg-blue-50 rounded-xl">
+            <h4 className="font-semibold text-blue-900 mb-2">Starter Magic</h4>
+            <p className="text-2xl font-bold text-blue-600">{feature.free}</p>
+          </div>
+          <div className="text-center p-4 bg-purple-50 rounded-xl">
+            <h4 className="font-semibold text-purple-900 mb-2">Storytime Plus</h4>
+            <p className="text-2xl font-bold text-purple-600">{feature.premium}</p>
+          </div>
+          <div className="text-center p-4 bg-emerald-50 rounded-xl">
+            <h4 className="font-semibold text-emerald-900 mb-2">Storytime Pro</h4>
+            <p className="text-2xl font-bold text-emerald-600">{feature.family}</p>
+          </div>
+        </div>
+
+        {/* Benefits */}
+        {feature.benefits && (
+          <div>
+            <h4 className="font-semibold text-gray-900 mb-3">Key Benefits:</h4>
+            <ul className="space-y-2">
+              {feature.benefits.map((benefit, index) => (
+                <li key={index} className="flex items-start space-x-3">
+                  <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
+                  <span className="text-gray-700">{benefit}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+      </div>
+    </DialogContent>
+  );
+}
 
 export default function Pricing() {
   const { isAuthenticated, user } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
+  const [selectedFeature, setSelectedFeature] = useState<typeof comparisonFeatures[0] | null>(null);
 
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers
@@ -140,57 +199,144 @@ export default function Pricing() {
       free: "3",
       premium: "Unlimited",
       family: "Unlimited",
+      description: "How many new personalized stories you can generate each week. Free users get 3 magical stories weekly, while premium users can create as many as their imagination desires.",
+      benefits: [
+        "Perfect for establishing bedtime routines",
+        "Fresh content to keep children engaged",
+        "No limits on creativity with premium plans"
+      ],
     },
-    { name: "Child profiles", free: "1", premium: "1", family: "Up to 5" },
+    { 
+      name: "Child profiles", 
+      free: "1", 
+      premium: "1", 
+      family: "Up to 5",
+      description: "Create individual profiles for each child with their unique preferences, interests, and characteristics for truly personalized storytelling.",
+      benefits: [
+        "Tailored stories for each child's age and interests",
+        "Track individual reading progress",
+        "Family plan perfect for multi-child households"
+      ],
+    },
     {
       name: "Story personalization",
       free: "Basic",
       premium: "Full",
       family: "Advanced",
+      description: "The level of customization available for your stories. From simple name insertion to complex personality traits and family dynamics.",
+      benefits: [
+        "Basic: Child's name and one trait",
+        "Full: Multiple traits, interests, family members",
+        "Advanced: Complex relationships and custom scenarios"
+      ],
     },
     {
       name: "Story themes",
       free: "3 popular",
       premium: "All genres",
       family: "All genres + Custom",
+      description: "Access to different story categories and themes. From classic bedtime stories to educational adventures and fantasy quests.",
+      benefits: [
+        "Popular themes include bedtime, adventure, and friendship",
+        "Premium unlocks fantasy, educational, holiday themes and more",
+        "Family plan includes custom theme creation"
+      ],
     },
     {
       name: "Story lengths",
       free: "Short only",
       premium: "Short, Medium, Long",
       family: "All + Custom",
+      description: "Choose the perfect story length for your bedtime routine. Short for quick reads, long for extended storytelling sessions.",
+      benefits: [
+        "Short: 2-3 minutes (perfect for toddlers)",
+        "Medium: 5-7 minutes (ideal for most children)",
+        "Long: 10-15 minutes (for extended bedtime routines)"
+      ],
     },
     {
       name: "AI illustrations",
       free: "None",
       premium: "1 per story",
       family: "3 per story",
+      description: "Beautiful, AI-generated illustrations that bring your stories to life. Each image is created specifically for your child's unique story.",
+      benefits: [
+        "Enhances visual storytelling experience",
+        "Helps children engage with the narrative",
+        "Professional-quality artwork for every story"
+      ],
     },
     {
       name: "Audio narration",
       free: "None",
       premium: "None",
       family: "AI voice",
+      description: "Professional-quality AI voice narration that reads stories aloud with perfect pronunciation and engaging storytelling voice.",
+      benefits: [
+        "Perfect for car rides or when parents need a break",
+        "Helps children with reading comprehension",
+        "Consistent, soothing bedtime voice"
+      ],
     },
     {
       name: "Story library",
       free: "Last 3",
       premium: "Unlimited",
       family: "Unlimited + Sharing",
+      description: "Save and organize all your favorite stories. Build a personal library of memories that grows with your child.",
+      benefits: [
+        "Never lose a beloved story",
+        "Track your child's favorites",
+        "Family sharing for siblings and relatives"
+      ],
     },
     {
       name: "PDF downloads",
       free: "None",
       premium: "Yes",
       family: "Yes + Enhanced",
+      description: "Download beautifully formatted PDF versions of stories for printing, sharing, or offline reading.",
+      benefits: [
+        "Create physical story books",
+        "Share with grandparents and family",
+        "Offline reading anywhere"
+      ],
     },
-    { name: "Magic Letters", free: "None", premium: "None", family: "Yes" },
-    { name: "Custom characters", free: "None", premium: "None", family: "Yes" },
+    { 
+      name: "Magic Letters", 
+      free: "None", 
+      premium: "None", 
+      family: "Yes",
+      description: "Interactive letters from story characters that appear in your child's inbox, creating magical moments beyond the story itself.",
+      benefits: [
+        "Extends the story experience",
+        "Encourages reading and writing",
+        "Creates lasting magical memories"
+      ],
+    },
+    { 
+      name: "Custom characters", 
+      free: "None", 
+      premium: "None", 
+      family: "Yes",
+      description: "Design and create unique characters that can appear across multiple stories, building a rich fictional world for your child.",
+      benefits: [
+        "Consistent character development",
+        "Build ongoing story arcs",
+        "Create family-specific characters"
+      ],
+    },
     {
       name: "Support",
       free: "Community",
       premium: "Premium",
       family: "Priority",
+      description: "Different levels of customer support to help you get the most out of Step Into Storytime.",
+      benefits: [
+        "Community: Access to user forums and FAQs",
+        "Premium: Direct email support within 24 hours",
+        "Priority: Phone and chat support with immediate response"
+      ],
     },
   ];
 
@@ -391,7 +537,18 @@ export default function Pricing() {
                 {comparisonFeatures.map((feature, index) => (
                   <tr key={index} className="hover:bg-gray-50">
                     <td className="px-6 py-4 text-sm font-medium text-gray-900">
-                      {feature.name}
+                      <Dialog>
+                        <DialogTrigger asChild>
+                          <button
+                            className="flex items-center gap-2 text-left hover:text-purple-600 transition-colors group"
+                            onClick={() => setSelectedFeature(feature)}
+                          >
+                            <span className="group-hover:underline">{feature.name}</span>
+                            <Info className="h-4 w-4 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                          </button>
+                        </DialogTrigger>
+                        <FeatureModal feature={feature} />
+                      </Dialog>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 text-center">
                       {feature.free}
