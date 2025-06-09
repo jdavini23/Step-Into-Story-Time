@@ -521,21 +521,21 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: { message: "Invalid billing period. Must be 'monthly' or 'yearly'", type: "validation_error" } });
         }
 
-        // Define predefined price IDs - these should be created in Stripe dashboard
-        const priceIds = {
+        // Define pricing amounts (in cents)
+        const pricingConfig = {
           premium: {
-            monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || "price_premium_monthly",
-            yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || "price_premium_yearly"
+            monthly: { amount: 699, interval: "month" as const }, // $6.99
+            yearly: { amount: 5900, interval: "year" as const }   // $59.00
           },
           family: {
-            monthly: process.env.STRIPE_FAMILY_MONTHLY_PRICE_ID || "price_family_monthly",
-            yearly: process.env.STRIPE_FAMILY_YEARLY_PRICE_ID || "price_family_yearly"
+            monthly: { amount: 1299, interval: "month" as const }, // $12.99
+            yearly: { amount: 10900, interval: "year" as const }   // $109.00
           }
         };
 
-        // Get the appropriate price ID
-        const priceId = priceIds[tier as keyof typeof priceIds][billing as keyof typeof priceIds.premium];
-        console.log("Using price ID:", priceId);
+        // Get the appropriate pricing configuration
+        const pricingInfo = pricingConfig[tier as keyof typeof pricingConfig][billing as keyof typeof pricingConfig.premium];
+        console.log("Using pricing config:", pricingInfo);
 
         // If user already has a subscription, retrieve it
         if (user.stripeSubscriptionId) {
@@ -671,14 +671,26 @@ export async function registerRoutes(app: Express): Promise<Server> {
           }
         }
 
-        // Create subscription using predefined price ID
+        // Create subscription with dynamic price creation
         let subscription;
         try {
           subscription = await stripe.subscriptions.create({
             customer: customer.id,
             items: [
               {
-                price: priceId,
+                price_data: {
+                  currency: "usd",
+                  product_data: {
+                    name: tier === "family" ? "Storytime Pro" : "Storytime Plus",
+                    description: tier === "family" 
+                      ? "The ultimate storytelling experience for families with multiple children"
+                      : "Unlimited personalized bedtime stories for your little one"
+                  },
+                  unit_amount: pricingInfo.amount,
+                  recurring: {
+                    interval: pricingInfo.interval,
+                  },
+                },
               },
             ],
             payment_behavior: "default_incomplete",
@@ -695,10 +707,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.error("Error creating Stripe subscription:", error);
           
           // Handle specific Stripe errors
-          if (error.code === "resource_missing") {
-            throw new Error("Subscription plan not found. Please contact support.");
-          } else if (error.code === "invalid_request_error") {
+          if (error.code === "invalid_request_error") {
             throw new Error("Invalid subscription configuration. Please try again or contact support.");
+          } else if (error.code === "card_error") {
+            throw new Error("There was an issue with your payment method. Please try a different card.");
           } else {
             throw new Error(`Failed to create subscription: ${error.message}`);
           }
@@ -736,7 +748,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Subscription ID:", subscription.id);
         console.log("Subscription status:", subscription.status);
         console.log("Billing period:", billing);
-        console.log("Price ID used:", priceId);
+        console.log("Pricing config used:", pricingInfo);
         console.log("Client secret generated:", clientSecret ? "Yes" : "No");
         console.log("Customer ID:", customer.id);
         console.log("Customer email:", customer.email);
