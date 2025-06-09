@@ -53,7 +53,8 @@ export function getSession() {
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
-    saveUninitialized: true, // Allow session creation for auth flow
+    saveUninitialized: false, // Only save session when data is added
+    rolling: true, // Reset expiry on each request
     cookie: {
       httpOnly: true,
       secure: false, // Disable secure cookies for development
@@ -105,9 +106,16 @@ export async function setupAuth(app: Express) {
       console.log("Tokens received:", !!tokens.access_token);
       console.log("Claims:", JSON.stringify(tokens.claims(), null, 2));
       
-      const user = {};
-      updateUserSession(user, tokens);
-      console.log("User object after session update:", JSON.stringify(user, null, 2));
+      // Create user object with proper structure
+      const user: any = {
+        id: tokens.claims().sub,
+        claims: tokens.claims(),
+        access_token: tokens.access_token,
+        refresh_token: tokens.refresh_token,
+        expires_at: tokens.claims()?.exp
+      };
+      
+      console.log("User object created:", JSON.stringify(user, null, 2));
       
       await upsertUser(tokens.claims());
       console.log("User upserted successfully");
