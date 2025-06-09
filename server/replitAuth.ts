@@ -101,12 +101,23 @@ export async function setupAuth(app: Express) {
     verified: passport.AuthenticateCallback,
   ) => {
     try {
+      console.log("=== OAUTH VERIFICATION START ===");
+      console.log("Tokens received:", !!tokens.access_token);
+      console.log("Claims:", JSON.stringify(tokens.claims(), null, 2));
+      
       const user = {};
       updateUserSession(user, tokens);
+      console.log("User object after session update:", JSON.stringify(user, null, 2));
+      
       await upsertUser(tokens.claims());
+      console.log("User upserted successfully");
+      
       verified(null, user);
+      console.log("=== OAUTH VERIFICATION SUCCESS ===");
     } catch (error) {
+      console.error("=== OAUTH VERIFICATION ERROR ===");
       console.error("Verification error:", error);
+      console.error("Error stack:", error.stack);
       verified(error, null);
     }
   };
@@ -135,8 +146,15 @@ export async function setupAuth(app: Express) {
   
   console.log("Registered authentication strategies:", registeredStrategies);
 
-  passport.serializeUser((user: Express.User, cb) => cb(null, user));
-  passport.deserializeUser((user: Express.User, cb) => cb(null, user));
+  passport.serializeUser((user: Express.User, cb) => {
+    console.log("Serializing user:", JSON.stringify(user, null, 2));
+    cb(null, user);
+  });
+  
+  passport.deserializeUser((user: Express.User, cb) => {
+    console.log("Deserializing user:", JSON.stringify(user, null, 2));
+    cb(null, user);
+  });
 
   app.get("/api/login", (req, res, next) => {
     // Store signup intent and return URL in session if present
@@ -206,8 +224,16 @@ export async function setupAuth(app: Express) {
 
       req.logIn(user, async (err) => {
         if (err) {
+          console.error("=== LOGIN ERROR ===");
+          console.error("Error during req.logIn:", err);
           return next(err);
         }
+
+        console.log("=== LOGIN SUCCESS ===");
+        console.log("User logged in successfully");
+        console.log("Session ID:", req.sessionID);
+        console.log("Session data:", JSON.stringify(req.session, null, 2));
+        console.log("Is authenticated:", req.isAuthenticated());
 
         try {
           // Ensure new users start with free tier
@@ -253,8 +279,16 @@ export async function setupAuth(app: Express) {
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
+  
+  console.log("=== AUTHENTICATION CHECK ===");
+  console.log("Session ID:", req.sessionID);
+  console.log("Is authenticated:", req.isAuthenticated());
+  console.log("User object exists:", !!user);
+  console.log("User data:", JSON.stringify(user, null, 2));
+  console.log("Session data:", JSON.stringify(req.session, null, 2));
 
-  if (!req.isAuthenticated() || !user.expires_at) {
+  if (!req.isAuthenticated() || !user || !user.expires_at) {
+    console.log("Authentication failed - missing auth state or expiry");
     return res.status(401).json({ message: "Unauthorized" });
   }
 
