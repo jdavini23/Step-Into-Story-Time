@@ -680,7 +680,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
               {
                 price_data: {
                   currency: "usd",
-                  product: tier === "family" ? "Storytime Pro" : "Storytime Plus",
+                  product_data: {
+                    name: tier === "family" ? "Storytime Pro" : "Storytime Plus",
+                    description: tier === "family" 
+                      ? "The ultimate storytelling experience for families with multiple children"
+                      : "Unlimited personalized bedtime stories for your little one"
+                  },
                   unit_amount: pricingInfo.amount,
                   recurring: {
                     interval: pricingInfo.interval,
