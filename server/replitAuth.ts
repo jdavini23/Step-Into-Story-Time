@@ -53,10 +53,10 @@ export function getSession() {
     secret: process.env.SESSION_SECRET!,
     store: sessionStore,
     resave: false,
-    saveUninitialized: false,
+    saveUninitialized: true, // Allow session creation for auth flow
     cookie: {
       httpOnly: true,
-      secure: isProduction, // Only use secure cookies in production
+      secure: false, // Disable secure cookies for development
       maxAge: sessionTtl,
       sameSite: 'lax', // Allow same-site requests
     },
@@ -171,23 +171,11 @@ export async function setupAuth(app: Express) {
 
     console.log(`Starting authentication with strategy: ${strategyName}`);
 
-    // Create the authenticate middleware
-    const authenticateMiddleware = passport.authenticate(strategyName, {
+    // Use passport authenticate with proper error handling
+    passport.authenticate(strategyName, {
       prompt: "login consent",
       scope: ["openid", "email", "profile", "offline_access"],
-    });
-
-    // Execute the middleware with error handling
-    authenticateMiddleware(req, res, (err) => {
-      if (err) {
-        console.error("Authentication middleware error:", err);
-        return res.status(500).json({ 
-          message: "Authentication failed", 
-          error: err.message 
-        });
-      }
-      // If no error, authentication should have handled the response
-    });
+    })(req, res, next);
   });
 
   app.get("/api/callback", (req, res, next) => {
@@ -200,13 +188,19 @@ export async function setupAuth(app: Express) {
       strategyName = registeredStrategies[0];
     }
     
-    passport.authenticate(strategyName, async (err: any, user: any) => {
+    passport.authenticate(strategyName, async (err: any, user: any, info: any) => {
       if (err) {
         console.error("Authentication error:", err);
-        return next(err);
+        console.error("Error details:", JSON.stringify(err, null, 2));
+        return res.status(500).json({ 
+          message: "Authentication failed", 
+          error: err.message,
+          details: err 
+        });
       }
       if (!user) {
         console.log("No user returned from authentication");
+        console.log("Info:", info);
         return res.redirect("/api/login");
       }
 
