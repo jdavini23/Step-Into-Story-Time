@@ -521,181 +521,164 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.status(400).json({ error: { message: "Invalid billing period. Must be 'monthly' or 'yearly'", type: "validation_error" } });
         }
 
+        // Define predefined price IDs - these should be created in Stripe dashboard
+        const priceIds = {
+          premium: {
+            monthly: process.env.STRIPE_PREMIUM_MONTHLY_PRICE_ID || "price_premium_monthly",
+            yearly: process.env.STRIPE_PREMIUM_YEARLY_PRICE_ID || "price_premium_yearly"
+          },
+          family: {
+            monthly: process.env.STRIPE_FAMILY_MONTHLY_PRICE_ID || "price_family_monthly",
+            yearly: process.env.STRIPE_FAMILY_YEARLY_PRICE_ID || "price_family_yearly"
+          }
+        };
+
+        // Get the appropriate price ID
+        const priceId = priceIds[tier as keyof typeof priceIds][billing as keyof typeof priceIds.premium];
+        console.log("Using price ID:", priceId);
+
         // If user already has a subscription, retrieve it
         if (user.stripeSubscriptionId) {
-          const subscription = await stripe.subscriptions.retrieve(
-            user.stripeSubscriptionId,
-            {
-              expand: ["latest_invoice.payment_intent"],
-            },
-          );
-
-          console.log("Existing subscription status:", subscription.status);
-
-          // If subscription is expired or incomplete for too long, cancel it and create a new one
-          if (subscription.status === "incomplete_expired" || 
-              (subscription.status === "incomplete" && 
-               new Date(subscription.created * 1000) < new Date(Date.now() - 24 * 60 * 60 * 1000))) {
-            console.log("Subscription expired or incomplete too long, canceling and creating new one");
-            try {
-              await stripe.subscriptions.cancel(subscription.id);
-            } catch (cancelError: any) {
-              // If subscription doesn't exist anymore, that's fine - we'll create a new one
-              if (cancelError.code === "resource_missing") {
-                console.log(
-                  "Expired subscription no longer exists in Stripe, proceeding to create new one",
-                );
-              } else {
-                throw cancelError;
-              }
-            }
-            // Clear the expired subscription ID and continue to create new one
-            user = await storage.updateUserStripeInfo(
-              userId,
-              user.stripeCustomerId!,
-              null,
+          try {
+            const subscription = await stripe.subscriptions.retrieve(
+              user.stripeSubscriptionId,
+              {
+                expand: ["latest_invoice.payment_intent"],
+              },
             );
-          } else {
-            // Handle active or recoverable subscriptions
-            let clientSecret = null;
 
-            // If subscription is incomplete, get the client secret
-            if (
-              subscription.status === "incomplete" ||
-              subscription.status === "past_due"
-            ) {
+            console.log("Existing subscription status:", subscription.status);
+
+            // If subscription is expired or incomplete for too long, cancel it and create a new one
+            if (subscription.status === "incomplete_expired" || 
+                (subscription.status === "incomplete" && 
+                 new Date(subscription.created * 1000) < new Date(Date.now() - 24 * 60 * 60 * 1000))) {
+              console.log("Subscription expired or incomplete too long, canceling and creating new one");
+              try {
+                await stripe.subscriptions.cancel(subscription.id);
+              } catch (cancelError: any) {
+                // If subscription doesn't exist anymore, that's fine - we'll create a new one
+                if (cancelError.code === "resource_missing") {
+                  console.log(
+                    "Expired subscription no longer exists in Stripe, proceeding to create new one",
+                  );
+                } else {
+                  console.error("Error canceling expired subscription:", cancelError);
+                }
+              }
+              // Clear the expired subscription ID and continue to create new one
+              user = await storage.updateUserStripeInfo(
+                userId,
+                user.stripeCustomerId!,
+                null,
+              );
+            } else {
+              // Handle active or recoverable subscriptions
+              let clientSecret = null;
+
+              // If subscription is incomplete, get the client secret
               if (
-                subscription.latest_invoice &&
-                typeof subscription.latest_invoice === "object"
+                subscription.status === "incomplete" ||
+                subscription.status === "past_due"
               ) {
-                const invoice = subscription.latest_invoice;
                 if (
-                  invoice.payment_intent &&
-                  typeof invoice.payment_intent === "object"
+                  subscription.latest_invoice &&
+                  typeof subscription.latest_invoice === "object"
                 ) {
-                  clientSecret = invoice.payment_intent.client_secret;
+                  const invoice = subscription.latest_invoice;
+                  if (
+                    invoice.payment_intent &&
+                    typeof invoice.payment_intent === "object"
+                  ) {
+                    clientSecret = invoice.payment_intent.client_secret;
+                  }
+                }
+
+                // If no client secret found, cancel and create new subscription
+                if (!clientSecret) {
+                  console.log("No client secret found for incomplete subscription, canceling and creating new one");
+                  try {
+                    await stripe.subscriptions.cancel(subscription.id);
+                    user = await storage.updateUserStripeInfo(
+                      userId,
+                      user.stripeCustomerId!,
+                      null,
+                    );
+                    // Continue to create new subscription below
+                  } catch (error) {
+                    console.error("Error canceling incomplete subscription:", error);
+                    // Continue to try creating new subscription
+                  }
                 }
               }
 
-              // If no client secret found, try to create a new payment intent
-              if (!clientSecret) {
-                console.log("No client secret found for incomplete subscription, creating new one");
-                try {
-                  await stripe.subscriptions.cancel(subscription.id);
-                  user = await storage.updateUserStripeInfo(
-                    userId,
-                    user.stripeCustomerId!,
-                    null,
-                  );
-                  // Continue to create new subscription below
-                } catch (error) {
-                  console.error("Error canceling incomplete subscription:", error);
-                  throw error;
-                }
+              if (clientSecret) {
+                console.log("Returning existing subscription with client secret");
+                return res.send({
+                  subscriptionId: subscription.id,
+                  clientSecret,
+                  status: subscription.status,
+                });
               }
             }
-
-            if (clientSecret) {
-              console.log(
-                "Existing subscription client secret:",
-                clientSecret ? "Yes" : "No",
+          } catch (subscriptionError: any) {
+            console.error("Error retrieving existing subscription:", subscriptionError);
+            // If subscription doesn't exist anymore, clear it and create new one
+            if (subscriptionError.code === "resource_missing") {
+              user = await storage.updateUserStripeInfo(
+                userId,
+                user.stripeCustomerId!,
+                null,
               );
-
-              res.send({
-                subscriptionId: subscription.id,
-                clientSecret,
-                status: subscription.status,
-              });
-              return;
+            } else {
+              throw subscriptionError;
             }
           }
         }
 
-        // Create new Stripe customer and subscription
+        // Create or reuse Stripe customer
         let customer;
         
-        try {
-          customer = await stripe.customers.create({
-            email: user.email,
-            name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
-            metadata: {
-              userId: userId,
-              tier: tier
-            }
-          });
-          console.log("Created Stripe customer:", customer.id);
-        } catch (error: any) {
-          console.error("Error creating Stripe customer:", error);
-          throw new Error(`Failed to create customer: ${error.message}`);
+        if (user.stripeCustomerId) {
+          try {
+            customer = await stripe.customers.retrieve(user.stripeCustomerId);
+            console.log("Retrieved existing Stripe customer:", customer.id);
+          } catch (customerError: any) {
+            console.error("Error retrieving existing customer:", customerError);
+            // Customer doesn't exist, create new one
+            customer = null;
+          }
         }
 
-        try {
-          user = await storage.updateStripeCustomerId(userId, customer.id);
-          console.log("Updated user with Stripe customer ID");
-        } catch (error: any) {
-          console.error("Error updating user with Stripe customer ID:", error);
-          throw new Error(`Failed to update user: ${error.message}`);
+        if (!customer) {
+          try {
+            customer = await stripe.customers.create({
+              email: user.email,
+              name: `${user.firstName || ""} ${user.lastName || ""}`.trim() || user.email,
+              metadata: {
+                userId: userId,
+                tier: tier
+              }
+            });
+            console.log("Created new Stripe customer:", customer.id);
+
+            // Update user with new customer ID
+            user = await storage.updateStripeCustomerId(userId, customer.id);
+            console.log("Updated user with new Stripe customer ID");
+          } catch (error: any) {
+            console.error("Error creating Stripe customer:", error);
+            throw new Error(`Failed to create customer: ${error.message}`);
+          }
         }
 
-        // Determine pricing based on tier (default to premium if not specified)
-        // Determine pricing based on tier and billing period
-        let priceInCents: number;
-        if (tier === "family") {
-          priceInCents = billing === "yearly" ? 10900 : 1299; // $109/year or $12.99/month
-        } else if (tier === "premium") {
-          priceInCents = billing === "yearly" ? 5900 : 699; // $59/year or $6.99/month
-        } else {
-          throw new Error("Invalid tier specified");
-        }
-
-        // Create product first
-        let product;
-        try {
-          product = await stripe.products.create({
-            name: tier === "family" ? "Storytime Pro" : "Storytime Plus",
-            description: tier === "family" 
-              ? "The ultimate storytelling experience for families with multiple children"
-              : "Unlimited personalized bedtime stories for your little one",
-            metadata: {
-              tier: tier,
-              userId: userId
-            }
-          });
-          console.log("Created Stripe product:", product.id);
-        } catch (error: any) {
-          console.error("Error creating Stripe product:", error);
-          throw new Error(`Failed to create product: ${error.message}`);
-        }
-
-        // Create price for the product
-        let price;
-        try {
-          price = await stripe.prices.create({
-            currency: "usd",
-            product: product.id,
-            unit_amount: priceInCents,
-            recurring: {
-              interval: billing === "yearly" ? "year" : "month",
-            },
-            metadata: {
-              tier: tier,
-              billing: billing
-            }
-          });
-          console.log("Created Stripe price:", price.id);
-        } catch (error: any) {
-          console.error("Error creating Stripe price:", error);
-          throw new Error(`Failed to create price: ${error.message}`);
-        }
-
-        // Create subscription for premium stories
+        // Create subscription using predefined price ID
         let subscription;
         try {
           subscription = await stripe.subscriptions.create({
             customer: customer.id,
             items: [
               {
-                price: price.id,
+                price: priceId,
               },
             ],
             payment_behavior: "default_incomplete",
@@ -710,7 +693,15 @@ export async function registerRoutes(app: Express): Promise<Server> {
           console.log("Created Stripe subscription:", subscription.id);
         } catch (error: any) {
           console.error("Error creating Stripe subscription:", error);
-          throw new Error(`Failed to create subscription: ${error.message}`);
+          
+          // Handle specific Stripe errors
+          if (error.code === "resource_missing") {
+            throw new Error("Subscription plan not found. Please contact support.");
+          } else if (error.code === "invalid_request_error") {
+            throw new Error("Invalid subscription configuration. Please try again or contact support.");
+          } else {
+            throw new Error(`Failed to create subscription: ${error.message}`);
+          }
         }
 
         try {
@@ -745,29 +736,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
         console.log("Subscription ID:", subscription.id);
         console.log("Subscription status:", subscription.status);
         console.log("Billing period:", billing);
-        console.log("Price in cents:", priceInCents);
+        console.log("Price ID used:", priceId);
         console.log("Client secret generated:", clientSecret ? "Yes" : "No");
         console.log("Customer ID:", customer.id);
         console.log("Customer email:", customer.email);
-        console.log("Product ID:", product.id);
-        console.log("Price ID:", price.id);
         console.log("User email:", user.email);
-        console.log(
-          "Latest invoice:",
-          subscription.latest_invoice ? "exists" : "missing",
-        );
-        if (subscription.latest_invoice && typeof subscription.latest_invoice === "object") {
-          console.log("Payment intent exists:", subscription.latest_invoice.payment_intent ? "Yes" : "No");
-          if (subscription.latest_invoice.payment_intent && typeof subscription.latest_invoice.payment_intent === "object") {
-            console.log("Payment intent status:", subscription.latest_invoice.payment_intent.status);
-            console.log("Payment intent client secret exists:", subscription.latest_invoice.payment_intent.client_secret ? "Yes" : "No");
-          }
-        }
-        console.log("Response being sent:", {
-          subscriptionId: subscription.id,
-          clientSecret: clientSecret ? "Present" : "Missing",
-          hasError: false
-        });
         console.log("=== END DEBUG INFO ===");
 
         if (!clientSecret) {
@@ -777,15 +750,9 @@ export async function registerRoutes(app: Express): Promise<Server> {
               id: subscription.id,
               status: subscription.status,
               latest_invoice: subscription.latest_invoice ? "exists" : "missing",
-              latest_invoice_details: subscription.latest_invoice && typeof subscription.latest_invoice === "object" 
-                ? {
-                    payment_intent: subscription.latest_invoice.payment_intent ? "exists" : "missing",
-                    payment_intent_type: typeof subscription.latest_invoice.payment_intent
-                  }
-                : "N/A"
             },
           );
-          throw new Error("Failed to create payment intent for subscription. No client secret available.");
+          throw new Error("Failed to create payment intent for subscription. Please try again or contact support.");
         }
 
         res.send({
@@ -807,19 +774,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
           errorMessage = "Too many requests. Please wait a moment and try again.";
           statusCode = 429;
         } else if (error.type === "StripeInvalidRequestError") {
-          errorMessage = "Invalid subscription request. Please contact support.";
+          errorMessage = "Invalid subscription request. Please contact support if this persists.";
           statusCode = 400;
         } else if (error.type === "StripeAPIError") {
           errorMessage = "Payment service temporarily unavailable. Please try again.";
           statusCode = 503;
+        } else if (error.type === "StripeConnectionError") {
+          errorMessage = "Network connection issue. Please check your internet and try again.";
+          statusCode = 503;
         } else if (error.message) {
           errorMessage = error.message;
+          // If it's our custom error message, use 400 status
+          if (error.message.includes("contact support") || error.message.includes("try again")) {
+            statusCode = 400;
+          }
         }
         
         return res.status(statusCode).json({ 
           error: { 
             message: errorMessage,
-            type: error.type || "subscription_error"
+            type: error.type || "subscription_error",
+            details: process.env.NODE_ENV === "development" ? error.stack : undefined
           } 
         });
       }

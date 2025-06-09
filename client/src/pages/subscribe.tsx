@@ -207,16 +207,29 @@ export default function Subscribe() {
                   
                   // Determine if we should retry based on error type
                   const errorType = errorData.error.type;
-                  shouldRetry = ["StripeAPIError", "network_error", "rate_limit_error"].includes(errorType);
+                  shouldRetry = [
+                    "StripeAPIError", 
+                    "StripeConnectionError", 
+                    "network_error", 
+                    "rate_limit_error"
+                  ].includes(errorType);
+                  
+                  // Don't retry on validation errors or invalid requests
+                  if (errorType === "StripeInvalidRequestError" || errorType === "validation_error") {
+                    shouldRetry = false;
+                  }
                 }
               } else {
                 errorMessage = error.message;
                 shouldRetry = error.message.includes("temporarily unavailable") || 
                             error.message.includes("network") ||
-                            error.message.includes("timeout");
+                            error.message.includes("timeout") ||
+                            error.message.includes("connection");
               }
             } catch (parseError) {
+              console.error("Error parsing error message:", parseError);
               errorMessage = error.message;
+              shouldRetry = false;
             }
           }
           
