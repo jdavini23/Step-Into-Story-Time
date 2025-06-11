@@ -155,15 +155,12 @@ export async function setupAuth(app: Express) {
   console.log("Registered authentication strategies:", registeredStrategies);
 
   passport.serializeUser((user: Express.User, cb) => {
-    console.log("Serializing user:", JSON.stringify(user, null, 2));
+    // Disable serialization logging to prevent spam
     cb(null, user);
   });
   
   passport.deserializeUser((user: Express.User, cb) => {
-    // Only log deserialization in debug mode to reduce noise
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Deserializing user:", JSON.stringify(user, null, 2));
-    }
+    // Completely disable deserialization logging to prevent spam
     cb(null, user);
   });
 
@@ -291,34 +288,22 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
   
-  // Only log detailed authentication info in development mode
-  if (process.env.NODE_ENV === 'development') {
-    console.log("=== AUTHENTICATION CHECK ===");
-    console.log("Session ID:", req.sessionID);
-    console.log("Is authenticated:", req.isAuthenticated());
-    console.log("User object exists:", !!user);
-    console.log("User data:", JSON.stringify(user, null, 2));
-    console.log("Session data:", JSON.stringify(req.session, null, 2));
-  }
-
+  // Quick authentication check without logging
   if (!req.isAuthenticated() || !user || !user.expires_at) {
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Authentication failed - missing auth state or expiry");
-    }
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const now = Math.floor(Date.now() / 1000);
   
-  // Add a buffer time to prevent frequent token refreshes
-  const bufferTime = 300; // 5 minutes buffer
+  // Add a larger buffer time to prevent frequent token refreshes
+  const bufferTime = 600; // 10 minutes buffer
   if (now <= (user.expires_at - bufferTime)) {
     return next();
   }
 
   // Check if we've already refreshed recently to prevent multiple simultaneous refreshes
   const lastRefresh = (req.session as any).lastTokenRefresh || 0;
-  if (now - lastRefresh < 60) { // Don't refresh more than once per minute
+  if (now - lastRefresh < 300) { // Don't refresh more than once per 5 minutes
     return next();
   }
 
@@ -336,15 +321,8 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     // Track the refresh time
     (req.session as any).lastTokenRefresh = now;
     
-    if (process.env.NODE_ENV === 'development') {
-      console.log("Token refreshed successfully");
-    }
-    
     return next();
   } catch (error) {
-    if (process.env.NODE_ENV === 'development') {
-      console.error("Token refresh failed:", error);
-    }
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
