@@ -12,6 +12,7 @@ import LoadingOverlay from "@/components/loading-overlay";
 import { WizardStep } from "@/components/story-wizard/wizard-step";
 import { ChildInfoStep } from "@/components/story-wizard/child-info-step";
 import { StoryStyleStep } from "@/components/story-wizard/story-style-step";
+import { TemplateSelectionStep } from "@/components/story-wizard/template-selection-step";
 import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
 import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
@@ -31,6 +32,12 @@ const STEPS = [
   },
   {
     id: 3,
+    title: "Pick a story template",
+    subtitle: "Choose a structure for your tale",
+    icon: "📋",
+  },
+  {
+    id: 4,
     title: "Add a personal touch",
     subtitle: "Make it extra special with a personal message",
     icon: "💝",
@@ -58,6 +65,7 @@ export default function StoryWizard() {
     favoriteThemes: "",
     tone: "",
     length: "",
+    storyTemplate: "",
     bedtimeMessage: "",
   });
 
@@ -162,11 +170,13 @@ export default function StoryWizard() {
   const canProceed = () => {
     switch (currentStep) {
       case 1:
-        return formData.childName && formData.childAge && formData.childGender;
+        return !!(formData.childName && formData.childAge && formData.childGender);
       case 2:
-        return formData.tone && formData.length;
+        return !!(formData.tone && formData.length);
       case 3:
-        return true; // Optional step
+        return true; // Template selection is optional
+      case 4:
+        return true; // Personal touch is optional
       default:
         return false;
     }
@@ -222,6 +232,13 @@ export default function StoryWizard() {
           />
         );
       case 3:
+        return (
+          <TemplateSelectionStep
+            formData={formData}
+            updateFormData={updateFormData}
+          />
+        );
+      case 4:
         return (
           <PersonalTouchStep
             formData={formData}

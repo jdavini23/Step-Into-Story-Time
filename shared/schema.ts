@@ -53,6 +53,7 @@ export const stories = pgTable("stories", {
   favoriteThemes: varchar("favorite_themes"),
   tone: varchar("tone").notNull(), // 'adventurous', 'silly', 'calming', 'educational'
   length: varchar("length").notNull(), // 'short', 'medium', 'long'
+  storyTemplate: varchar("story_template"), // Story structure template
   bedtimeMessage: text("bedtime_message"),
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
