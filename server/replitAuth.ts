@@ -54,7 +54,7 @@ export function getSession() {
     store: sessionStore,
     resave: false,
     saveUninitialized: false, // Only save session when data is added
-    rolling: true, // Reset expiry on each request
+    rolling: false, // Don't reset expiry on each request to reduce session writes
     cookie: {
       httpOnly: true,
       secure: false, // Disable secure cookies for development
@@ -160,7 +160,10 @@ export async function setupAuth(app: Express) {
   });
   
   passport.deserializeUser((user: Express.User, cb) => {
-    console.log("Deserializing user:", JSON.stringify(user, null, 2));
+    // Only log deserialization in debug mode to reduce noise
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Deserializing user:", JSON.stringify(user, null, 2));
+    }
     cb(null, user);
   });
 
@@ -288,20 +291,34 @@ export async function setupAuth(app: Express) {
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
   const user = req.user as any;
   
-  console.log("=== AUTHENTICATION CHECK ===");
-  console.log("Session ID:", req.sessionID);
-  console.log("Is authenticated:", req.isAuthenticated());
-  console.log("User object exists:", !!user);
-  console.log("User data:", JSON.stringify(user, null, 2));
-  console.log("Session data:", JSON.stringify(req.session, null, 2));
+  // Only log detailed authentication info in development mode
+  if (process.env.NODE_ENV === 'development') {
+    console.log("=== AUTHENTICATION CHECK ===");
+    console.log("Session ID:", req.sessionID);
+    console.log("Is authenticated:", req.isAuthenticated());
+    console.log("User object exists:", !!user);
+    console.log("User data:", JSON.stringify(user, null, 2));
+    console.log("Session data:", JSON.stringify(req.session, null, 2));
+  }
 
   if (!req.isAuthenticated() || !user || !user.expires_at) {
-    console.log("Authentication failed - missing auth state or expiry");
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Authentication failed - missing auth state or expiry");
+    }
     return res.status(401).json({ message: "Unauthorized" });
   }
 
   const now = Math.floor(Date.now() / 1000);
-  if (now <= user.expires_at) {
+  
+  // Add a buffer time to prevent frequent token refreshes
+  const bufferTime = 300; // 5 minutes buffer
+  if (now <= (user.expires_at - bufferTime)) {
+    return next();
+  }
+
+  // Check if we've already refreshed recently to prevent multiple simultaneous refreshes
+  const lastRefresh = (req.session as any).lastTokenRefresh || 0;
+  if (now - lastRefresh < 60) { // Don't refresh more than once per minute
     return next();
   }
 
@@ -315,8 +332,19 @@ export const isAuthenticated: RequestHandler = async (req, res, next) => {
     const config = await getOidcConfig();
     const tokenResponse = await client.refreshTokenGrant(config, refreshToken);
     updateUserSession(user, tokenResponse);
+    
+    // Track the refresh time
+    (req.session as any).lastTokenRefresh = now;
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.log("Token refreshed successfully");
+    }
+    
     return next();
   } catch (error) {
+    if (process.env.NODE_ENV === 'development') {
+      console.error("Token refresh failed:", error);
+    }
     res.status(401).json({ message: "Unauthorized" });
     return;
   }
