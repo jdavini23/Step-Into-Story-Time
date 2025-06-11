@@ -1,5 +1,6 @@
 import OpenAI from "openai";
 import crypto from "crypto";
+import { STORY_TEMPLATES } from "../shared/storyTemplates";
 
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 
@@ -133,9 +134,6 @@ const createPrompt = (params: StoryGenerationParams) => {
         ? { they: "she", them: "her", their: "her" }
         : { they: "they", them: "them", their: "their" };
 
-  // Import the template system
-  const { STORY_TEMPLATES } = require("../shared/storyTemplates");
-  
   let templateSpec = "";
   if (storyTemplate && storyTemplate !== "") {
     const template = STORY_TEMPLATES.find((t: any) => t.id === storyTemplate);
