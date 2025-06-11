@@ -55,6 +55,7 @@ const generateCacheKey = (params: StoryGenerationParams): string => {
     favoriteThemes: params.favoriteThemes,
     tone: params.tone,
     length: params.length,
+    storyTemplate: params.storyTemplate,
   };
   return crypto.createHash("md5").update(JSON.stringify(keyData)).digest("hex");
 };
@@ -96,6 +97,7 @@ export interface StoryGenerationParams {
   favoriteThemes?: string;
   tone: string; // 'adventurous', 'silly', 'calming', 'educational'
   length: string; // 'short', 'medium'
+  storyTemplate?: string;
   bedtimeMessage?: string;
 }
 
@@ -112,6 +114,7 @@ const createPrompt = (params: StoryGenerationParams) => {
     favoriteThemes,
     tone,
     length,
+    storyTemplate,
     bedtimeMessage,
   } = params;
 
@@ -130,6 +133,17 @@ const createPrompt = (params: StoryGenerationParams) => {
         ? { they: "she", them: "her", their: "her" }
         : { they: "they", them: "them", their: "their" };
 
+  // Import the template system
+  const { STORY_TEMPLATES } = require("../shared/storyTemplates");
+  
+  let templateSpec = "";
+  if (storyTemplate && storyTemplate !== "") {
+    const template = STORY_TEMPLATES.find((t: any) => t.id === storyTemplate);
+    if (template) {
+      templateSpec = `\n\nFollow this story structure: ${template.structure.replace('{childName}', childName)}`;
+    }
+  }
+
   return `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
 
 The story should be:
@@ -139,7 +153,7 @@ The story should be:
 - ${tone} in tone while still being suitable for bedtime
 - Include ${childName} as the main character (use pronouns: ${pronouns.they}/${pronouns.them}/${pronouns.their})
 - Have a clear beginning, middle, and satisfying end
-- End on a peaceful, sleepy note perfect for bedtime
+- End on a peaceful, sleepy note perfect for bedtime${templateSpec}
 
 ${messageSpec}
 
