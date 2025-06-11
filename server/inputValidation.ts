@@ -91,6 +91,7 @@ export const sanitizedStorySchema = z.object({
   favoriteThemes: themesSchema,
   tone: z.enum(['adventurous', 'silly', 'calming', 'educational']),
   length: z.enum(['short', 'medium', 'long']),
+  storyTemplate: z.string().optional(),
   bedtimeMessage: bedtimeMessageSchema,
   title: storyTitleSchema.optional(),
   content: storyContentSchema.optional(),
