@@ -151,7 +151,8 @@ The story should be:
 - ${tone} in tone while still being suitable for bedtime
 - Include ${childName} as the main character (use pronouns: ${pronouns.they}/${pronouns.them}/${pronouns.their})
 - Have a clear beginning, middle, and satisfying end
-- End on a peaceful, sleepy note perfect for bedtime${templateSpec}
+- End on a peaceful, sleepy note perfect for bedtime
+- Use creative and varied story openings - avoid starting with "Once upon a time" and instead use engaging, original beginnings that immediately draw the reader in${templateSpec}
 
 ${messageSpec}
 
