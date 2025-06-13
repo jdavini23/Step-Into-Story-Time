@@ -100,9 +100,17 @@ export async function getUserTier(
     throw new Error("User not found");
   }
 
+  let tier = (user[0].subscriptionTier as SubscriptionTier) || "free";
+  const status = (user[0].subscriptionStatus as SubscriptionStatus) || "active";
+
+  // If the subscription is not active, force the tier to be free.
+  if (status !== "active" && status !== "trialing") {
+    tier = "free";
+  }
+
   return {
-    tier: (user[0].subscriptionTier as SubscriptionTier) || "free",
-    status: (user[0].subscriptionStatus as SubscriptionStatus) || "active",
+    tier: tier,
+    status: status,
   };
 }
 

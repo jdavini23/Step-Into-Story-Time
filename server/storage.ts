@@ -237,6 +237,7 @@ export class DatabaseStorage implements IStorage {
     tier: string,
     status: string,
   ): Promise<User> {
+    console.log(`Updating user ${userId} subscription: tier=${tier}, status=${status}`);
     const [user] = await db
       .update(users)
       .set({

@@ -43,7 +43,7 @@ export const checkStoryGenerationPermissions = async (
     const permissionCheck = await canUserGenerateStory(userId);
 
     if (!permissionCheck.canGenerate) {
-      let message = "Story generation not allowed";
+      let message = permissionCheck.reason || "Story generation not allowed";
       let upgradeRequired = false;
 
       if (permissionCheck.reason === "Weekly story limit reached") {
@@ -52,15 +52,22 @@ export const checkStoryGenerationPermissions = async (
         upgradeRequired = true;
       } else if (permissionCheck.reason === "Subscription is not active") {
         message =
-          "Your subscription is not active. Please check your billing or contact support.";
+          "Your subscription has expired. Please renew your subscription or continue with 3 free stories per week.";
         upgradeRequired = true;
+      } else if (permissionCheck.reason === "User not found") {
+        // Handle case where user lookup fails
+        message = "Account error. Please try logging out and back in.";
+        upgradeRequired = false;
       }
+
+      console.log(`Story generation blocked for user ${userId}: ${message}`);
 
       res.status(403).json({
         error: "Generation limit reached",
         message,
         upgradeRequired,
         storiesRemaining: permissionCheck.storiesRemaining || 0,
+        currentTier: permissionCheck.currentTier || "free",
       });
       return;
     }
