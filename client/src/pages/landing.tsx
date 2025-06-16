@@ -3,12 +3,22 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useState, useEffect } from "react";
 import HeroSection from "@/components/landing/hero-section";
 import FeaturesSection from "@/components/landing/features-section";
+import { SchemaMarkup, organizationSchema, softwareApplicationSchema } from "@/components/schema-markup";
+import { useSEO } from "@/hooks/useSEO";
 import HowItWorksSection from "@/components/landing/how-it-works-section";
 import TestimonialsSection from "@/components/landing/testimonials-section";
 import CTASection from "@/components/landing/cta-section";
 
 export default function Landing() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
+
+  useSEO({
+    title: "Step Into Storytime - Magical AI-Powered Bedtime Stories for Children",
+    description: "Create magical, personalized bedtime stories for your children in minutes. AI-powered storytelling that makes every night a new adventure.",
+    keywords: "bedtime stories, children's stories, AI storytelling, personalized stories, kids bedtime, magical stories, family entertainment",
+    url: window.location.href,
+    type: "website"
+  });
   const [storyVisible, setStoryVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
 
@@ -43,21 +53,35 @@ export default function Landing() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 overflow-hidden">
+    <>
+      <SchemaMarkup schema={organizationSchema} />
+      <SchemaMarkup schema={softwareApplicationSchema} />
+      <main className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 overflow-hidden">
       {/* Hero Section */}
-      <HeroSection />
+      <section aria-label="Hero section">
+        <HeroSection />
+      </section>
 
       {/* Features Section */}
-      <FeaturesSection />
+      <section aria-label="Features and benefits">
+        <FeaturesSection />
+      </section>
 
       {/* How It Works Section */}
-      <HowItWorksSection />
+      <section aria-label="How it works">
+        <HowItWorksSection />
+      </section>
 
       {/* Testimonials Section */}
-      <TestimonialsSection />
+      <section aria-label="Customer testimonials">
+        <TestimonialsSection />
+      </section>
 
       {/* CTA Section */}
-      <CTASection />
-    </div>
+      <section aria-label="Call to action">
+        <CTASection />
+      </section>
+    </main>
+    </>
   );
 }

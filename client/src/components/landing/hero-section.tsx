@@ -141,17 +141,17 @@ export default function HeroSection() {
             </div>
 
             <div className="mt-6 flex items-center justify-between">
-              <div className="flex items-center space-x-4 text-xs text-gray-500">
-                <span className="flex items-center space-x-1">
-                  <span>👶</span>
+              <div className="flex items-center space-x-4 text-xs text-gray-500" role="list" aria-label="Story characteristics">
+                <span className="flex items-center space-x-1" role="listitem">
+                  <span aria-hidden="true">👶</span>
                   <span>Age 6</span>
                 </span>
-                <span className="flex items-center space-x-1">
-                  <span>🎭</span>
+                <span className="flex items-center space-x-1" role="listitem">
+                  <span aria-hidden="true">🎭</span>
                   <span>Adventure</span>
                 </span>
-                <span className="flex items-center space-x-1">
-                  <span>⏱️</span>
+                <span className="flex items-center space-x-1" role="listitem">
+                  <span aria-hidden="true">⏱️</span>
                   <span>3 min</span>
                 </span>
               </div>
@@ -159,6 +159,7 @@ export default function HeroSection() {
                 variant="outline"
                 size="sm"
                 className="text-purple-600 border-purple-600 hover:bg-purple-600 hover:text-white"
+                aria-label="Read full sample story"
               >
                 Read Full Story
               </Button>

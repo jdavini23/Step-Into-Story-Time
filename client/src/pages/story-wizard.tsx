@@ -16,6 +16,9 @@ import { TemplateSelectionStep } from "@/components/story-wizard/template-select
 import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
 import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
+import { generateUniqueId } from "@/lib/utils";
+import { useRef } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 const STEPS = [
   {
@@ -45,6 +48,15 @@ const STEPS = [
 ];
 
 export default function StoryWizard() {
+  const [currentStep, setCurrentStep] = useState(1);
+
+  useSEO({
+    title: "Create Your Story - Step Into Storytime | AI-Powered Bedtime Stories",
+    description: "Create personalized, magical bedtime stories for your children in minutes. Choose themes, characters, and let AI craft the perfect adventure.",
+    keywords: "create story, personalized bedtime stories, AI storytelling, custom children's stories, bedtime story generator",
+    url: window.location.href,
+    type: "website"
+  });
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: tierInfo, isLoading: tierLoading } = useTierInfo();
   const [, setLocation] = useLocation();
@@ -57,7 +69,7 @@ export default function StoryWizard() {
     window.location.href = `/api/login?returnTo=${encodeURIComponent(currentUrl)}`;
     return null;
   }
-  const [currentStep, setCurrentStep] = useState(1);
+
   const [formData, setFormData] = useState<Partial<InsertStory>>({
     childName: "",
     childAge: 4,

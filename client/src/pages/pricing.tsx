@@ -19,6 +19,7 @@ import { CheckCircle, Star, Crown, Sparkles, Heart, Users, Info } from "lucide-r
 import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
+import { useSEO } from "@/hooks/useSEO";
 
 // Feature Modal Component
 function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
@@ -33,7 +34,7 @@ function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
           {feature.description}
         </DialogDescription>
       </DialogHeader>
-      
+
       <div className="mt-6 space-y-6">
         {/* Plan Comparison */}
         <div className="grid grid-cols-3 gap-4">
@@ -71,11 +72,18 @@ function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
 }
 
 export default function Pricing() {
-  const { isAuthenticated, user } = useAuth();
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
   const [selectedFeature, setSelectedFeature] = useState<typeof comparisonFeatures[0] | null>(null);
+
+  useSEO({
+    title: "Pricing Plans - Step Into Storytime | Magical Bedtime Stories",
+    description: "Choose the perfect storytelling plan for your family. From free magical stories to premium features with unlimited adventures.",
+    keywords: "pricing, bedtime stories, subscription plans, family entertainment, children's stories pricing",
+    url: window.location.href,
+    type: "website"
+  });
 
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers
@@ -91,7 +99,7 @@ export default function Pricing() {
         tier === "free"
           ? "/"
           : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
-      
+
       console.log("Redirecting non-authenticated user to login with returnUrl:", returnUrl);
       window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
       return;

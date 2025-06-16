@@ -11,6 +11,7 @@ import { registerFavoriteRoutes } from "./favorites";
 import { registerPaymentRoutes } from "./payments";
 import { registerWebhookRoutes } from "./webhooks";
 import { registerSystemRoutes } from "./system";
+import { registerSEORoutes } from "./seo";
 
 // Rate limiters for different endpoints
 export const storyGenerationLimiter = new RateLimiter(5, 60000); // 5 requests per minute
@@ -21,6 +22,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   await setupAuth(app);
 
   // Register all route modules
+  registerSEORoutes(app);
   registerSystemRoutes(app);
   registerAuthRoutes(app);
   registerStoryRoutes(app, storyGenerationLimiter, generalLimiter);
