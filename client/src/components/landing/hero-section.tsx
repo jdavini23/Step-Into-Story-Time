@@ -13,12 +13,12 @@ export default function HeroSection() {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-20">
       <div className="grid lg:grid-cols-2 gap-12 items-center">
         <div className="text-center lg:text-left">
-          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-700 leading-tight mb-6">
-            Tuck in. Tap a button.
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-gray-700 leading-tight mb-6">
+            Create Magical Bedtime Stories in Minutes
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 ml-3">
-              Start the magic.
+              That Star Your Child
             </span>
-          </h2>
+          </h1>
           <p className="text-xl text-gray-600 mb-8 leading-relaxed">
             Create personalized bedtime stories in minutes — starring your
             child.
@@ -167,20 +167,24 @@ export default function HeroSection() {
           </div>
 
           {/* Interactive Floating Elements */}
-          <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl">
-            <span className="text-2xl">📚</span>
+          <div className="absolute -top-4 -left-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl" aria-label="Storybook icon" role="img">
+            <span className="text-2xl" aria-hidden="true">📚</span>
           </div>
           <div
             className="absolute -bottom-4 -right-4 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl"
             style={{ animationDelay: "1s" }}
+            aria-label="Magic sparkles icon"
+            role="img"
           >
-            <span className="text-2xl">✨</span>
+            <span className="text-2xl" aria-hidden="true">✨</span>
           </div>
           <div
             className="absolute top-1/2 -right-6 bg-white p-3 rounded-xl shadow-lg animate-bounce hover:scale-125 hover:rotate-12 transition-transform cursor-pointer hover:shadow-xl"
             style={{ animationDelay: "1.5s" }}
+            aria-label="Bedtime moon icon"
+            role="img"
           >
-            <span className="text-2xl">🌙</span>
+            <span className="text-2xl" aria-hidden="true">🌙</span>
           </div>
 
           {/* Sparkle Animation */}

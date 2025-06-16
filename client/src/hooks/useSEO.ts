@@ -1,6 +1,8 @@
 
 import { useEffect } from "react";
 
+import { useEffect } from "react";
+
 interface SEOData {
   title?: string;
   description?: string;
@@ -8,6 +10,7 @@ interface SEOData {
   image?: string;
   url?: string;
   type?: string;
+  canonical?: string;
 }
 
 export function useSEO(data: SEOData) {
@@ -54,6 +57,11 @@ export function useSEO(data: SEOData) {
     if (data.image) {
       updateMetaName("twitter:image", data.image);
     }
+
+    // Update canonical URL
+    if (data.canonical || data.url) {
+      updateCanonicalUrl(data.canonical || data.url!);
+    }
   }, [data]);
 }
 
@@ -85,4 +93,14 @@ function updateMetaName(name: string, content: string) {
     document.head.appendChild(meta);
   }
   meta.setAttribute("content", content);
+}
+
+function updateCanonicalUrl(url: string) {
+  let canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement("link");
+    canonical.setAttribute("rel", "canonical");
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute("href", url);
 }

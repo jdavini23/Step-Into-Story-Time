@@ -49,17 +49,18 @@ const STEPS = [
 
 export default function StoryWizard() {
   const [currentStep, setCurrentStep] = useState(1);
+  const [, setLocation] = useLocation();
 
   useSEO({
-    title: "Create Your Story - Step Into Storytime | AI-Powered Bedtime Stories",
-    description: "Create personalized, magical bedtime stories for your children in minutes. Choose themes, characters, and let AI craft the perfect adventure.",
-    keywords: "create story, personalized bedtime stories, AI storytelling, custom children's stories, bedtime story generator",
+    title: "Create Your Personalized Bedtime Story | Step Into Storytime",
+    description: "Follow our simple 4-step wizard to create a magical, personalized bedtime story for your child in under 2 minutes.",
+    keywords: "create bedtime story, story wizard, personalized children's story, AI story creator",
     url: window.location.href,
+    canonical: "https://stepintostorytime.com/story-wizard",
     type: "website"
   });
   const { user, isLoading, isAuthenticated } = useAuth();
   const { data: tierInfo, isLoading: tierLoading } = useTierInfo();
-  const [, setLocation] = useLocation();
   const { toast } = useToast();
 
   // Handle authentication redirect

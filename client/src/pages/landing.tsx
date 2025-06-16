@@ -13,10 +13,11 @@ export default function Landing() {
   const [hoveredFeature, setHoveredFeature] = useState<number | null>(null);
 
   useSEO({
-    title: "Step Into Storytime - Magical AI-Powered Bedtime Stories for Children",
-    description: "Create magical, personalized bedtime stories for your children in minutes. AI-powered storytelling that makes every night a new adventure.",
-    keywords: "bedtime stories, children's stories, AI storytelling, personalized stories, kids bedtime, magical stories, family entertainment",
+    title: "Create Magical Personalized Bedtime Stories | Step Into Storytime",
+    description: "Transform bedtime with AI-powered stories that star your child. Create your first story in under 2 minutes — no credit card required.",
+    keywords: "bedtime stories, children's stories, AI storytelling, personalized stories, kids bedtime, magical stories, family entertainment, parenting tools",
     url: window.location.href,
+    canonical: "https://stepintostorytime.com/",
     type: "website"
   });
   const [storyVisible, setStoryVisible] = useState(false);

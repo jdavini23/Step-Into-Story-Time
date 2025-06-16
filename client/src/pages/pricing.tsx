@@ -72,18 +72,21 @@ function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
 }
 
 export default function Pricing() {
+  const { user } = useAuth();
+
+  useSEO({
+    title: "Pricing Plans - Affordable Bedtime Story Magic | Step Into Storytime",
+    description: "Choose the perfect plan for your family. From free bedtime stories to unlimited magical adventures. Start creating personalized stories today.",
+    keywords: "bedtime story pricing, AI story plans, children's story subscription, family entertainment pricing",
+    url: window.location.href,
+    canonical: "https://stepintostorytime.com/pricing",
+    type: "website"
+  });
+
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
   const [selectedFeature, setSelectedFeature] = useState<typeof comparisonFeatures[0] | null>(null);
-
-  useSEO({
-    title: "Pricing Plans - Step Into Storytime | Magical Bedtime Stories",
-    description: "Choose the perfect storytelling plan for your family. From free magical stories to premium features with unlimited adventures.",
-    keywords: "pricing, bedtime stories, subscription plans, family entertainment, children's stories pricing",
-    url: window.location.href,
-    type: "website"
-  });
 
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers
