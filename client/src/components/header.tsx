@@ -9,7 +9,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { BookOpen, Plus, Home, LogOut, Menu, Crown } from "lucide-react";
+import { BookOpen, Plus, Users, Home, LogOut, Menu, Crown } from "lucide-react";
 import { useState, useMemo, useCallback } from "react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 
@@ -22,6 +22,7 @@ interface NavigationItem {
 const navigation: NavigationItem[] = [
   { name: "My Stories", href: "/", icon: BookOpen },
   { name: "Create Story", href: "/story-wizard", icon: Plus },
+  { name: "Characters", href: "/characters", icon: Users },
   { name: "Go Premium", href: "/subscribe", icon: Crown },
 ];
 
