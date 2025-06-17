@@ -30,6 +30,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerFavoriteRoutes(app);
   registerPaymentRoutes(app);
   registerWebhookRoutes(app);
+  registerCharacterRoutes(app, generalLimiter);
 
   // Debug endpoints for testing (remove in production)
   if (process.env.NODE_ENV === "development") {

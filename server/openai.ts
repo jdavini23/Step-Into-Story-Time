@@ -100,6 +100,7 @@ export interface StoryGenerationParams {
   length: string; // 'short', 'medium'
   storyTemplate?: string;
   bedtimeMessage?: string;
+  customCharacters?: string[]; // Array of custom character IDs
 }
 
 const MAX_CONTENT_SIZE_MAP = {
@@ -107,7 +108,7 @@ const MAX_CONTENT_SIZE_MAP = {
   medium: 4000,
 };
 
-const createPrompt = (params: StoryGenerationParams) => {
+const createPrompt = (params: StoryGenerationParams, customCharacters?: any[]) => {
   const {
     childName,
     childAge,
@@ -142,6 +143,13 @@ const createPrompt = (params: StoryGenerationParams) => {
     }
   }
 
+  let charactersSpec = "";
+  if (customCharacters && customCharacters.length > 0) {
+    charactersSpec = `\n\nInclude these custom characters in the story:\n${customCharacters.map(char => 
+      `- ${char.name} (${char.role}): ${char.description}. Appearance: ${char.appearance}. Personality: ${char.personality}.${char.specialAbilities ? ` Special abilities: ${char.specialAbilities}.` : ''}`
+    ).join('\n')}`;
+  }
+
   return `Create a magical ${tone} bedtime story for a ${childAge}-year-old ${childGender} named ${childName}${themeSpec}. 
 
 The story should be:
@@ -152,7 +160,7 @@ The story should be:
 - Include ${childName} as the main character (use pronouns: ${pronouns.they}/${pronouns.them}/${pronouns.their})
 - Have a clear beginning, middle, and satisfying end
 - End on a peaceful, sleepy note perfect for bedtime
-- Use creative and varied story openings - avoid starting with "Once upon a time" and instead use engaging, original beginnings that immediately draw the reader in${templateSpec}
+- Use creative and varied story openings - avoid starting with "Once upon a time" and instead use engaging, original beginnings that immediately draw the reader in${templateSpec}${charactersSpec}
 
 ${messageSpec}
 
@@ -221,7 +229,7 @@ export async function generateBedtimeStory(
     }
   }
 
-  const prompt = createPrompt(params);
+  const prompt = createPrompt(params, customCharacters);
 
   // Adjust content length based on story length
   let targetWords: number;

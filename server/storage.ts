@@ -328,6 +328,59 @@ export class DatabaseStorage implements IStorage {
 
     return updatedUsage;
   }
+
+  // Custom Character operations
+  async createCustomCharacter(userId: string, character: InsertCustomCharacter): Promise<CustomCharacter> {
+    const [newCharacter] = await db
+      .insert(customCharacters)
+      .values({
+        ...character,
+        userId,
+      })
+      .returning();
+    return newCharacter;
+  }
+
+  async getUserCustomCharacters(userId: string): Promise<CustomCharacter[]> {
+    const result = await db
+      .select()
+      .from(customCharacters)
+      .where(and(eq(customCharacters.userId, userId), eq(customCharacters.isActive, true)))
+      .orderBy(desc(customCharacters.createdAt));
+    return result;
+  }
+
+  async getCustomCharacter(id: number, userId: string): Promise<CustomCharacter | undefined> {
+    const [character] = await db
+      .select()
+      .from(customCharacters)
+      .where(and(eq(customCharacters.id, id), eq(customCharacters.userId, userId)));
+    return character;
+  }
+
+  async updateCustomCharacter(
+    id: number,
+    userId: string,
+    updates: Partial<InsertCustomCharacter>,
+  ): Promise<CustomCharacter | undefined> {
+    const [updatedCharacter] = await db
+      .update(customCharacters)
+      .set({
+        ...updates,
+        updatedAt: new Date(),
+      })
+      .where(and(eq(customCharacters.id, id), eq(customCharacters.userId, userId)))
+      .returning();
+    return updatedCharacter;
+  }
+
+  async deleteCustomCharacter(id: number, userId: string): Promise<boolean> {
+    const result = await db
+      .update(customCharacters)
+      .set({ isActive: false, updatedAt: new Date() })
+      .where(and(eq(customCharacters.id, id), eq(customCharacters.userId, userId)));
+    return (result.rowCount || 0) > 0;
+  }
 }
 
 export const storage = new DatabaseStorage();

@@ -34,6 +34,7 @@ function Router() {
       <Header />
       <Switch>
         <Route path="/pricing" component={Pricing} />
+        <Route path="/characters" component={lazy(() => import("./pages/characters"))} />
         <Route path="/story-wizard" component={StoryWizard} />
         <Route path="/story/:id" component={StoryReader} />
         <Route path="/subscribe" component={Subscribe} />
