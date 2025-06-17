@@ -7,6 +7,7 @@ import {
   index,
   serial,
   integer,
+  boolean,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
@@ -55,6 +56,7 @@ export const stories = pgTable("stories", {
   length: varchar("length").notNull(), // 'short', 'medium', 'long'
   storyTemplate: varchar("story_template"), // Story structure template
   bedtimeMessage: text("bedtime_message"),
+  customCharacters: text("custom_characters").array(), // Array of custom character IDs to include
   createdAt: timestamp("created_at").defaultNow(),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -128,3 +130,34 @@ export const insertUsageTrackingSchema = createInsertSchema(usageTracking).omit(
 
 export type InsertUsageTracking = z.infer<typeof insertUsageTrackingSchema>;
 export type UsageTracking = typeof usageTracking.$inferSelect;
+
+// Custom Characters table
+export const customCharacters = pgTable("custom_characters", {
+  id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id),
+  name: varchar("name").notNull(),
+  description: text("description").notNull(),
+  appearance: text("appearance").notNull(), // Physical description
+  personality: text("personality").notNull(), // Character traits
+  role: varchar("role").notNull(), // friend, pet, mentor, villain, etc.
+  species: varchar("species").default("human"), // human, animal, magical creature, etc.
+  age: varchar("age"), // young, adult, elderly, etc.
+  specialAbilities: text("special_abilities"), // Any magical or special powers
+  backstory: text("backstory"), // Character's history
+  favoriteThings: text("favorite_things"), // What they like
+  isActive: boolean("is_active").default(true),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
+export const insertCustomCharacterSchema = createInsertSchema(customCharacters).omit({
+  id: true,
+  userId: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
+export type InsertCustomCharacter = z.infer<typeof insertCustomCharacterSchema>;
+export type CustomCharacter = typeof customCharacters.$inferSelect;

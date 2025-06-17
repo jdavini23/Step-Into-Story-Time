@@ -3,6 +3,7 @@ import {
   stories,
   favorites,
   usageTracking,
+  customCharacters,
   type User,
   type UpsertUser,
   type Story,
@@ -11,6 +12,8 @@ import {
   type InsertFavorite,
   type UsageTracking,
   type InsertUsageTracking,
+  type CustomCharacter,
+  type InsertCustomCharacter,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -61,6 +64,17 @@ export interface IStorage {
   ): Promise<UsageTracking | undefined>;
   createUsageTracking(userId: string, weekStart: Date): Promise<UsageTracking>;
   incrementWeeklyUsage(userId: string, weekStart: Date): Promise<UsageTracking>;
+
+  // Custom Character operations
+  createCustomCharacter(userId: string, character: InsertCustomCharacter): Promise<CustomCharacter>;
+  getUserCustomCharacters(userId: string): Promise<CustomCharacter[]>;
+  getCustomCharacter(id: number, userId: string): Promise<CustomCharacter | undefined>;
+  updateCustomCharacter(
+    id: number,
+    userId: string,
+    updates: Partial<InsertCustomCharacter>,
+  ): Promise<CustomCharacter | undefined>;
+  deleteCustomCharacter(id: number, userId: string): Promise<boolean>;
 }
 
 export class DatabaseStorage implements IStorage {
