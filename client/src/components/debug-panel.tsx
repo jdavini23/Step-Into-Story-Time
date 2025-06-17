@@ -27,35 +27,51 @@ export function DebugPanel() {
 
   const setTier = async (tier: string, status = "active") => {
     try {
+      console.log(`Debug Panel: Attempting to set tier to ${tier} with status ${status}`);
+      
       const response = await apiRequest("POST", "/api/debug/set-tier", {
         tier,
         status,
       });
 
+      console.log(`Debug Panel: Response status: ${response.status}`);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
-        throw new Error(errorData.message || `HTTP ${response.status}`);
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorData.error || errorMessage;
+          console.error("Debug Panel: Error response data:", errorData);
+        } catch (parseError) {
+          console.error("Debug Panel: Failed to parse error response:", parseError);
+          const responseText = await response.text();
+          console.error("Debug Panel: Raw response text:", responseText);
+          errorMessage = responseText || errorMessage;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      console.log("Tier update response:", data);
+      console.log("Debug Panel: Success response:", data);
 
       toast({
-        title: "Tier Updated",
-        description: data.message || `Successfully updated to ${tier} tier`,
+        title: "Tier Updated Successfully",
+        description: `Updated to ${tier} tier with ${status} status`,
       });
 
-      // Refresh all relevant queries
-      queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/subscription-status"] });
-      queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      // Refresh all relevant queries with a small delay to ensure backend is updated
+      setTimeout(() => {
+        queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/subscription-status"] });
+        queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
+      }, 100);
 
       await fetchDebugInfo();
     } catch (error: any) {
-      console.error("Error setting tier:", error);
+      console.error("Debug Panel: Error setting tier:", error);
       toast({
-        title: "Error",
-        description: error.message || "Failed to update tier",
+        title: "Failed to Update Tier",
+        description: error.message || "Unknown error occurred",
         variant: "destructive",
       });
     }

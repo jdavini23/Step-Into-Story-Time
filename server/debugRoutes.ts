@@ -19,10 +19,24 @@ export function registerDebugRoutes(app: Express) {
   // Force set user tier for testing
   app.post("/api/debug/set-tier", isAuthenticated, async (req: any, res) => {
     try {
-      const userId = req.user.claims.sub;
+      const userId = req.user?.claims?.sub;
       const { tier, status = "active" } = req.body;
 
-      console.log(`Debug: Setting tier for user ${userId} to ${tier} with status ${status}`);
+      console.log(`=== DEBUG SET TIER START ===`);
+      console.log(`User ID: ${userId}`);
+      console.log(`Requested tier: ${tier}`);
+      console.log(`Requested status: ${status}`);
+      console.log(`Request user object:`, req.user);
+
+      if (!userId) {
+        console.log(`Debug: No user ID found in request`);
+        return res.status(401).json({ message: "User not authenticated" });
+      }
+
+      if (!tier) {
+        console.log(`Debug: No tier provided in request body`);
+        return res.status(400).json({ message: "Tier is required" });
+      }
 
       if (!["free", "premium", "family"].includes(tier)) {
         console.log(`Debug: Invalid tier received: ${tier}`);
@@ -34,25 +48,47 @@ export function registerDebugRoutes(app: Express) {
         return res.status(400).json({ message: `Invalid status: ${status}` });
       }
 
+      // Check if user exists first
+      const existingUser = await storage.getUser(userId);
+      if (!existingUser) {
+        console.log(`Debug: User ${userId} not found in database`);
+        return res.status(404).json({ message: "User not found" });
+      }
+
+      console.log(`Debug: Current user state:`, {
+        tier: existingUser.subscriptionTier,
+        status: existingUser.subscriptionStatus
+      });
+
       // Update the subscription using the storage layer
       const updatedUser = await storage.updateUserSubscription(userId, tier, status);
       console.log(`Debug: Successfully updated user subscription:`, {
         userId,
-        tier: updatedUser.subscriptionTier,
-        status: updatedUser.subscriptionStatus
+        oldTier: existingUser.subscriptionTier,
+        newTier: updatedUser.subscriptionTier,
+        oldStatus: existingUser.subscriptionStatus,
+        newStatus: updatedUser.subscriptionStatus
       });
+
+      console.log(`=== DEBUG SET TIER SUCCESS ===`);
 
       res.json({ 
         message: `Successfully updated user tier to ${tier} with status ${status}`, 
         tier: updatedUser.subscriptionTier, 
         status: updatedUser.subscriptionStatus,
-        userId
+        userId,
+        previousTier: existingUser.subscriptionTier,
+        previousStatus: existingUser.subscriptionStatus
       });
     } catch (error) {
+      console.error("=== DEBUG SET TIER ERROR ===");
       console.error("Error setting tier:", error);
+      console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
+      
       res.status(500).json({ 
         message: "Failed to set tier", 
-        error: error instanceof Error ? error.message : "Unknown error" 
+        error: error instanceof Error ? error.message : "Unknown error",
+        stack: process.env.NODE_ENV === "development" ? (error instanceof Error ? error.stack : undefined) : undefined
       });
     }
   });

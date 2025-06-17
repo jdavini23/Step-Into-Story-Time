@@ -253,29 +253,41 @@ export class DatabaseStorage implements IStorage {
     tier: string,
     status: string,
   ): Promise<User> {
-    console.log(`Storage: Updating user ${userId} subscription: tier=${tier}, status=${status}`);
+    console.log(`=== STORAGE UPDATE SUBSCRIPTION START ===`);
+    console.log(`User ID: ${userId}`);
+    console.log(`New tier: ${tier}`);
+    console.log(`New status: ${status}`);
     
-    const [user] = await db
-      .update(users)
-      .set({
-        subscriptionTier: tier,
-        subscriptionStatus: status,
-        updatedAt: new Date(),
-      })
-      .where(eq(users.id, userId))
-      .returning();
-    
-    if (!user) {
-      throw new Error(`User with ID ${userId} not found`);
+    try {
+      const [user] = await db
+        .update(users)
+        .set({
+          subscriptionTier: tier,
+          subscriptionStatus: status,
+          updatedAt: new Date(),
+        })
+        .where(eq(users.id, userId))
+        .returning();
+      
+      if (!user) {
+        console.log(`Storage: No user returned from update operation for ID ${userId}`);
+        throw new Error(`User with ID ${userId} not found or update failed`);
+      }
+      
+      console.log(`=== STORAGE UPDATE SUBSCRIPTION SUCCESS ===`);
+      console.log(`Updated user:`, {
+        userId: user.id,
+        tier: user.subscriptionTier,
+        status: user.subscriptionStatus,
+        updatedAt: user.updatedAt
+      });
+      
+      return user;
+    } catch (error) {
+      console.error(`=== STORAGE UPDATE SUBSCRIPTION ERROR ===`);
+      console.error(`Error updating user ${userId}:`, error);
+      throw error;
     }
-    
-    console.log(`Storage: Successfully updated user subscription:`, {
-      userId: user.id,
-      tier: user.subscriptionTier,
-      status: user.subscriptionStatus
-    });
-    
-    return user;
   }
 
   // Usage tracking operations
