@@ -33,11 +33,19 @@ export function DebugPanel() {
   const setTier = async (tier: string, status = "active") => {
     try {
       console.log(`Debug Panel: Attempting to set tier to ${tier} with status ${status}`);
-      
+
+      // Get CSRF token
+      const csrfResponse = await fetch("/api/csrf-token");
+      if (!csrfResponse.ok) {
+        throw new Error("Failed to get CSRF token");
+      }
+      const { csrfToken } = await csrfResponse.json();
+
       const response = await fetch("/api/debug/set-tier", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "X-CSRF-Token": csrfToken,
         },
         credentials: "include",
         body: JSON.stringify({

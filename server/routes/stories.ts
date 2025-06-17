@@ -43,11 +43,19 @@ export function registerStoryRoutes(
     validateStoryParameters,
     validateInput(sanitizedStorySchema.omit({ title: true, content: true })),
     async (req: any, res) => {
+      const userId = req.user.claims.sub;
+      console.log(`=== STORY GENERATION START ===`);
+      console.log(`User ID: ${userId}`);
+      console.log(`User Tier: ${req.userTier}`);
+      console.log(`Request Body:`, req.body);
+      
       try {
-        const userId = req.user.claims.sub;
         const storyData = req.validatedBody;
+        
+        console.log(`Validated story data:`, storyData);
 
         // Generate story using OpenAI
+        console.log(`Calling OpenAI API for story generation...`);
         const generatedStory = await generateBedtimeStory({
           childName: storyData.childName,
           childAge: storyData.childAge,
@@ -56,19 +64,31 @@ export function registerStoryRoutes(
           tone: storyData.tone,
           length: storyData.length,
           bedtimeMessage: storyData.bedtimeMessage || undefined,
+          customCharacters: storyData.customCharacters || undefined,
+        }, userId);
+
+        console.log(`OpenAI API returned story:`, {
+          title: generatedStory.title,
+          contentLength: generatedStory.content?.length || 0
         });
 
         // Save story to database
+        console.log(`Saving story to database...`);
         const story = await storage.createStory(userId, {
           ...storyData,
           title: generatedStory.title,
           content: generatedStory.content,
         });
 
+        console.log(`Story saved with ID: ${story.id}`);
+
         // Track usage for free users
         if (req.userTier === "free") {
+          console.log(`Tracking usage for free user...`);
           await incrementWeeklyUsage(userId);
         }
+
+        console.log(`=== STORY GENERATION SUCCESS ===`);
 
         res.json({
           ...story,
@@ -76,14 +96,36 @@ export function registerStoryRoutes(
           tierLimits: req.tierLimits,
         });
       } catch (error) {
-        console.error("Error generating story:", error);
+        console.error(`=== STORY GENERATION ERROR ===`);
+        console.error(`User ID: ${userId}`);
+        console.error(`Error:`, error);
+        console.error(`Error stack:`, error instanceof Error ? error.stack : 'No stack trace');
+
         if (error instanceof z.ZodError) {
+          console.error(`Validation error details:`, error.errors);
           res.status(400).json({
             message: "Invalid story parameters",
             errors: error.errors,
+            details: "Input validation failed"
+          });
+        } else if (error instanceof Error && error.message.includes("Rate limit")) {
+          res.status(429).json({ 
+            message: "OpenAI rate limit exceeded. Please try again in a moment.",
+            error: "rate_limit_exceeded"
+          });
+        } else if (error instanceof Error && error.message.includes("OpenAI")) {
+          res.status(503).json({ 
+            message: "Story generation service temporarily unavailable. Please try again.",
+            error: "service_unavailable"
           });
         } else {
-          res.status(500).json({ message: "Failed to generate story" });
+          res.status(500).json({ 
+            message: "Failed to generate story. Please try again.",
+            error: "internal_error",
+            details: process.env.NODE_ENV === 'development' 
+              ? (error instanceof Error ? error.message : 'Unknown error')
+              : undefined
+          });
         }
       }
     },

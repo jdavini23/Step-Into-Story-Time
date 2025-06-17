@@ -11,18 +11,49 @@ import { db } from "./db";
 import { usageTracking } from "../shared/schema";
 import { eq, and } from "drizzle-orm";
 
-export function registerDebugRoutes(app: Express) {
-  if (process.env.NODE_ENV !== "development") {
+export function registerDebugRoutes(app: Express): void {
+  // Check if we're in development mode
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
+  if (!isDevelopment) {
+    console.log("Debug routes disabled in production");
     return;
   }
 
-  // Force set user tier for testing
+  // Get user info for debugging
+  app.get("/api/debug/user-info", isAuthenticated, async (req: any, res) => {
+    try {
+      const userId = req.user.claims.sub;
+      const user = await storage.getUser(userId);
+
+      res.json({
+        user: user ? {
+          id: user.id,
+          email: user.email,
+          subscriptionTier: user.subscriptionTier,
+          subscriptionStatus: user.subscriptionStatus,
+          stripeCustomerId: user.stripeCustomerId,
+          stripeSubscriptionId: user.stripeSubscriptionId,
+          createdAt: user.createdAt,
+          updatedAt: user.updatedAt
+        } : null,
+        claims: req.user.claims,
+        timestamp: new Date().toISOString()
+      });
+    } catch (error) {
+      console.error("Error fetching debug user info:", error);
+      res.status(500).json({ message: "Failed to fetch user info" });
+    }
+  });
+
+  // Set user tier for testing (debug only)
   app.post("/api/debug/set-tier", isAuthenticated, async (req: any, res) => {
     try {
+      console.log(`=== DEBUG SET TIER START ===`);
+
       const userId = req.user?.claims?.sub;
       const { tier, status = "active" } = req.body;
 
-      console.log(`=== DEBUG SET TIER START ===`);
       console.log(`User ID: ${userId}`);
       console.log(`Requested tier: ${tier}`);
       console.log(`Requested status: ${status}`);
@@ -84,7 +115,7 @@ export function registerDebugRoutes(app: Express) {
       console.error("=== DEBUG SET TIER ERROR ===");
       console.error("Error setting tier:", error);
       console.error("Error stack:", error instanceof Error ? error.stack : "No stack trace");
-      
+
       res.status(500).json({ 
         message: "Failed to set tier", 
         error: error instanceof Error ? error.message : "Unknown error",

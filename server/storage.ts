@@ -290,6 +290,26 @@ export class DatabaseStorage implements IStorage {
     }
   }
 
+  // Add a method to check for debug overrides
+  async getUserWithDebugCheck(userId: string, debugOverride?: any): Promise<User | undefined> {
+    const user = await this.getUser(userId);
+    
+    if (user && debugOverride && process.env.NODE_ENV === 'development') {
+      // In debug mode, apply override if it's recent (within 5 minutes)
+      const overrideAge = Date.now() - debugOverride.timestamp;
+      if (overrideAge < 5 * 60 * 1000) { // 5 minutes
+        console.log(`Applying debug tier override: ${debugOverride.tier}/${debugOverride.status}`);
+        return {
+          ...user,
+          subscriptionTier: debugOverride.tier,
+          subscriptionStatus: debugOverride.status
+        };
+      }
+    }
+    
+    return user;
+  }
+
   // Usage tracking operations
   async getUserWeeklyUsage(
     userId: string,

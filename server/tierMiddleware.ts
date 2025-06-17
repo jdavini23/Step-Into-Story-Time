@@ -39,7 +39,28 @@ export const checkStoryGenerationPermissions = async (
       return;
     }
 
-    // Check if user can generate a story
+    // Check for debug override in development
+    let userTier = null;
+    if (process.env.NODE_ENV === 'development' && req.session?.debugTierOverride) {
+      const override = req.session.debugTierOverride;
+      const overrideAge = Date.now() - override.timestamp;
+
+      // Apply override if it's recent (within 5 minutes)
+      if (overrideAge < 5 * 60 * 1000) {
+        console.log(`Using debug tier override: ${override.tier}/${override.status}`);
+        userTier = override.tier;
+
+        // For debug mode, allow story generation if tier is premium or family
+        if (override.tier !== 'free' && override.status === 'active') {
+          req.userTier = override.tier;
+          req.tierLimits = TIER_LIMITS[override.tier];
+          next();
+          return;
+        }
+      }
+    }
+
+    // Check if user can generate stories (normal flow)
     const permissionCheck = await canUserGenerateStory(userId);
 
     if (!permissionCheck.canGenerate) {
