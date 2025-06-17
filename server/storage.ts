@@ -253,7 +253,8 @@ export class DatabaseStorage implements IStorage {
     tier: string,
     status: string,
   ): Promise<User> {
-    console.log(`Updating user ${userId} subscription: tier=${tier}, status=${status}`);
+    console.log(`Storage: Updating user ${userId} subscription: tier=${tier}, status=${status}`);
+    
     const [user] = await db
       .update(users)
       .set({
@@ -263,6 +264,17 @@ export class DatabaseStorage implements IStorage {
       })
       .where(eq(users.id, userId))
       .returning();
+    
+    if (!user) {
+      throw new Error(`User with ID ${userId} not found`);
+    }
+    
+    console.log(`Storage: Successfully updated user subscription:`, {
+      userId: user.id,
+      tier: user.subscriptionTier,
+      status: user.subscriptionStatus
+    });
+    
     return user;
   }
 

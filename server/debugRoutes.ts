@@ -22,15 +22,38 @@ export function registerDebugRoutes(app: Express) {
       const userId = req.user.claims.sub;
       const { tier, status = "active" } = req.body;
 
+      console.log(`Debug: Setting tier for user ${userId} to ${tier} with status ${status}`);
+
       if (!["free", "premium", "family"].includes(tier)) {
-        return res.status(400).json({ message: "Invalid tier" });
+        console.log(`Debug: Invalid tier received: ${tier}`);
+        return res.status(400).json({ message: `Invalid tier: ${tier}. Must be one of: free, premium, family` });
       }
 
-      await updateUserSubscription(userId, tier, status);
-      res.json({ message: `User tier set to ${tier}`, tier, status });
+      if (!["active", "canceled", "past_due", "incomplete", "incomplete_expired", "trialing", "unpaid"].includes(status)) {
+        console.log(`Debug: Invalid status received: ${status}`);
+        return res.status(400).json({ message: `Invalid status: ${status}` });
+      }
+
+      // Update the subscription using the storage layer
+      const updatedUser = await storage.updateUserSubscription(userId, tier, status);
+      console.log(`Debug: Successfully updated user subscription:`, {
+        userId,
+        tier: updatedUser.subscriptionTier,
+        status: updatedUser.subscriptionStatus
+      });
+
+      res.json({ 
+        message: `Successfully updated user tier to ${tier} with status ${status}`, 
+        tier: updatedUser.subscriptionTier, 
+        status: updatedUser.subscriptionStatus,
+        userId
+      });
     } catch (error) {
       console.error("Error setting tier:", error);
-      res.status(500).json({ message: "Failed to set tier" });
+      res.status(500).json({ 
+        message: "Failed to set tier", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 
@@ -40,7 +63,9 @@ export function registerDebugRoutes(app: Express) {
       const userId = req.user.claims.sub;
       const weekStart = getCurrentWeekStart();
 
-      await db
+      console.log(`Debug: Resetting usage for user ${userId} for week starting ${weekStart}`);
+
+      const result = await db
         .update(usageTracking)
         .set({ storiesGenerated: 0, updatedAt: new Date() })
         .where(
@@ -50,10 +75,19 @@ export function registerDebugRoutes(app: Express) {
           ),
         );
 
-      res.json({ message: "Weekly usage reset" });
+      console.log(`Debug: Reset usage result:`, result);
+
+      res.json({ 
+        message: "Weekly usage reset successfully", 
+        userId, 
+        weekStart: weekStart.toISOString() 
+      });
     } catch (error) {
       console.error("Error resetting usage:", error);
-      res.status(500).json({ message: "Failed to reset usage" });
+      res.status(500).json({ 
+        message: "Failed to reset usage", 
+        error: error instanceof Error ? error.message : "Unknown error" 
+      });
     }
   });
 

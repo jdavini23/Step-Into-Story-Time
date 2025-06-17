@@ -31,11 +31,18 @@ export function DebugPanel() {
         tier,
         status,
       });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: "Unknown error" }));
+        throw new Error(errorData.message || `HTTP ${response.status}`);
+      }
+
       const data = await response.json();
+      console.log("Tier update response:", data);
 
       toast({
         title: "Tier Updated",
-        description: data.message,
+        description: data.message || `Successfully updated to ${tier} tier`,
       });
 
       // Refresh all relevant queries
@@ -44,10 +51,11 @@ export function DebugPanel() {
       queryClient.invalidateQueries({ queryKey: ["/api/stories"] });
 
       await fetchDebugInfo();
-    } catch (error) {
+    } catch (error: any) {
+      console.error("Error setting tier:", error);
       toast({
         title: "Error",
-        description: "Failed to update tier",
+        description: error.message || "Failed to update tier",
         variant: "destructive",
       });
     }
