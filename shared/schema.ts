@@ -69,6 +69,8 @@ export const insertStorySchema = createInsertSchema(stories).omit({
   userId: true,
   createdAt: true,
   updatedAt: true,
+}).extend({
+  customCharacters: z.array(z.string()).optional(),
 });
 
 export type InsertStory = z.infer<typeof insertStorySchema>;

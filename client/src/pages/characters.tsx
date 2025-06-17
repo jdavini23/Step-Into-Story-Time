@@ -165,7 +165,10 @@ function CharacterForm({ character, onSuccess, onCancel }: {
   });
 
   const createMutation = useMutation({
-    mutationFn: (data: CharacterFormData) => apiRequest("/api/characters", "POST", data),
+    mutationFn: async (data: CharacterFormData) => {
+      const response = await apiRequest("/api/characters", "POST", data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/characters"] });
       toast({ title: "Character created successfully!" });
@@ -181,8 +184,10 @@ function CharacterForm({ character, onSuccess, onCancel }: {
   });
 
   const updateMutation = useMutation({
-    mutationFn: (data: CharacterFormData) => 
-      apiRequest(`/api/characters/${character!.id}`, "PATCH", data),
+    mutationFn: async (data: CharacterFormData) => {
+      const response = await apiRequest(`/api/characters/${character!.id}`, "PATCH", data);
+      return response.json();
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/characters"] });
       toast({ title: "Character updated successfully!" });
@@ -439,7 +444,10 @@ export default function CharactersPage() {
   });
 
   const deleteMutation = useMutation({
-    mutationFn: (id: number) => apiRequest(`/api/characters/${id}`, "DELETE"),
+    mutationFn: async (id: number) => {
+      await apiRequest(`/api/characters/${id}`, "DELETE");
+      return id;
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/characters"] });
       toast({ title: "Character deleted successfully" });

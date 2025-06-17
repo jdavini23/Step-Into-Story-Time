@@ -4,6 +4,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
+import { lazy } from "react";
 import NotFound from "@/pages/not-found";
 import Landing from "@/pages/landing";
 import StoryWizard from "@/pages/story-wizard";
@@ -12,6 +13,8 @@ import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import Pricing from "@/pages/pricing";
 import Header from "@/components/header";
+
+const Characters = lazy(() => import("@/pages/characters"));
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,7 +37,7 @@ function Router() {
       <Header />
       <Switch>
         <Route path="/pricing" component={Pricing} />
-        <Route path="/characters" component={lazy(() => import("./pages/characters"))} />
+        <Route path="/characters" component={Characters} />
         <Route path="/story-wizard" component={StoryWizard} />
         <Route path="/story/:id" component={StoryReader} />
         <Route path="/subscribe" component={Subscribe} />

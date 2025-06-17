@@ -49,6 +49,7 @@ Step Into Storytime is a full-stack web application that creates personalized be
 - Favorites system for story bookmarking
 - PDF generation for story downloads (premium feature)
 - Content sanitization and validation
+- Custom characters system for personalized storytelling (Pro feature)
 
 ## Data Flow
 
@@ -99,6 +100,12 @@ Step Into Storytime is a full-stack web application that creates personalized be
 ```
 Changelog:
 - June 17, 2025. Initial setup
+- June 17, 2025. Custom Characters Feature Implementation:
+  * Added database schema for custom characters with personality traits
+  * Created CRUD API endpoints with tier-based access control
+  * Built character management interface for Storytime Pro users
+  * Integrated custom characters into AI story generation
+  * Added character selection component for story wizard
 ```
 
 ## User Preferences

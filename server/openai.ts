@@ -211,6 +211,23 @@ export async function generateBedtimeStory(
   title: string;
   content: string;
 }> {
+  let customCharacters: any[] = [];
+  
+  // Fetch custom characters if provided
+  if (params.customCharacters && params.customCharacters.length > 0 && userId) {
+    try {
+      const { storage } = await import('./storage');
+      for (const charId of params.customCharacters) {
+        const character = await storage.getCustomCharacter(parseInt(charId), userId);
+        if (character) {
+          customCharacters.push(character);
+        }
+      }
+    } catch (error) {
+      console.warn('Failed to fetch custom characters:', error);
+    }
+  }
+
   // Rate limiting check
   if (userId && !checkRateLimit(userId)) {
     throw new Error("Rate limit exceeded. Please try again later.");
