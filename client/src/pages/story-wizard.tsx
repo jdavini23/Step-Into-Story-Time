@@ -17,7 +17,7 @@ import CharacterSelectionStep from "@/components/story-wizard/character-selectio
 import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
 import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
-import { generateUniqueId } from "@/lib/utils";
+// Removed unused import
 import { useRef } from "react";
 import { useSEO } from "@/hooks/useSEO";
 
@@ -60,7 +60,7 @@ export default function StoryWizard() {
 
   useSEO({
     title: "Create Your Personalized Bedtime Story | Step Into Storytime",
-    description: "Follow our simple 4-step wizard to create a magical, personalized bedtime story for your child in under 2 minutes.",
+    description: "Follow our simple 5-step wizard to create a magical, personalized bedtime story for your child in under 2 minutes.",
     keywords: "create bedtime story, story wizard, personalized children's story, AI story creator",
     url: window.location.href,
     canonical: "https://stepintostorytime.com/story-wizard",
@@ -196,6 +196,8 @@ export default function StoryWizard() {
       case 3:
         return true; // Template selection is optional
       case 4:
+        return true; // Character selection is optional
+      case 5:
         return true; // Personal touch is optional
       default:
         return false;
