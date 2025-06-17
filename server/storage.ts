@@ -201,7 +201,9 @@ export class DatabaseStorage implements IStorage {
         favoriteThemes: stories.favoriteThemes,
         tone: stories.tone,
         length: stories.length,
+        storyTemplate: stories.storyTemplate,
         bedtimeMessage: stories.bedtimeMessage,
+        customCharacters: stories.customCharacters,
         createdAt: stories.createdAt,
         updatedAt: stories.updatedAt,
       })

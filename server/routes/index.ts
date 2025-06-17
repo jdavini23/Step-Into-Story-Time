@@ -10,6 +10,7 @@ import { registerStoryRoutes } from "./stories";
 import { registerFavoriteRoutes } from "./favorites";
 import { registerPaymentRoutes } from "./payments";
 import { registerWebhookRoutes } from "./webhooks";
+import { registerCharacterRoutes } from "./characters";
 import { registerSystemRoutes } from "./system";
 import { registerSEORoutes } from "./seo";
 
