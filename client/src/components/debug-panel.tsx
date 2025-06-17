@@ -17,9 +17,14 @@ export function DebugPanel() {
 
   const fetchDebugInfo = async () => {
     try {
-      const response = await apiRequest("GET", "/api/debug/user-info");
-      const data = await response.json();
-      setDebugInfo(data);
+      const response = await fetch("/api/debug/user-info", {
+        method: "GET",
+        credentials: "include",
+      });
+      if (response.ok) {
+        const data = await response.json();
+        setDebugInfo(data);
+      }
     } catch (error) {
       console.error("Failed to fetch debug info:", error);
     }
@@ -29,9 +34,16 @@ export function DebugPanel() {
     try {
       console.log(`Debug Panel: Attempting to set tier to ${tier} with status ${status}`);
       
-      const response = await apiRequest("POST", "/api/debug/set-tier", {
-        tier,
-        status,
+      const response = await fetch("/api/debug/set-tier", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          tier,
+          status,
+        }),
       });
 
       console.log(`Debug Panel: Response status: ${response.status}`);
@@ -79,16 +91,26 @@ export function DebugPanel() {
 
   const resetUsage = async () => {
     try {
-      const response = await apiRequest("POST", "/api/debug/reset-usage");
-      const data = await response.json();
-
-      toast({
-        title: "Usage Reset",
-        description: data.message,
+      const response = await fetch("/api/debug/reset-usage", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
       });
 
-      queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
-      await fetchDebugInfo();
+      if (response.ok) {
+        const data = await response.json();
+        toast({
+          title: "Usage Reset",
+          description: data.message,
+        });
+
+        queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
+        await fetchDebugInfo();
+      } else {
+        throw new Error(`HTTP ${response.status}`);
+      }
     } catch (error) {
       toast({
         title: "Error",
