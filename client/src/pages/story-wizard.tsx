@@ -13,6 +13,7 @@ import { WizardStep } from "@/components/story-wizard/wizard-step";
 import { ChildInfoStep } from "@/components/story-wizard/child-info-step";
 import { StoryStyleStep } from "@/components/story-wizard/story-style-step";
 import { TemplateSelectionStep } from "@/components/story-wizard/template-selection-step";
+import CharacterSelectionStep from "@/components/story-wizard/character-selection-step";
 import { PersonalTouchStep } from "@/components/story-wizard/personal-touch-step";
 import { TierStatusAlert } from "@/components/story-wizard/tier-status-alert";
 import { WizardNavigation } from "@/components/story-wizard/wizard-navigation";
@@ -41,6 +42,12 @@ const STEPS = [
   },
   {
     id: 4,
+    title: "Add custom characters",
+    subtitle: "Include your unique characters in the story",
+    icon: "👥",
+  },
+  {
+    id: 5,
     title: "Add a personal touch",
     subtitle: "Make it extra special with a personal message",
     icon: "💝",

@@ -62,7 +62,7 @@ function CharacterCard({ character, isSelected, onToggle }: {
           </div>
           <Checkbox
             checked={isSelected}
-            onChange={() => onToggle(character.id.toString())}
+            onCheckedChange={() => onToggle(character.id.toString())}
             className="mt-1"
           />
         </div>
