@@ -104,20 +104,26 @@ export async function setupAuth(app: Express) {
     try {
       console.log("=== OAUTH VERIFICATION START ===");
       console.log("Tokens received:", !!tokens.access_token);
-      console.log("Claims:", JSON.stringify(tokens.claims(), null, 2));
+      
+      const claims = tokens.claims();
+      if (!claims) {
+        throw new Error("No claims received from token");
+      }
+      
+      console.log("Claims:", JSON.stringify(claims, null, 2));
       
       // Create user object with proper structure
       const user: any = {
-        id: tokens.claims().sub,
-        claims: tokens.claims(),
+        id: claims.sub,
+        claims: claims,
         access_token: tokens.access_token,
         refresh_token: tokens.refresh_token,
-        expires_at: tokens.claims()?.exp
+        expires_at: claims?.exp
       };
       
       console.log("User object created:", JSON.stringify(user, null, 2));
       
-      await upsertUser(tokens.claims());
+      await upsertUser(claims);
       console.log("User upserted successfully");
       
       verified(null, user);
@@ -125,7 +131,9 @@ export async function setupAuth(app: Express) {
     } catch (error) {
       console.error("=== OAUTH VERIFICATION ERROR ===");
       console.error("Verification error:", error);
-      console.error("Error stack:", error.stack);
+      if (error instanceof Error) {
+        console.error("Error stack:", error.stack);
+      }
       verified(error, null);
     }
   };
