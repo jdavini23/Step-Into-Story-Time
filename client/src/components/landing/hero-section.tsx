@@ -26,7 +26,7 @@ export default function HeroSection() {
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start mb-8">
             <Button
-              onClick={() => (window.location.href = "/api/login?signup=true")}
+              onClick={() => (window.location.href = "/story-wizard")}
               className="bg-purple-600 hover:bg-purple-700 text-white px-8 py-4 rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
             >
               ✨ Tell Tonight's Story
