@@ -20,6 +20,10 @@ export function registerAuthRoutes(app: Express): void {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);
 
+      if (!user) {
+        return res.status(404).json({ message: "User not found" });
+      }
+
       // Sanitize user data before sending
       const sanitizedUser = {
         ...user,
