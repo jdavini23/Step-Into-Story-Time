@@ -205,11 +205,19 @@ export async function setupAuth(app: Express) {
 
     console.log(`Starting authentication with strategy: ${strategyName}`);
 
-    // Use passport authenticate with proper error handling
-    passport.authenticate(strategyName, {
-      prompt: "login consent",
-      scope: ["openid", "email", "profile", "offline_access"],
-    })(req, res, next);
+    // Ensure session is saved before authentication
+    req.session.save((err) => {
+      if (err) {
+        console.error("Session save error before authentication:", err);
+        return res.status(500).json({ message: "Session error" });
+      }
+      
+      // Use passport authenticate with proper error handling
+      passport.authenticate(strategyName, {
+        prompt: "login consent",
+        scope: ["openid", "email", "profile", "offline_access"],
+      })(req, res, next);
+    });
   });
 
   app.get("/api/callback", (req, res, next) => {
