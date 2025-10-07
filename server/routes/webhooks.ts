@@ -11,7 +11,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-05-28.basil",
 });
 
 export function registerWebhookRoutes(app: Express): void {
@@ -36,11 +36,11 @@ export function registerWebhookRoutes(app: Express): void {
     try {
       switch (event.type) {
         case "invoice.payment_succeeded": {
-          const invoice = event.data.object as Stripe.Invoice;
+          const invoice = event.data.object as any;
 
-          if (invoice.subscription) {
+          if (invoice.subscription && typeof invoice.subscription === 'string') {
             const subscription = await stripe.subscriptions.retrieve(
-              invoice.subscription as string,
+              invoice.subscription,
             );
             const customer = (await stripe.customers.retrieve(
               subscription.customer as string,
@@ -65,7 +65,7 @@ export function registerWebhookRoutes(app: Express): void {
               }
 
               // Update user subscription tier and status
-              await updateUserSubscription(user.id, tier, subscription.status);
+              await updateUserSubscription(user.id, tier, subscription.status as any);
 
               console.log(
                 `Updated user ${user.id} to ${tier} tier with status ${subscription.status}`,
@@ -108,7 +108,7 @@ export function registerWebhookRoutes(app: Express): void {
               }
             }
 
-            await updateUserSubscription(user.id, tier, subscription.status);
+            await updateUserSubscription(user.id, tier, subscription.status as any);
             console.log(
               `Updated user ${user.id} subscription: ${tier} tier, status ${subscription.status}`,
             );
