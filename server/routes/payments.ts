@@ -271,8 +271,25 @@ export function registerPaymentRoutes(app: Express): void {
       }
 
       console.log("Retrieving Stripe subscription:", user.stripeSubscriptionId);
-      const subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
-      console.log("Stripe subscription status:", subscription.status);
+      let subscription;
+      try {
+        subscription = await stripe.subscriptions.retrieve(user.stripeSubscriptionId);
+        console.log("Stripe subscription status:", subscription.status);
+      } catch (stripeError: any) {
+        // Handle case where subscription doesn't exist in Stripe (404)
+        if (stripeError.statusCode === 404 || stripeError.code === 'resource_missing') {
+          console.log("Subscription not found in Stripe, clearing user subscription data");
+          // Clear the stale subscription data from the user
+          await storage.updateUserSubscription(userId, "free", "canceled");
+          return res.json({ 
+            hasActiveSubscription: false,
+            status: "canceled",
+            tier: "free",
+            message: "Subscription no longer exists"
+          });
+        }
+        throw stripeError; // Re-throw other errors
+      }
 
       // Synchronize user tier with Stripe subscription status
       let shouldUpdateUserTier = false;
