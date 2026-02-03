@@ -3,6 +3,9 @@ import type { Express } from "express";
 import Stripe from "stripe";
 import { isAuthenticated } from "../replitAuth";
 import { storage } from "../storage";
+import { db } from "../db";
+import { users } from "@shared/schema";
+import { eq } from "drizzle-orm";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
@@ -279,8 +282,14 @@ export function registerPaymentRoutes(app: Express): void {
         // Handle case where subscription doesn't exist in Stripe (404)
         if (stripeError.statusCode === 404 || stripeError.code === 'resource_missing') {
           console.log("Subscription not found in Stripe, clearing user subscription data");
-          // Clear the stale subscription data from the user
-          await storage.updateUserSubscription(userId, "free", "canceled");
+          // Clear the stale subscription data from the user, including the subscription ID
+          await db.update(users).set({
+            subscriptionTier: "free",
+            subscriptionStatus: "canceled",
+            stripeSubscriptionId: null,
+            updatedAt: new Date()
+          }).where(eq(users.id, userId));
+          console.log("Cleared stripeSubscriptionId for user:", userId);
           return res.json({ 
             hasActiveSubscription: false,
             status: "canceled",
