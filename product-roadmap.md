@@ -16,9 +16,11 @@ The PRD says a first-time user should be able to create a story before signing u
 
 ## 2. Mobile-First Reading Experience
 **Priority:** Medium
-**Status:** Not Started
+**Status:** Completed
 
-The PRD emphasizes a "mobile-first reading experience" as a core UX principle. The story reader and wizard should be audited for mobile usability — layout, font sizes, touch targets, and reading comfort on phones.
+The PRD emphasizes a "mobile-first reading experience" as a core UX principle. The story reader and wizard were audited for mobile usability.
+- **Story Reader:** Moved controls to a fixed bottom bar on mobile, adjusted padding, font sizes, and image heights for smaller screens. Added "touch-manipulation" support and improved tap targets.
+- **Wizard:** Audited for touch usability and layout.
 
 **Goal:** Ensure the story reader and wizard feel natural and comfortable on mobile devices.
 

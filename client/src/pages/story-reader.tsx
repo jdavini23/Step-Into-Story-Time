@@ -374,47 +374,49 @@ export default function StoryReader() {
         />
       </div>
 
-      {/* Reading Controls - Fixed Sidebar */}
-      <div className="fixed right-4 top-1/2 transform -translate-y-1/2 z-40 space-y-2">
-        <StoryReadingControls
-          isDarkMode={isDarkMode}
-          onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
-          fontSize={fontSize}
-          onIncreaseFontSize={increaseFontSize}
-          onDecreaseFontSize={decreaseFontSize}
-          isReading={isReading}
-          onToggleReadAloud={toggleReadAloud}
-          cardClasses={cardClasses}
-        />
+      {/* Reading Controls - Fixed Sidebar for desktop, bottom bar for mobile */}
+      <div className="fixed bottom-4 left-4 right-4 md:right-4 md:top-1/2 md:bottom-auto md:left-auto md:transform md:-translate-y-1/2 z-40">
+        <div className="flex md:flex-col justify-center gap-2">
+          <StoryReadingControls
+            isDarkMode={isDarkMode}
+            onToggleDarkMode={() => setIsDarkMode(!isDarkMode)}
+            fontSize={fontSize}
+            onIncreaseFontSize={increaseFontSize}
+            onDecreaseFontSize={decreaseFontSize}
+            isReading={isReading}
+            onToggleReadAloud={toggleReadAloud}
+            cardClasses={cardClasses}
+          />
+        </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 md:py-12">
         {/* Back Navigation */}
-        <div className="mb-6">
+        <div className="mb-4 md:mb-6">
           <Button
             variant="ghost"
             onClick={() => setLocation("/")}
-            className="mb-4"
+            className="mb-2 md:mb-4"
           >
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Stories
+            Back
           </Button>
         </div>
 
         {/* Story header */}
-        <Card className={`shadow-2xl p-8 mb-8 text-center ${cardClasses}`}>
-          <div className="w-20 h-20 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-6">
-            <BookOpen className="w-10 h-10 text-white" />
+        <Card className={`shadow-xl md:shadow-2xl p-6 md:p-8 mb-6 md:mb-8 text-center ${cardClasses}`}>
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+            <BookOpen className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </div>
-          <h1 className="text-3xl font-bold mb-2">{story.title}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4">
+          <h1 className="text-2xl md:text-3xl font-bold mb-2 px-2">{story.title}</h1>
+          <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm md:text-base">
             A magical bedtime adventure
           </p>
-          <div className="flex items-center justify-center space-x-6 text-sm text-gray-500 dark:text-gray-400">
-            <span>
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-gray-500 dark:text-gray-400">
+            <span className="whitespace-nowrap">
               📅 {new Date(story.createdAt || "").toLocaleDateString()}
             </span>
-            <span>
+            <span className="whitespace-nowrap">
               ⏱️{" "}
               {story.length === "short"
                 ? "2-3"
@@ -423,18 +425,18 @@ export default function StoryReader() {
                   : "10-15"}{" "}
               min read
             </span>
-            <span>🎯 Age {story.childAge}</span>
+            <span className="whitespace-nowrap">🎯 Age {story.childAge}</span>
           </div>
         </Card>
 
         {/* Story content */}
-        <Card className={`shadow-2xl p-8 mb-8 ${cardClasses}`}>
+        <Card className={`shadow-xl md:shadow-2xl p-6 md:p-8 mb-20 md:mb-8 ${cardClasses}`}>
           <article className="max-w-none leading-relaxed">
             {/* Story illustration placeholder */}
-            <div className="w-full h-64 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 dark:from-purple-900 dark:via-blue-900 dark:to-yellow-900 rounded-xl mb-8 flex items-center justify-center">
-              <div className="text-center">
-                <span className="text-6xl mb-2 block">✨</span>
-                <p className="text-gray-600 dark:text-gray-300 font-medium">
+            <div className="w-full h-48 md:h-64 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 dark:from-purple-900 dark:via-blue-900 dark:to-yellow-900 rounded-xl mb-6 md:mb-8 flex items-center justify-center">
+              <div className="text-center p-4">
+                <span className="text-4xl md:text-6xl mb-2 block">✨</span>
+                <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">
                   Magical Story Illustration
                 </p>
               </div>
@@ -444,9 +446,9 @@ export default function StoryReader() {
               {formatStoryContent}
 
               {story.bedtimeMessage && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 p-6 rounded-xl mt-8 border-l-4 border-yellow-400">
+                <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 md:p-6 rounded-xl mt-6 md:mt-8 border-l-4 border-yellow-400">
                   <p
-                    className="text-lg italic text-purple-700 dark:text-purple-300"
+                    className="text-base md:text-lg italic text-purple-700 dark:text-purple-300"
                     style={{ fontSize: `${fontSize}px` }}
                   >
                     {story.bedtimeMessage}
@@ -458,14 +460,16 @@ export default function StoryReader() {
         </Card>
 
         {/* Story actions */}
-        <StoryActions
-          story={story}
-          onDownloadPDF={downloadPDF}
-          onShare={shareStory}
-          onCreateAnother={() => setLocation("/story-wizard")}
-          tierInfo={tierInfo}
-          cardClasses={cardClasses}
-        />
+        <div className="mb-24 md:mb-0">
+          <StoryActions
+            story={story}
+            onDownloadPDF={downloadPDF}
+            onShare={shareStory}
+            onCreateAnother={() => setLocation("/story-wizard")}
+            tierInfo={tierInfo}
+            cardClasses={cardClasses}
+          />
+        </div>
       </div>
     </div>
   );
