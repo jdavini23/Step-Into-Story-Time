@@ -163,3 +163,20 @@ export const insertCustomCharacterSchema = createInsertSchema(customCharacters).
 
 export type InsertCustomCharacter = z.infer<typeof insertCustomCharacterSchema>;
 export type CustomCharacter = typeof customCharacters.$inferSelect;
+
+// Chat/Conversations tables (for Replit Integration)
+export const conversations = pgTable("conversations", {
+  id: serial("id").primaryKey(),
+  title: varchar("title").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messages = pgTable("messages", {
+  id: serial("id").primaryKey(),
+  conversationId: integer("conversation_id")
+    .notNull()
+    .references(() => conversations.id),
+  role: varchar("role").notNull(), // 'user', 'assistant'
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
