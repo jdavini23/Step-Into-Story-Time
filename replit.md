@@ -2,24 +2,145 @@
 
 ## Overview
 
-Step Into Storytime is a full-stack web application that creates personalized bedtime stories for children using AI. The platform allows parents to generate custom stories featuring their child as the main character, with various themes, tones, and templates to choose from.
+Step Into Storytime is a web application that helps parents create personalized bedtime stories for their children using AI. Parents can generate stories where their child is the main character, choose tones and themes, save favorites, and build a repeatable bedtime ritual in under 2 minutes. The product is designed to be calm, simple, and focused on emotional connection at the end of the day.
+
+## Problem Statement
+
+Parents want bedtime to feel meaningful, but:
+- They are tired and short on time
+- They repeat the same books over and over
+- Making up new stories feels hard at night
+- Generic AI tools are not kid-safe or bedtime-appropriate
+
+There is a gap between static books and overly complex apps. Parents need fast, safe, personalized stories designed specifically for bedtime.
+
+## Product Vision
+
+Make bedtime the most connected part of the day by helping parents create personalized, calming bedtime stories in under 2 minutes.
+
+## Target Users
+
+**Primary Users**
+- Parents of children ages 2–8
+- Busy evenings, limited mental energy
+- Care deeply about routines and bonding
+
+**Secondary Users**
+- Parents with multiple children
+- Grandparents and caregivers
+- Families willing to pay for repeat nightly use
+
+## Core Product Goals
+
+**Product Goals**
+- Generate high-quality personalized stories reliably
+- Make the child the hero of each story
+- Encourage repeat nightly or weekly use
+- Keep the experience calm and low-stress
+
+**Business Goals**
+- Convert free users into paid subscribers
+- Retain users through saved stories and characters
+- Build a product families return to consistently
+
+## Non-Goals
+
+The product intentionally does not aim to:
+- Be a social or community platform
+- Allow public story feeds or comments
+- Replace physical books
+- Act as a learning curriculum
+- Include heavy gamification or stimulation
+
+## Core Features
+
+### Story Creation
+- Multi-step wizard collects: child's name, age, story tone (calming, adventurous, silly, educational), theme or template
+- Optional custom characters (paid tiers)
+- Simple, guided flow with minimal decisions
+
+### Story Generation
+- AI-generated stories using structured prompts
+- Age-appropriate language
+- Bedtime-safe pacing and tone
+- No frightening or overly stimulating content
+
+### Story Library
+- Save generated stories
+- View, re-read, and manage past stories
+- Favorites system for bookmarking
+- Pagination and filtering
+
+### Custom Characters (Pro Feature)
+- Create reusable characters with name and personality traits
+- Characters persist across sessions
+- Characters can be assigned to new stories
+
+### Export & Sharing
+- Download stories as formatted PDFs (paid feature)
+- Layout optimized for reading aloud
+
+### Authentication & Accounts
+- User accounts with session-based authentication (Replit Auth)
+- Accounts linked to subscription tiers
+- Tier-based feature enforcement
+
+## Subscription Tiers
+
+| Tier | Stories | PDF Downloads | Custom Characters |
+|------|---------|--------------|-------------------|
+| Free | Limited | No | No |
+| Premium | Higher limits | Yes | No |
+| Family | Highest limits | Yes | Yes |
+
+## User Flows
+
+**First-Time User**
+1. Lands on marketing page
+2. Starts creating a story
+3. Generates a personalized story
+4. Prompted to sign up to save or export
+5. Optional upgrade to paid tier
+
+**Returning User**
+1. Logs in
+2. Sees story library
+3. Creates a new story or re-reads an old one
+4. Uses saved characters if available
+
+## UX Principles
+
+- Calm, bedtime-friendly design
+- Simple language and clear actions
+- Minimal cognitive load
+- Mobile-first reading experience
+- No dark patterns or pressure tactics
+
+## Success Metrics
+
+- Users complete stories
+- Users return within 7 days
+- Stories are saved and re-read
+- Free users convert to paid tiers
+- Subscribers retain month-over-month
+- Revenue matters, but repeat usage matters more
 
 ## System Architecture
 
-### Frontend Architecture
+### Frontend
 - **Framework**: React 18 with TypeScript
 - **Routing**: Wouter for lightweight client-side routing
 - **State Management**: TanStack Query for server state management
 - **UI Framework**: Tailwind CSS with shadcn/ui components
 - **Build Tool**: Vite for fast development and optimized production builds
 
-### Backend Architecture
+### Backend
 - **Runtime**: Node.js with Express.js server
 - **Authentication**: Replit Auth with OpenID Connect
 - **Session Management**: Express session with PostgreSQL storage
 - **API Design**: RESTful endpoints with proper error handling and rate limiting
 
-### Database Layer
+### Database
 - **Primary Database**: PostgreSQL via Neon serverless
 - **ORM**: Drizzle ORM for type-safe database operations
 - **Connection**: Connection pooling for optimal performance
@@ -51,15 +172,6 @@ Step Into Storytime is a full-stack web application that creates personalized be
 - Content sanitization and validation
 - Custom characters system for personalized storytelling (Pro feature)
 
-## Data Flow
-
-1. **User Authentication**: Users authenticate via Replit Auth, creating session tokens
-2. **Story Creation**: User inputs child details and preferences through multi-step wizard
-3. **AI Generation**: OpenAI API generates story content based on templates and parameters
-4. **Storage**: Stories are saved to PostgreSQL with proper user association
-5. **Retrieval**: Stories are fetched with tier-based filtering and pagination
-6. **Export**: Premium users can download stories as formatted PDFs
-
 ## External Dependencies
 
 ### Core Services
@@ -74,9 +186,17 @@ Step Into Storytime is a full-stack web application that creates personalized be
 - **Drizzle Kit**: Database migrations and schema management
 - **Prettier**: Code formatting
 
-## Deployment Strategy
+## Data Flow
 
-### Platform
+1. Users authenticate via Replit Auth, creating session tokens
+2. User inputs child details and preferences through multi-step wizard
+3. OpenAI API generates story content based on templates and parameters
+4. Stories are saved to PostgreSQL with proper user association
+5. Stories are fetched with tier-based filtering and pagination
+6. Premium users can download stories as formatted PDFs
+
+## Deployment
+
 - **Hosting**: Replit with autoscale deployment
 - **Environment**: Node.js 20 with PostgreSQL 16
 - **Build Process**: Vite for client, ESBuild for server
@@ -89,18 +209,26 @@ Step Into Storytime is a full-stack web application that creates personalized be
 - `STRIPE_SECRET_KEY`: Stripe payment processing
 - `REPLIT_DOMAINS`: Allowed authentication domains
 
-### Security Features
+### Security
 - Content Security Policy headers
 - XSS protection and MIME type validation
 - Input sanitization and validation
 - Rate limiting on API endpoints
 - CSRF token protection
 
+## Future Considerations (Not Committed)
+
+- Text-to-speech narration
+- Multiple child profiles
+- Story collections or themes
+- Night mode UI
+- Weekly story prompts
+
 ## Changelog
+
 ```
-Changelog:
-- June 17, 2025. Initial setup
-- June 17, 2025. Custom Characters Feature Implementation:
+- June 17, 2025: Initial setup
+- June 17, 2025: Custom Characters Feature Implementation
   * Added database schema for custom characters with personality traits
   * Created CRUD API endpoints with tier-based access control
   * Built character management interface for Storytime Pro users
@@ -109,6 +237,7 @@ Changelog:
 ```
 
 ## User Preferences
+
 ```
 Preferred communication style: Simple, everyday language.
 ```
