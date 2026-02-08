@@ -17,11 +17,96 @@ import { generateStoryPDF, generateEnhancedPDF } from "../pdfGenerator";
 import { incrementWeeklyUsage, getUserTier } from "../tierManager";
 import { z } from "zod";
 
+const ipPreviewLimiter = new Map<string, { count: number; windowStart: number }>();
+const IP_PREVIEW_WINDOW = 24 * 60 * 60 * 1000;
+const IP_PREVIEW_MAX = 3;
+
+function isPreviewAllowed(ip: string): boolean {
+  const now = Date.now();
+  const entry = ipPreviewLimiter.get(ip);
+  if (!entry || now - entry.windowStart > IP_PREVIEW_WINDOW) {
+    ipPreviewLimiter.set(ip, { count: 1, windowStart: now });
+    return true;
+  }
+  if (entry.count >= IP_PREVIEW_MAX) {
+    return false;
+  }
+  entry.count++;
+  return true;
+}
+
+const FREE_TONES = ['adventurous', 'silly', 'calming', 'educational'];
+
 export function registerStoryRoutes(
   app: Express, 
   storyGenerationLimiter: RateLimiter, 
   generalLimiter: RateLimiter
 ): void {
+
+  app.post(
+    "/api/stories/generate-preview",
+    validateInput(sanitizedStorySchema.omit({ title: true, content: true })),
+    async (req: any, res) => {
+      try {
+        const ip = req.ip || req.connection?.remoteAddress || 'unknown';
+        if (!isPreviewAllowed(ip)) {
+          return res.status(429).json({
+            message: "You've reached the preview limit. Sign up to create more stories!",
+            retryAfter: 86400
+          });
+        }
+
+        const storyData = req.validatedBody;
+
+        if (storyData.length !== 'short') {
+          return res.status(400).json({
+            message: "Preview stories are limited to short length. Sign up for longer stories!"
+          });
+        }
+
+        if (!FREE_TONES.includes(storyData.tone)) {
+          return res.status(400).json({
+            message: "This tone is not available for preview. Sign up to access all tones!"
+          });
+        }
+
+        const generatedStory = await generateBedtimeStory({
+          childName: storyData.childName,
+          childAge: storyData.childAge,
+          childGender: storyData.childGender,
+          favoriteThemes: storyData.favoriteThemes || undefined,
+          tone: storyData.tone,
+          length: storyData.length,
+          storyTemplate: storyData.storyTemplate || undefined,
+          bedtimeMessage: storyData.bedtimeMessage || undefined,
+        }, "anonymous-preview");
+
+        res.json({
+          title: generatedStory.title,
+          content: generatedStory.content,
+          childName: storyData.childName,
+          childAge: storyData.childAge,
+          childGender: storyData.childGender,
+          tone: storyData.tone,
+          length: storyData.length,
+          storyTemplate: storyData.storyTemplate || null,
+          bedtimeMessage: storyData.bedtimeMessage || null,
+          preview: true,
+        });
+      } catch (error) {
+        console.error("Preview story generation error:", error);
+        if (error instanceof z.ZodError) {
+          res.status(400).json({ message: "Invalid story parameters", errors: error.errors });
+        } else if (error instanceof Error && (error.message.includes("Rate limit") || error.message.includes("quota"))) {
+          res.status(429).json({ message: "Our story service is temporarily busy. Please try again in a few minutes." });
+        } else if (error instanceof Error && error.message.includes("OpenAI")) {
+          res.status(503).json({ message: "Story generation is temporarily unavailable. Please try again shortly." });
+        } else {
+          res.status(500).json({ message: "Failed to generate preview story. Please try again." });
+        }
+      }
+    }
+  );
   
   // Story generation endpoint
   app.post(
