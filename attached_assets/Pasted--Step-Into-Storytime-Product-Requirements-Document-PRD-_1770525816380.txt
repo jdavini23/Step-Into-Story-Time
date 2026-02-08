@@ -1,0 +1,214 @@
+🛌 Step Into Storytime
+
+Product Requirements Document (PRD)
+
+Owner: Joe
+Status: Live MVP
+Product Type: AI-powered bedtime story app for families
+
+⸻
+
+1. Overview
+
+Step Into Storytime is a web application that helps parents create personalized bedtime stories for their children using AI.
+
+Parents can generate stories where their child is the main character, choose tones and themes, save favorites, and build a repeatable bedtime ritual in under 2 minutes.
+
+The product is designed to be calm, simple, and focused on emotional connection at the end of the day.
+
+⸻
+
+2. Problem Statement
+
+Parents want bedtime to feel meaningful, but:
+	•	They are tired and short on time
+	•	They repeat the same books over and over
+	•	Making up new stories feels hard at night
+	•	Generic AI tools are not kid-safe or bedtime-appropriate
+
+There is a gap between static books and overly complex apps.
+
+Parents need fast, safe, personalized stories designed specifically for bedtime.
+
+⸻
+
+3. Product Vision
+
+Make bedtime the most connected part of the day by helping parents create personalized, calming bedtime stories in under 2 minutes.
+
+⸻
+
+4. Target Users
+
+Primary Users
+	•	Parents of children ages 2–8
+	•	Busy evenings, limited mental energy
+	•	Care deeply about routines and bonding
+
+Secondary Users
+	•	Parents with multiple children
+	•	Grandparents and caregivers
+	•	Families willing to pay for repeat nightly use
+
+⸻
+
+5. Core Product Goals
+
+Product Goals
+	•	Generate high-quality personalized stories reliably
+	•	Make the child the hero of each story
+	•	Encourage repeat nightly or weekly use
+	•	Keep the experience calm and low-stress
+
+Business Goals
+	•	Convert free users into paid subscribers
+	•	Retain users through saved stories and characters
+	•	Build a product families return to consistently
+
+⸻
+
+6. Non-Goals (Important)
+
+The product intentionally does not aim to:
+	•	Be a social or community platform
+	•	Allow public story feeds or comments
+	•	Replace physical books
+	•	Act as a learning curriculum
+	•	Include heavy gamification or stimulation
+
+⸻
+
+7. Core Features (Current Scope)
+
+7.1 Story Creation
+	•	Multi-step wizard collects:
+	•	Child’s name
+	•	Age
+	•	Story tone (calming, adventurous, silly, educational)
+	•	Theme or template
+	•	Optional custom characters (paid tiers)
+	•	Simple, guided flow with minimal decisions
+
+⸻
+
+7.2 Story Generation
+	•	AI-generated stories using structured prompts
+	•	Age-appropriate language
+	•	Bedtime-safe pacing and tone
+	•	No frightening or overly stimulating content
+
+⸻
+
+7.3 Story Library
+	•	Save generated stories
+	•	View, re-read, and manage past stories
+	•	Favorites system for bookmarking
+	•	Pagination and filtering
+
+⸻
+
+7.4 Custom Characters (Pro Feature)
+	•	Create reusable characters with:
+	•	Name
+	•	Personality traits
+	•	Characters persist across sessions
+	•	Characters can be assigned to new stories
+
+⸻
+
+7.5 Export & Sharing
+	•	Download stories as formatted PDFs (paid feature)
+	•	Layout optimized for reading aloud
+
+⸻
+
+7.6 Authentication & Accounts
+	•	User accounts with session-based authentication
+	•	Accounts linked to subscription tiers
+	•	Tier-based feature enforcement
+
+⸻
+
+8. Subscription Tiers
+
+Free
+	•	Limited story generation
+	•	No PDF downloads
+	•	No custom characters
+
+Premium
+	•	Higher usage limits
+	•	PDF story downloads
+	•	Favorites system
+
+Family
+	•	Highest usage limits
+	•	Custom characters
+	•	Designed for multi-child or nightly use
+
+⸻
+
+9. User Flows
+
+First-Time User
+	1.	Lands on marketing page
+	2.	Starts creating a story
+	3.	Generates a personalized story
+	4.	Prompted to sign up to save or export
+	5.	Optional upgrade to paid tier
+
+⸻
+
+Returning User
+	1.	Logs in
+	2.	Sees story library
+	3.	Creates a new story or re-reads an old one
+	4.	Uses saved characters if available
+
+⸻
+
+10. UX Principles
+	•	Calm, bedtime-friendly design
+	•	Simple language and clear actions
+	•	Minimal cognitive load
+	•	Mobile-first reading experience
+	•	No dark patterns or pressure tactics
+
+⸻
+
+11. Success Metrics
+
+The product is successful if:
+	•	Users complete stories
+	•	Users return within 7 days
+	•	Stories are saved and re-read
+	•	Free users convert to paid tiers
+	•	Subscribers retain month-over-month
+
+Revenue matters, but repeat usage matters more.
+
+⸻
+
+12. Future Considerations (Not Committed)
+	•	Text-to-speech narration
+	•	Multiple child profiles
+	•	Story collections or themes
+	•	Night mode UI
+	•	Weekly story prompts
+
+⸻
+
+13. Relationship to Technical Docs
+
+This PRD defines:
+	•	What the product is
+	•	Who it’s for
+	•	What features matter
+	•	What success looks like
+
+Technical architecture documents define:
+	•	How the product is built
+	•	What technologies are used
+	•	How data flows and scales
+
+Both documents work together.
