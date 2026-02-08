@@ -154,7 +154,7 @@ The product intentionally does not aim to:
 - CSRF protection for form submissions
 
 ### Story Generation Engine
-- OpenAI GPT-4o integration for story creation
+- Google Gemini (gemini-2.5-flash) via Replit AI Integrations for story creation
 - Template-based story structure with customizable parameters
 - Rate limiting and usage tracking per user tier
 - Caching system for improved performance
@@ -175,7 +175,7 @@ The product intentionally does not aim to:
 ## External Dependencies
 
 ### Core Services
-- **OpenAI API**: Story generation using GPT-4o model
+- **Google Gemini API**: Story generation using gemini-2.5-flash model (via Replit AI Integrations)
 - **Stripe**: Payment processing and subscription management
 - **Neon Database**: Serverless PostgreSQL hosting
 - **Replit Auth**: Authentication and user management
@@ -190,7 +190,7 @@ The product intentionally does not aim to:
 
 1. Users authenticate via Replit Auth, creating session tokens
 2. User inputs child details and preferences through multi-step wizard
-3. OpenAI API generates story content based on templates and parameters
+3. Google Gemini API generates story content based on templates and parameters
 4. Stories are saved to PostgreSQL with proper user association
 5. Stories are fetched with tier-based filtering and pagination
 6. Premium users can download stories as formatted PDFs
@@ -205,7 +205,8 @@ The product intentionally does not aim to:
 ### Environment Variables
 - `DATABASE_URL`: PostgreSQL connection string
 - `SESSION_SECRET`: Session encryption key
-- `OPENAI_API_KEY`: OpenAI API access
+- `AI_INTEGRATIONS_GEMINI_API_KEY`: Gemini API access (via Replit AI Integrations)
+- `AI_INTEGRATIONS_GEMINI_BASE_URL`: Gemini base URL (via Replit AI Integrations)
 - `STRIPE_SECRET_KEY`: Stripe payment processing
 - `REPLIT_DOMAINS`: Allowed authentication domains
 
@@ -234,6 +235,10 @@ The product intentionally does not aim to:
   * Built character management interface for Storytime Pro users
   * Integrated custom characters into AI story generation
   * Added character selection component for story wizard
+- February 8, 2026: Switched from OpenAI to Google Gemini
+  * Replaced OpenAI GPT-4o with Google Gemini 2.5 Flash via Replit AI Integrations
+  * No API key needed - uses Replit's built-in Gemini access
+  * All story generation features preserved (caching, rate limiting, templates, custom characters)
 ```
 
 ## User Preferences

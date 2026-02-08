@@ -1,10 +1,15 @@
-import OpenAI from "openai";
+import { GoogleGenAI } from "@google/genai";
 import crypto from "crypto";
 import { STORY_TEMPLATES } from "../shared/storyTemplates";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
+const ai = new GoogleGenAI({
+  apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
+  httpOptions: {
+    apiVersion: "",
+    baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
+  },
+});
 
-// Simple in-memory cache for story generation
 interface CacheEntry {
   story: { title: string; content: string };
   timestamp: number;
@@ -13,7 +18,6 @@ interface CacheEntry {
 const storyCache = new Map<string, CacheEntry>();
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
-// Usage tracking for rate limiting
 interface UsageData {
   count: number;
   windowStart: number;
@@ -41,14 +45,12 @@ const checkRateLimit = (userId: string): boolean => {
 };
 
 const trackUsage = (userId: string, tokensUsed: number = 0) => {
-  // Could integrate with a proper analytics service here
   console.log(
     `Story generated for user ${userId}, estimated tokens: ${tokensUsed}`,
   );
 };
 
 const generateCacheKey = (params: StoryGenerationParams): string => {
-  // Create a cache key based on core parameters (excluding bedtime message for variability)
   const keyData = {
     childName: params.childName,
     childAge: params.childAge,
@@ -84,23 +86,17 @@ const setCachedStory = (
     timestamp: Date.now(),
   });
 };
-const openai = new OpenAI({
-  apiKey:
-    process.env.OPENAI_API_KEY ||
-    process.env.OPENAI_API_KEY_ENV_VAR ||
-    "default_key",
-});
 
 export interface StoryGenerationParams {
   childName: string;
   childAge: number;
-  childGender: string; // 'boy', 'girl', 'other'
+  childGender: string;
   favoriteThemes?: string;
-  tone: string; // 'adventurous', 'silly', 'calming', 'educational'
-  length: string; // 'short', 'medium'
+  tone: string;
+  length: string;
   storyTemplate?: string;
   bedtimeMessage?: string;
-  customCharacters?: string[]; // Array of custom character IDs
+  customCharacters?: string[];
 }
 
 const MAX_CONTENT_SIZE_MAP = {
@@ -184,13 +180,13 @@ async function retryWithBackoff<T>(
     } catch (error) {
       if (attempt === maxRetries) throw error;
 
-      // Check if it's a retryable error
       const isRetryable =
         error instanceof Error &&
         (error.message.includes("rate limit") ||
           error.message.includes("timeout") ||
           error.message.includes("503") ||
-          error.message.includes("502"));
+          error.message.includes("502") ||
+          error.message.includes("429"));
 
       if (!isRetryable) throw error;
 
@@ -213,7 +209,6 @@ export async function generateBedtimeStory(
 }> {
   let customCharacters: any[] = [];
   
-  // Fetch custom characters if provided
   if (params.customCharacters && params.customCharacters.length > 0 && userId) {
     try {
       const { storage } = await import('./storage');
@@ -228,7 +223,6 @@ export async function generateBedtimeStory(
     }
   }
 
-  // Rate limiting check
   if (userId && !checkRateLimit(userId)) {
     throw new Error("Rate limit exceeded. Please try again later.");
   }
@@ -236,7 +230,6 @@ export async function generateBedtimeStory(
     MAX_CONTENT_SIZE_MAP[params.length as keyof typeof MAX_CONTENT_SIZE_MAP] ||
     MAX_CONTENT_SIZE_MAP["medium"];
 
-  // Check cache first (only if no custom bedtime message)
   if (!params.bedtimeMessage) {
     const cacheKey = generateCacheKey(params);
     const cachedStory = getCachedStory(cacheKey);
@@ -248,62 +241,33 @@ export async function generateBedtimeStory(
 
   const prompt = createPrompt(params, customCharacters);
 
-  // Adjust content length based on story length
-  let targetWords: number;
-  let targetParagraphs: number;
-
-  switch (params.length) {
-    case "short":
-      targetWords = 200;
-      targetParagraphs = 4;
-      break;
-    case "medium":
-      targetWords = 400;
-      targetParagraphs = 6;
-      break;
-    case "long":
-      targetWords = 800;
-      targetParagraphs = 10;
-      break;
-    default:
-      targetWords = 200;
-      targetParagraphs = 4;
-  }
+  const systemInstruction = "You are a professional children's bedtime story writer who creates magical, age-appropriate stories that help children drift off to sleep. Always respond with valid JSON only - no markdown, no code fences, just raw JSON.";
 
   try {
     const response = await retryWithBackoff(() =>
-      openai.chat.completions.create({
-        model: "gpt-4o",
-        messages: [
-          {
-            role: "system",
-            content:
-              "You are a professional children's bedtime story writer who creates magical, age-appropriate stories that help children drift off to sleep. Always respond with valid JSON.",
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-        response_format: { type: "json_object" },
-        temperature: 0.8,
+      ai.models.generateContent({
+        model: "gemini-2.5-flash",
+        contents: prompt,
+        config: {
+          systemInstruction: systemInstruction,
+          temperature: 0.8,
+        },
       }),
     );
 
-    const result = JSON.parse(response.choices[0].message.content || "{}");
+    const rawText = response.text || "{}";
+    const cleanedText = rawText.replace(/```json\s*/g, '').replace(/```\s*/g, '').trim();
+    const result = JSON.parse(cleanedText);
 
     if (!result || !result.title || !result.content) {
       throw new Error("Invalid response: Title or content missing.");
     }
 
-    // Validate content safety and appropriateness
     const validateContent = (content: string, title: string) => {
-      // Check for minimum content length
       if (content.length < 100) {
         throw new Error("Generated story is too short");
       }
 
-      // Check for inappropriate content (basic filtering)
       const inappropriateWords = [
         "violence",
         "scary",
@@ -319,10 +283,8 @@ export async function generateBedtimeStory(
         console.warn(
           `Potentially inappropriate content detected: ${foundInappropriate}`,
         );
-        // Could regenerate or filter content here
       }
 
-      // Ensure the child's name appears in the story
       const childNameLower = params.childName.toLowerCase();
       if (
         !lowercaseContent.includes(childNameLower) &&
@@ -348,16 +310,13 @@ export async function generateBedtimeStory(
       content: result.content,
     };
 
-    // Cache the result if no custom bedtime message
     if (!params.bedtimeMessage) {
       const cacheKey = generateCacheKey(params);
       setCachedStory(cacheKey, finalStory);
     }
 
-    // Track usage
     if (userId) {
-      const estimatedTokens = response.usage?.total_tokens || 0;
-      trackUsage(userId, estimatedTokens);
+      trackUsage(userId);
     }
 
     return finalStory;
