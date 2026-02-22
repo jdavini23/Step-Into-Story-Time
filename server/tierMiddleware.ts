@@ -39,27 +39,6 @@ export const checkStoryGenerationPermissions = async (
       return;
     }
 
-    // Check for debug override in development
-    let userTier = null;
-    if (process.env.NODE_ENV === 'development' && req.session?.debugTierOverride) {
-      const override = req.session.debugTierOverride;
-      const overrideAge = Date.now() - override.timestamp;
-
-      // Apply override if it's recent (within 5 minutes)
-      if (overrideAge < 5 * 60 * 1000) {
-        console.log(`Using debug tier override: ${override.tier}/${override.status}`);
-        userTier = override.tier;
-
-        // For debug mode, allow story generation if tier is premium or family
-        if (override.tier !== 'free' && override.status === 'active') {
-          req.userTier = override.tier;
-          req.tierLimits = TIER_LIMITS[override.tier];
-          next();
-          return;
-        }
-      }
-    }
-
     // Check if user can generate stories (normal flow)
     const permissionCheck = await canUserGenerateStory(userId);
 
@@ -88,7 +67,6 @@ export const checkStoryGenerationPermissions = async (
         message,
         upgradeRequired,
         storiesRemaining: permissionCheck.storiesRemaining || 0,
-        currentTier: permissionCheck.currentTier || "free",
       });
       return;
     }
@@ -101,10 +79,9 @@ export const checkStoryGenerationPermissions = async (
     next();
   } catch (error) {
     console.error("Error checking story generation permissions:", error);
-    // Fallback to free tier on errors but don't block generation
-    req.userTier = "free";
-    req.tierLimits = TIER_LIMITS["free"];
-    next();
+    res.status(503).json({
+      message: "Unable to verify your account permissions. Please try again in a moment.",
+    });
   }
 };
 
@@ -167,8 +144,9 @@ export const validateStoryParameters = async (
     next();
   } catch (error) {
     console.error("Error validating story parameters:", error);
-    // Don't block story generation due to validation errors
-    next();
+    res.status(503).json({
+      message: "Unable to validate story parameters. Please try again in a moment.",
+    });
   }
 };
 

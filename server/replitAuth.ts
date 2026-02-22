@@ -57,7 +57,7 @@ export function getSession() {
     rolling: false, // Don't reset expiry on each request to reduce session writes
     cookie: {
       httpOnly: true,
-      secure: false, // Disable secure cookies for development
+      secure: isProduction,
       maxAge: sessionTtl,
       sameSite: 'lax', // Allow same-site requests
     },

@@ -42,7 +42,7 @@ export interface IStorage {
 
   // Story operations
   createStory(userId: string, story: InsertStory): Promise<Story>;
-  getUserStories(userId: string): Promise<Story[]>;
+  getUserStories(userId: string, limit?: number): Promise<Story[]>;
   getStory(id: number, userId: string): Promise<Story | undefined>;
   updateStory(
     id: number,
@@ -129,12 +129,13 @@ export class DatabaseStorage implements IStorage {
     return newStory;
   }
 
-  async getUserStories(userId: string): Promise<Story[]> {
-    return await db
+  async getUserStories(userId: string, limit?: number): Promise<Story[]> {
+    const query = db
       .select()
       .from(stories)
       .where(eq(stories.userId, userId))
       .orderBy(desc(stories.createdAt));
+    return limit !== undefined ? await query.limit(limit) : await query;
   }
 
   async getStory(id: number, userId: string): Promise<Story | undefined> {

@@ -138,7 +138,6 @@ export function validateInput<T>(schema: z.ZodSchema<T>) {
           errors: error.errors.map(err => ({
             field: err.path.join('.'),
             message: err.message,
-            received: err.received,
           })),
           requestBody: req.body,
         });
@@ -182,3 +181,12 @@ export function validateCSRFToken(req: any, res: any, next: any) {
 export function generateCSRFToken(): string {
   return randomBytes(32).toString("hex");
 }
+
+export const paymentIntentSchema = z.object({
+  amount: z.number().positive("Amount must be a positive number"),
+});
+
+export const subscriptionSchema = z.object({
+  tier: z.enum(['premium', 'family']),
+  billing: z.enum(['monthly', 'yearly']),
+});

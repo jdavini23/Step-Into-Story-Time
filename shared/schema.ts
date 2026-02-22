@@ -45,7 +45,7 @@ export const stories = pgTable("stories", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title").notNull(),
   content: text("content").notNull(),
   childName: varchar("child_name").notNull(),
@@ -83,10 +83,10 @@ export const favorites = pgTable(
     id: serial("id").primaryKey(),
     userId: varchar("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     storyId: integer("story_id")
       .notNull()
-      .references(() => stories.id),
+      .references(() => stories.id, { onDelete: "cascade" }),
     createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => [
@@ -110,7 +110,7 @@ export const usageTracking = pgTable(
     id: serial("id").primaryKey(),
     userId: varchar("user_id")
       .notNull()
-      .references(() => users.id),
+      .references(() => users.id, { onDelete: "cascade" }),
     weekStart: timestamp("week_start").notNull(), // Monday 00:00:00 of the week
     storiesGenerated: integer("stories_generated").default(0),
     createdAt: timestamp("created_at").defaultNow(),
@@ -138,7 +138,7 @@ export const customCharacters = pgTable("custom_characters", {
   id: serial("id").primaryKey(),
   userId: varchar("user_id")
     .notNull()
-    .references(() => users.id),
+    .references(() => users.id, { onDelete: "cascade" }),
   name: varchar("name").notNull(),
   description: text("description").notNull(),
   appearance: text("appearance").notNull(), // Physical description
