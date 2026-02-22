@@ -1,7 +1,7 @@
 
 import type { Express } from "express";
 import Stripe from "stripe";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../authMiddleware";
 import { storage } from "../storage";
 import { db } from "../db";
 import { users } from "@shared/schema";

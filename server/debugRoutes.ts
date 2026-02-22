@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { isAuthenticated } from "./replitAuth";
+import { isAuthenticated } from "./authMiddleware";
 import {
   updateUserSubscription,
   getUserTier,
@@ -225,24 +225,18 @@ export function registerDebugRoutes(app: Express): void {
 }
 
 export function setupDebugRoutes(app: Express) {
-  app.get("/api/debug/auth", isAuthenticated, async (req, res) => {
-    const user = req.user as any;
+  app.get("/api/debug/auth", isAuthenticated, async (req: any, res) => {
+    const user = req.user;
 
     res.json({
-      isAuthenticated: req.isAuthenticated(),
+      isAuthenticated: !!user,
       user: {
         claims: user?.claims,
-        expires_at: user?.expires_at,
-        hasRefreshToken: !!user?.refresh_token,
-      },
-      session: {
-        id: req.sessionID,
-        cookie: req.session.cookie,
       },
     });
   });
 
-  app.get("/api/debug/subscription", isAuthenticated, async (req, res) => {
+  app.get("/api/debug/subscription", isAuthenticated, async (req: any, res) => {
     try {
       const user = req.user as any;
       const userId = user?.claims?.sub;

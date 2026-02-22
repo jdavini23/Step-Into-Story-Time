@@ -1,7 +1,6 @@
 
 import type { Express } from "express";
 import { createServer, type Server } from "http";
-import { setupAuth } from "../replitAuth";
 import { RateLimiter } from "../inputValidation";
 
 // Import route modules
@@ -19,8 +18,6 @@ export const storyGenerationLimiter = new RateLimiter(5, 60000); // 5 requests p
 export const generalLimiter = new RateLimiter(30, 60000); // 30 requests per minute
 
 export async function registerRoutes(app: Express): Promise<Server> {
-  // Auth middleware setup
-  await setupAuth(app);
 
   // Register all route modules
   registerSEORoutes(app);

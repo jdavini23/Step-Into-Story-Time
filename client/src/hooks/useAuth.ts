@@ -9,7 +9,7 @@ export function useAuth() {
     error,
     isError,
   } = useQuery<User | null>({
-    queryKey: ["/api/auth/user"],
+    queryKey: ["/api/me"],
     queryFn: getQueryFn<User | null>({ on401: "returnNull" }),
     retry: false,
     refetchOnWindowFocus: false,

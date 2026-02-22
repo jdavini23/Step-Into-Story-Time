@@ -1,4 +1,6 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./auth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
 
@@ -28,6 +30,9 @@ app.use((req, res, next) => {
   
   next();
 });
+
+// better-auth handler — must be mounted before express.json() to handle its own body parsing
+app.all("/api/auth/*splat", toNodeHandler(auth));
 
 app.use(express.json({ limit: '10mb' })); // Limit request size
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));

@@ -13,6 +13,7 @@ import Dashboard from "@/pages/dashboard";
 import Subscribe from "@/pages/subscribe";
 import Pricing from "@/pages/pricing";
 import Header from "@/components/header";
+import Login from "@/pages/login";
 
 const Characters = lazy(() => import("@/pages/characters"));
 
@@ -34,19 +35,24 @@ function Router() {
 
   return (
     <div className="min-h-screen bg-yellow-50">
-      <Header />
       <Switch>
-        <Route path="/pricing" component={Pricing} />
-        <Route path="/characters" component={Characters} />
-        <Route path="/story-wizard" component={StoryWizard} />
-        <Route path="/story/:id" component={StoryReader} />
-        <Route path="/subscribe" component={Subscribe} />
-        {!isAuthenticated ? (
-          <Route path="/" component={Landing} />
-        ) : (
-          <Route path="/" component={Dashboard} />
-        )}
-        <Route component={NotFound} />
+        <Route path="/login" component={Login} />
+        <Route>
+          <Header />
+          <Switch>
+            <Route path="/pricing" component={Pricing} />
+            <Route path="/characters" component={Characters} />
+            <Route path="/story-wizard" component={StoryWizard} />
+            <Route path="/story/:id" component={StoryReader} />
+            <Route path="/subscribe" component={Subscribe} />
+            {!isAuthenticated ? (
+              <Route path="/" component={Landing} />
+            ) : (
+              <Route path="/" component={Dashboard} />
+            )}
+            <Route component={NotFound} />
+          </Switch>
+        </Route>
       </Switch>
     </div>
   );

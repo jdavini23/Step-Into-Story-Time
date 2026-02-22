@@ -1,21 +1,21 @@
 
 import type { Express } from "express";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../authMiddleware";
 import { storage } from "../storage";
 import { getUserTier, canUserGenerateStory, getUserWeeklyUsage } from "../tierManager";
 import { addTierInfoToResponse } from "../tierMiddleware";
-import { generateCSRFToken, sanitizeText } from "../inputValidation";
+import { generateCSRFToken, storeCsrfToken, sanitizeText } from "../inputValidation";
 
 export function registerAuthRoutes(app: Express): void {
   // CSRF token endpoint
   app.get("/api/csrf-token", isAuthenticated, (req: any, res) => {
     const token = generateCSRFToken();
-    req.session.csrfToken = token;
+    storeCsrfToken(req.user.claims.sub, token);
     res.json({ csrfToken: token });
   });
 
-  // Auth routes
-  app.get("/api/auth/user", isAuthenticated, async (req: any, res) => {
+  // Current user endpoint — at /api/me to avoid conflict with better-auth /api/auth/* wildcard
+  app.get("/api/me", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       const user = await storage.getUser(userId);

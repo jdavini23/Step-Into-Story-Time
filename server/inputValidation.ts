@@ -148,27 +148,35 @@ export function validateInput<T>(schema: z.ZodSchema<T>) {
   };
 }
 
+// In-memory CSRF token store keyed by user ID (replaces session-based storage)
+const csrfTokenStore = new Map<string, string>();
+
+export function storeCsrfToken(userId: string, token: string): void {
+  csrfTokenStore.set(userId, token);
+}
+
 // CSRF protection helper
 export function validateCSRFToken(req: any, res: any, next: any) {
   const token = req.headers['x-csrf-token'] || req.body._csrf;
-  const sessionToken = req.session?.csrfToken;
+  const userId = req.user?.claims?.sub;
 
   if (!token) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       message: "CSRF token required",
       code: "CSRF_TOKEN_MISSING"
     });
   }
 
-  if (!sessionToken) {
-    return res.status(403).json({ 
+  if (!userId) {
+    return res.status(403).json({
       message: "Invalid session - CSRF token not found",
       code: "CSRF_SESSION_INVALID"
     });
   }
 
-  if (token !== sessionToken) {
-    return res.status(403).json({ 
+  const storedToken = csrfTokenStore.get(userId);
+  if (!storedToken || token !== storedToken) {
+    return res.status(403).json({
       message: "Invalid CSRF token",
       code: "CSRF_TOKEN_INVALID"
     });
