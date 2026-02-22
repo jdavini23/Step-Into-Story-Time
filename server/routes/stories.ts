@@ -14,7 +14,7 @@ import {
 } from "../inputValidation";
 import { generateBedtimeStory } from "../openai";
 import { generateStoryPDF, generateEnhancedPDF } from "../pdfGenerator";
-import { incrementWeeklyUsage, getUserTier } from "../tierManager";
+import { incrementWeeklyUsage, getUserTier, TIER_LIMITS } from "../tierManager";
 import { z } from "zod";
 
 const ipPreviewLimiter = new Map<string, { count: number; windowStart: number }>();
@@ -221,20 +221,8 @@ export function registerStoryRoutes(
     try {
       const userId = req.user.claims.sub;
       const { tier } = await getUserTier(userId);
-      let stories = await storage.getUserStories(userId);
-
-      // Apply story library restrictions for free users
-      if (tier === "free") {
-        // Sort by creation date (newest first) and limit to 3 most recent
-        stories = stories
-          .sort((a, b) => {
-            const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-            const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-            return dateB - dateA;
-          })
-          .slice(0, 3);
-      }
-
+      const limit = tier === "free" ? (TIER_LIMITS.free.maxStoriesInLibrary ?? undefined) : undefined;
+      const stories = await storage.getUserStories(userId, limit);
       res.json(stories);
     } catch (error) {
       console.error("Error fetching stories:", error);

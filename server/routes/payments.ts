@@ -6,6 +6,7 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { validateInput, paymentIntentSchema, subscriptionSchema } from "../inputValidation";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
@@ -17,9 +18,9 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
 
 export function registerPaymentRoutes(app: Express): void {
   // Create payment intent for one-time payments
-  app.post("/api/create-payment-intent", isAuthenticated, async (req: any, res) => {
+  app.post("/api/create-payment-intent", isAuthenticated, validateInput(paymentIntentSchema), async (req: any, res) => {
     try {
-      const { amount } = req.body;
+      const { amount } = req.validatedBody;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: Math.round(amount * 100), // Convert to cents
         currency: "usd",
@@ -33,11 +34,11 @@ export function registerPaymentRoutes(app: Express): void {
   });
 
   // Get or create subscription for premium features
-  app.post("/api/get-or-create-subscription", isAuthenticated, async (req: any, res) => {
+  app.post("/api/get-or-create-subscription", isAuthenticated, validateInput(subscriptionSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
-      const { tier = "premium", billing = "monthly" } = req.body;
+      const { tier, billing } = req.validatedBody;
 
       console.log("=== SUBSCRIPTION REQUEST DEBUG ===");
       console.log("User ID:", userId);
@@ -46,28 +47,15 @@ export function registerPaymentRoutes(app: Express): void {
 
       if (!user) {
         console.error("User not found:", userId);
-        return res.status(404).json({ 
-          error: { message: "User not found", type: "user_error" } 
+        return res.status(404).json({
+          error: { message: "User not found", type: "user_error" }
         });
       }
 
       if (!user.email) {
         console.error("User email not found:", userId);
-        return res.status(400).json({ 
-          error: { message: "User email is required for subscription", type: "user_error" } 
-        });
-      }
-
-      // Validate parameters
-      if (!["premium", "family"].includes(tier)) {
-        return res.status(400).json({ 
-          error: { message: "Invalid subscription tier", type: "validation_error" } 
-        });
-      }
-
-      if (!["monthly", "yearly"].includes(billing)) {
-        return res.status(400).json({ 
-          error: { message: "Invalid billing period", type: "validation_error" } 
+        return res.status(400).json({
+          error: { message: "User email is required for subscription", type: "user_error" }
         });
       }
 
