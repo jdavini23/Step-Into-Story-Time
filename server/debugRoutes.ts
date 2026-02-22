@@ -260,7 +260,7 @@ export function setupDebugRoutes(app: Express) {
     } catch (error) {
       res.status(500).json({
         error: error instanceof Error ? error.message : "Unknown error",
-        stack: error instanceof Error ? error.stack : undefined,
+        stack: process.env.NODE_ENV === "development" && error instanceof Error ? error.stack : undefined,
       });
     }
   });
