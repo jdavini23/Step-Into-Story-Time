@@ -32,7 +32,7 @@ export default function Dashboard() {
   const { user, isLoading } = useAuth();
   const { data: tierInfo } = useTierInfo();
   const [, setLocation] = useLocation();
-  const { showActionToast } = useEnhancedToast();
+  const { showActionToast, toast } = useEnhancedToast();
 
   const {
     data: stories = [],
@@ -76,7 +76,7 @@ export default function Dashboard() {
   useEffect(() => {
     // Handle unauthorized user
     if (!isLoading && !user) {
-      showActionToast.toast({
+      toast({
         title: "Session Required",
         description: "Redirecting to login...",
         variant: "destructive",
@@ -89,7 +89,7 @@ export default function Dashboard() {
 
     // Handle API errors
     if (error && isUnauthorizedError(error as Error)) {
-      showActionToast.toast({
+      toast({
         title: "Session Expired",
         description: "Redirecting to login...",
         variant: "destructive",

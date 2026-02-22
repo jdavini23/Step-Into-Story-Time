@@ -21,8 +21,17 @@ import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
 
+interface ComparisonFeature {
+  name: string;
+  free: string;
+  premium: string;
+  family: string;
+  description: string;
+  benefits: string[];
+}
+
 // Feature Modal Component
-function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
+function FeatureModal({ feature }: { feature: ComparisonFeature }) {
   return (
     <DialogContent className="max-w-2xl">
       <DialogHeader>
@@ -72,7 +81,7 @@ function FeatureModal({ feature }: { feature: typeof comparisonFeatures[0] }) {
 }
 
 export default function Pricing() {
-  const { user } = useAuth();
+  const { user, isAuthenticated } = useAuth();
 
   useSEO({
     title: "Pricing Plans - Affordable Bedtime Story Magic | Step Into Storytime",
@@ -86,7 +95,7 @@ export default function Pricing() {
   const [billingPeriod, setBillingPeriod] = useState<"monthly" | "yearly">(
     "monthly",
   );
-  const [selectedFeature, setSelectedFeature] = useState<typeof comparisonFeatures[0] | null>(null);
+  const [selectedFeature, setSelectedFeature] = useState<ComparisonFeature | null>(null);
 
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers

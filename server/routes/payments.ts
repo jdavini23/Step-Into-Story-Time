@@ -13,7 +13,7 @@ if (!process.env.STRIPE_SECRET_KEY) {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
-  apiVersion: "2023-10-16",
+  apiVersion: "2025-05-28.basil",
 });
 
 export function registerPaymentRoutes(app: Express): void {
@@ -90,7 +90,7 @@ export function registerPaymentRoutes(app: Express): void {
           }
 
           if (subscription.status === "incomplete") {
-            const invoice = subscription.latest_invoice as Stripe.Invoice;
+            const invoice = subscription.latest_invoice as any;
             const paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent;
             
             if (paymentIntent?.client_secret) {
@@ -188,7 +188,7 @@ export function registerPaymentRoutes(app: Express): void {
       await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
 
       // Get client secret
-      const invoice = subscription.latest_invoice as Stripe.Invoice;
+      const invoice = subscription.latest_invoice as any;
       const paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent;
       const clientSecret = paymentIntent?.client_secret;
 
