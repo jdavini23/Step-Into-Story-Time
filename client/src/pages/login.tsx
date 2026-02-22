@@ -18,10 +18,21 @@ export default function Login() {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleGoogleSignIn = async () => {
-    await authClient.signIn.social({
-      provider: "google",
-      callbackURL: "/",
-    });
+    setIsLoading(true);
+    try {
+      const result = await authClient.signIn.social({
+        provider: "google",
+        callbackURL: "/",
+      });
+      if (result?.error) {
+        toast({ title: "Google sign in failed", description: result.error.message, variant: "destructive" });
+      }
+    } catch (err) {
+      console.error("Google sign in error:", err);
+      toast({ title: "Google sign in failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
