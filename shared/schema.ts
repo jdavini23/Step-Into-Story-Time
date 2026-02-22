@@ -210,9 +210,12 @@ export const insertCustomCharacterSchema = createInsertSchema(customCharacters).
 export type InsertCustomCharacter = z.infer<typeof insertCustomCharacterSchema>;
 export type CustomCharacter = typeof customCharacters.$inferSelect;
 
-// Chat/Conversations tables (for Replit Integration)
+// Chat/Conversations tables
 export const conversations = pgTable("conversations", {
   id: serial("id").primaryKey(),
+  userId: varchar("user_id")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
   title: varchar("title").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
