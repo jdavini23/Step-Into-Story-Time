@@ -98,7 +98,7 @@ const SubscribeForm = ({
       } else if (error.type === "validation_error") {
         errorMessage =
           error.message || "Please check your payment information.";
-      } else if (error.type === "authentication_required") {
+      } else if ((error as any).type === "authentication_required") {
         errorMessage =
           "Additional authentication required. Please complete the verification.";
       }
@@ -320,7 +320,7 @@ export default function Subscribe() {
           {billingPeriod === "yearly" && (
             <div className="mt-4">
               <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1">
-                💰 {currentPricing.savings} with yearly billing
+                💰 {pricing.yearly.savings} with yearly billing
               </Badge>
             </div>
           )}
@@ -354,7 +354,7 @@ export default function Subscribe() {
                   </div>
                   {billingPeriod === "yearly" && (
                     <div className="text-xs text-green-600 mt-1 font-medium">
-                      {currentPricing.savings}
+                      {pricing.yearly.savings}
                     </div>
                   )}
                   <div className="text-xs text-gray-500 mt-1">
