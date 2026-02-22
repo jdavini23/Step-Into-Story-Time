@@ -1,5 +1,8 @@
 import { useState } from "react";
 import { useLocation } from "wouter";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { authClient } from "@/lib/authClient";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,14 +11,31 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 
+const signInSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().optional(),
+});
+
+const signUpSchema = z.object({
+  email: z.string().email("Invalid email address"),
+  password: z.string().min(8, "Password must be at least 8 characters"),
+  name: z.string().min(1, "Name is required"),
+});
+
+type SignInFormData = z.infer<typeof signInSchema>;
+type SignUpFormData = z.infer<typeof signUpSchema>;
+
 export default function Login() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const form = useForm<SignUpFormData>({
+    resolver: zodResolver(mode === "signup" ? signUpSchema : signInSchema),
+    defaultValues: { email: "", password: "", name: "" },
+  });
 
   const handleGoogleSignIn = async () => {
     setIsLoading(true);
@@ -35,19 +55,19 @@ export default function Login() {
     }
   };
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleEmailSubmit = async (data: SignInFormData | SignUpFormData) => {
     setIsLoading(true);
     try {
       if (mode === "signin") {
-        const result = await authClient.signIn.email({ email, password, callbackURL: "/" });
+        const result = await authClient.signIn.email({ email: data.email, password: data.password, callbackURL: "/" });
         if (result.error) {
           toast({ title: "Sign in failed", description: result.error.message, variant: "destructive" });
         } else {
           navigate("/");
         }
       } else {
-        const result = await authClient.signUp.email({ email, password, name, callbackURL: "/" });
+        const { name } = data as SignUpFormData;
+        const result = await authClient.signUp.email({ email: data.email, password: data.password, name, callbackURL: "/" });
         if (result.error) {
           toast({ title: "Sign up failed", description: result.error.message, variant: "destructive" });
         } else {
@@ -115,7 +135,7 @@ export default function Login() {
             </div>
 
             {/* Email/Password Form */}
-            <form onSubmit={handleEmailSubmit} className="space-y-3">
+            <form onSubmit={form.handleSubmit(handleEmailSubmit)} className="space-y-3">
               {mode === "signup" && (
                 <div className="space-y-1">
                   <Label htmlFor="name">Name</Label>
@@ -123,10 +143,11 @@ export default function Login() {
                     id="name"
                     type="text"
                     placeholder="Your name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    required
+                    {...form.register("name")}
                   />
+                  {form.formState.errors.name && (
+                    <p className="text-sm text-red-500">{form.formState.errors.name.message}</p>
+                  )}
                 </div>
               )}
               <div className="space-y-1">
@@ -135,10 +156,11 @@ export default function Login() {
                   id="email"
                   type="email"
                   placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
+                  {...form.register("email")}
                 />
+                {form.formState.errors.email && (
+                  <p className="text-sm text-red-500">{form.formState.errors.email.message}</p>
+                )}
               </div>
               <div className="space-y-1">
                 <Label htmlFor="password">Password</Label>
@@ -146,11 +168,11 @@ export default function Login() {
                   id="password"
                   type="password"
                   placeholder={mode === "signup" ? "Choose a password" : "Your password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={8}
+                  {...form.register("password")}
                 />
+                {form.formState.errors.password && (
+                  <p className="text-sm text-red-500">{form.formState.errors.password.message}</p>
+                )}
               </div>
               <Button
                 type="submit"
@@ -166,7 +188,10 @@ export default function Login() {
               {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 type="button"
-                onClick={() => setMode(mode === "signin" ? "signup" : "signin")}
+                onClick={() => {
+                  setMode(mode === "signin" ? "signup" : "signin");
+                  form.reset();
+                }}
                 className="text-purple-600 hover:text-purple-700 font-medium underline"
               >
                 {mode === "signin" ? "Sign up" : "Sign in"}
