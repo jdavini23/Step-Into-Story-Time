@@ -3,6 +3,7 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./auth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { RateLimiter } from "./inputValidation";
 
 const app = express();
 
@@ -31,8 +32,18 @@ app.use((req, res, next) => {
   next();
 });
 
+// Rate limiter for auth endpoints (30 req/min per IP)
+const authLimiter = new RateLimiter(30, 60000);
+const authRateLimitMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
+  if (!authLimiter.isAllowed(ip)) {
+    return res.status(429).json({ message: "Too many requests. Please try again later." });
+  }
+  return next();
+};
+
 // better-auth handler — must be mounted before express.json() to handle its own body parsing
-app.all("/api/auth/*splat", toNodeHandler(auth));
+app.all("/api/auth/*", authRateLimitMiddleware, toNodeHandler(auth));
 
 app.use(express.json({ limit: '10mb' })); // Limit request size
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));

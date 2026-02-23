@@ -29,7 +29,7 @@ const navigation: NavigationItem[] = [
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Memoize user initials to prevent recalculation on every render
@@ -66,7 +66,7 @@ export default function Header() {
   }, []);
 
   const handleLogin = useCallback(() => {
-    window.location.href = "/login";
+    navigate("/login");
   }, []);
 
   const closeMobileMenu = useCallback(() => {

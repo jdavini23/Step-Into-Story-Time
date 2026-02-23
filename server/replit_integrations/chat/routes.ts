@@ -3,6 +3,10 @@ import { GoogleGenAI } from "@google/genai";
 import { chatStorage } from "./storage";
 import { isAuthenticated } from "../../authMiddleware";
 
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY environment variable is required");
+}
+
 const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });

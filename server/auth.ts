@@ -3,6 +3,21 @@ import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { db } from "./db";
 import * as schema from "@shared/schema";
 
+// Validate required environment variables at startup
+const requiredEnv = {
+  BETTER_AUTH_SECRET: process.env.BETTER_AUTH_SECRET,
+  GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
+};
+for (const [key, value] of Object.entries(requiredEnv)) {
+  if (!value) {
+    throw new Error(`Missing required environment variable: ${key}`);
+  }
+}
+const authSecret = process.env.BETTER_AUTH_SECRET as string;
+const googleClientId = process.env.GOOGLE_CLIENT_ID as string;
+const googleClientSecret = process.env.GOOGLE_CLIENT_SECRET as string;
+
 export const auth = betterAuth({
   baseURL: process.env.BETTER_AUTH_BASE_URL ?? process.env.TRUSTED_ORIGINS?.split(",")[0],
   database: drizzleAdapter(db, {
@@ -16,12 +31,13 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
+    // TODO: set to true once SMTP/email delivery is configured
     requireEmailVerification: false,
   },
   socialProviders: {
     google: {
-      clientId: process.env.GOOGLE_CLIENT_ID!,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
+      clientId: googleClientId,
+      clientSecret: googleClientSecret,
     },
   },
   user: {
@@ -36,5 +52,5 @@ export const auth = betterAuth({
     },
   },
   trustedOrigins: process.env.TRUSTED_ORIGINS?.split(",") ?? [],
-  secret: process.env.BETTER_AUTH_SECRET!,
+  secret: authSecret,
 });

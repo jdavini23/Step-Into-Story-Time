@@ -1,12 +1,16 @@
 import { GoogleGenAI, Modality } from "@google/genai";
 
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error("GEMINI_API_KEY environment variable is required");
+}
+
 export const ai = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY,
 });
 
 /**
  * Generate an image and return as base64 data URL.
- * Uses gemini-2.5-flash-image model via Replit AI Integrations.
+ * Uses gemini-2.5-flash-image model via the Google GenAI SDK directly.
  */
 export async function generateImage(prompt: string): Promise<string> {
   const response = await ai.models.generateContent({
