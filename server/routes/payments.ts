@@ -114,10 +114,17 @@ export function registerPaymentRoutes(app: Express): void {
       }
 
       // Create or get customer
-      let customer;
+      let customer: Stripe.Customer | null = null;
       if (user.stripeCustomerId) {
         try {
-          customer = await stripe.customers.retrieve(user.stripeCustomerId);
+          const retrieved = await stripe.customers.retrieve(user.stripeCustomerId);
+          // Stripe returns deleted customers without throwing — discard them
+          if (!("deleted" in retrieved && retrieved.deleted)) {
+            customer = retrieved as Stripe.Customer;
+          } else {
+            console.log("Existing customer is deleted, will create new one:", user.stripeCustomerId);
+            await storage.updateStripeCustomerId(userId, "");
+          }
         } catch (error) {
           customer = null;
         }
@@ -187,13 +194,37 @@ export function registerPaymentRoutes(app: Express): void {
       // Update user with subscription info
       await storage.updateUserStripeInfo(userId, customer.id, subscription.id);
 
-      // Get client secret
-      const invoice = subscription.latest_invoice as any;
-      const paymentIntent = invoice?.payment_intent as Stripe.PaymentIntent;
-      const clientSecret = paymentIntent?.client_secret;
+      // Get client secret — handle both expanded and unexpanded invoice/payment_intent
+      const rawInvoice = subscription.latest_invoice;
+      let clientSecret: string | null = null;
+
+      if (rawInvoice && typeof rawInvoice !== "string") {
+        const rawPi = (rawInvoice as any).payment_intent;
+        if (rawPi && typeof rawPi !== "string") {
+          clientSecret = (rawPi as Stripe.PaymentIntent).client_secret ?? null;
+        } else if (typeof rawPi === "string") {
+          // Payment intent exists but wasn't expanded — retrieve it
+          console.log("Payment intent not expanded, retrieving:", rawPi);
+          const pi = await stripe.paymentIntents.retrieve(rawPi);
+          clientSecret = pi.client_secret ?? null;
+        }
+      } else if (typeof rawInvoice === "string") {
+        // Invoice not expanded — retrieve it with payment intent
+        console.log("Invoice not expanded, retrieving:", rawInvoice);
+        const fullInvoice = await stripe.invoices.retrieve(rawInvoice, {
+          expand: ["payment_intent"],
+        });
+        const rawPi = (fullInvoice as any).payment_intent;
+        if (rawPi && typeof rawPi !== "string") {
+          clientSecret = (rawPi as Stripe.PaymentIntent).client_secret ?? null;
+        }
+      }
 
       if (!clientSecret) {
-        throw new Error("Failed to create payment intent");
+        console.error("clientSecret is null. subscription.status:", subscription.status,
+          "latest_invoice type:", typeof rawInvoice,
+          "latest_invoice:", JSON.stringify(rawInvoice)?.slice(0, 500));
+        throw new Error("Failed to obtain payment client secret from subscription");
       }
 
       console.log("Subscription setup complete");
