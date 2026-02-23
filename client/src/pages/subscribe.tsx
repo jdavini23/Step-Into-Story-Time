@@ -163,7 +163,7 @@ export default function Subscribe() {
   useEffect(() => {
     // Only create subscription if user is authenticated
     if (user) {
-      apiRequest("POST", "/api/get-or-create-subscription", {
+      apiRequest("/api/get-or-create-subscription", "POST", {
         tier: selectedTier,
         billing: billingPeriod,
       })

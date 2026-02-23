@@ -113,7 +113,7 @@ export function StoryActionsMenu({
 
   const deleteMutation = useMutation({
     mutationFn: async (csrfToken: string) => {
-      return apiRequest("DELETE", `/api/stories/${storyId}`);
+      return apiRequest(`/api/stories/${storyId}`, "DELETE");
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
@@ -135,7 +135,7 @@ export function StoryActionsMenu({
   const favoriteMutation = useMutation({
     mutationFn: async (csrfToken: string) => {
       const method = isFavorited ? "DELETE" : "POST";
-      return apiRequest(method, `/api/favorites/${storyId}`);
+      return apiRequest(`/api/favorites/${storyId}`, method);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });

@@ -134,7 +134,7 @@ export default function StoryWizard() {
         return await response.json();
       }
 
-      const response = await apiRequest("POST", "/api/stories/generate", data);
+      const response = await apiRequest("/api/stories/generate", "POST", data);
       return await response.json();
     },
     onSuccess: (story) => {
