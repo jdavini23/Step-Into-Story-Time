@@ -7,6 +7,9 @@ import { RateLimiter } from "./inputValidation";
 
 const app = express();
 
+// Trust the first proxy (Railway, etc.) so req.ip reflects the real client IP
+app.set("trust proxy", 1);
+
 // Security headers middleware
 app.use((req, res, next) => {
   // Prevent XSS attacks
