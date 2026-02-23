@@ -1,6 +1,6 @@
 
 import type { Express } from "express";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../authMiddleware";
 import { storage } from "../storage";
 
 export function registerFavoriteRoutes(app: Express): void {

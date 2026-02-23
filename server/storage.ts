@@ -4,6 +4,8 @@ import {
   favorites,
   usageTracking,
   customCharacters,
+  conversations,
+  messages,
   type User,
   type UpsertUser,
   type Story,
@@ -14,6 +16,8 @@ import {
   type InsertUsageTracking,
   type CustomCharacter,
   type InsertCustomCharacter,
+  type Conversation,
+  type Message,
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and } from "drizzle-orm";
@@ -22,7 +26,7 @@ import { validateContentSize, FILE_SIZE_LIMITS } from "./fileUtils";
 // Interface for storage operations
 export interface IStorage {
   // User operations
-  // (IMPORTANT) these user operations are mandatory for Replit Auth.
+  // User identity operations
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
   updateStripeCustomerId(
@@ -75,11 +79,19 @@ export interface IStorage {
     updates: Partial<InsertCustomCharacter>,
   ): Promise<CustomCharacter | undefined>;
   deleteCustomCharacter(id: number, userId: string): Promise<boolean>;
+
+  // Chat/Conversation operations
+  getConversation(id: number, userId: string): Promise<Conversation | undefined>;
+  getAllConversations(userId: string): Promise<Conversation[]>;
+  createConversation(title: string, userId: string): Promise<Conversation>;
+  deleteConversation(id: number, userId: string): Promise<void>;
+  getMessagesByConversation(conversationId: number): Promise<Message[]>;
+  createMessage(conversationId: number, role: string, content: string): Promise<Message>;
 }
 
 export class DatabaseStorage implements IStorage {
   // User operations
-  // (IMPORTANT) these user operations are mandatory for Replit Auth.
+  // User identity operations
 
   async getUser(id: string): Promise<User | undefined> {
     const [user] = await db.select().from(users).where(eq(users.id, id));
@@ -425,6 +437,58 @@ export class DatabaseStorage implements IStorage {
       .set({ isActive: false, updatedAt: new Date() })
       .where(and(eq(customCharacters.id, id), eq(customCharacters.userId, userId)));
     return (result.rowCount || 0) > 0;
+  }
+
+  // Chat/Conversation operations
+  async getConversation(id: number, userId: string): Promise<Conversation | undefined> {
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, id), eq(conversations.userId, userId)));
+    return conversation;
+  }
+
+  async getAllConversations(userId: string): Promise<Conversation[]> {
+    return db
+      .select()
+      .from(conversations)
+      .where(eq(conversations.userId, userId))
+      .orderBy(desc(conversations.createdAt));
+  }
+
+  async createConversation(title: string, userId: string): Promise<Conversation> {
+    const [conversation] = await db
+      .insert(conversations)
+      .values({ title, userId })
+      .returning();
+    return conversation;
+  }
+
+  async deleteConversation(id: number, userId: string): Promise<void> {
+    // Verify ownership before deleting
+    const [conversation] = await db
+      .select()
+      .from(conversations)
+      .where(and(eq(conversations.id, id), eq(conversations.userId, userId)));
+    if (!conversation) return;
+    await db.delete(messages).where(eq(messages.conversationId, id));
+    await db.delete(conversations).where(eq(conversations.id, id));
+  }
+
+  async getMessagesByConversation(conversationId: number): Promise<Message[]> {
+    return db
+      .select()
+      .from(messages)
+      .where(eq(messages.conversationId, conversationId))
+      .orderBy(messages.createdAt);
+  }
+
+  async createMessage(conversationId: number, role: string, content: string): Promise<Message> {
+    const [message] = await db
+      .insert(messages)
+      .values({ conversationId, role, content })
+      .returning();
+    return message;
   }
 }
 

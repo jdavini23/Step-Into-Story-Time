@@ -1,5 +1,5 @@
 import type { Express } from "express";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../authMiddleware";
 import { storage } from "../storage";
 import { validateInput, validateCSRFToken, type RateLimiter } from "../inputValidation";
 import { insertCustomCharacterSchema } from "../../shared/schema";

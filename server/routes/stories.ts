@@ -1,6 +1,6 @@
 
 import type { Express } from "express";
-import { isAuthenticated } from "../replitAuth";
+import { isAuthenticated } from "../authMiddleware";
 import { storage } from "../storage";
 import { 
   checkStoryGenerationPermissions,
@@ -193,13 +193,13 @@ export function registerStoryRoutes(
             errors: error.errors,
             details: "Input validation failed"
           });
-        } else if (error instanceof Error && error.message.includes("Rate limit")) {
-          res.status(429).json({ 
-            message: "OpenAI rate limit exceeded. Please try again in a moment.",
+        } else if (error instanceof Error && (error.message.includes("Rate limit") || error.message.includes("429") || (error as any).status === 429)) {
+          res.status(429).json({
+            message: "Story generation rate limit exceeded. Please try again in a moment.",
             error: "rate_limit_exceeded"
           });
-        } else if (error instanceof Error && error.message.includes("OpenAI")) {
-          res.status(503).json({ 
+        } else if (error instanceof Error && (error.message.includes("503") || (error as any).status === 503 || (error as any).status === 502)) {
+          res.status(503).json({
             message: "Story generation service temporarily unavailable. Please try again.",
             error: "service_unavailable"
           });

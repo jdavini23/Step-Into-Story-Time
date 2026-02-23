@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/useAuth";
+import { authClient } from "@/lib/authClient";
 import { Link, useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -28,7 +29,7 @@ const navigation: NavigationItem[] = [
 
 export default function Header() {
   const { user, isAuthenticated } = useAuth();
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   // Memoize user initials to prevent recalculation on every render
@@ -58,13 +59,14 @@ export default function Header() {
   }, [user?.firstName, user?.lastName, user?.email]);
 
   // Optimize logout handler
-  const handleLogout = useCallback(() => {
+  const handleLogout = useCallback(async () => {
     setMobileMenuOpen(false);
-    window.location.href = "/api/logout";
+    await authClient.signOut();
+    window.location.href = "/";
   }, []);
 
   const handleLogin = useCallback(() => {
-    window.location.href = "/api/login";
+    navigate("/login");
   }, []);
 
   const closeMobileMenu = useCallback(() => {

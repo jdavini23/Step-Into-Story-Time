@@ -11,13 +11,7 @@ import pRetry from "p-retry";
  * import { batchProcess } from "./replit_integrations/batch";
  * import { GoogleGenAI } from "@google/genai";
  *
- * const ai = new GoogleGenAI({
- *   apiKey: process.env.AI_INTEGRATIONS_GEMINI_API_KEY,
- *   httpOptions: {
- *     apiVersion: "",
- *     baseUrl: process.env.AI_INTEGRATIONS_GEMINI_BASE_URL,
- *   },
- * });
+ * const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
  *
  * const results = await batchProcess(
  *   items,

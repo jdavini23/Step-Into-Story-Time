@@ -1,8 +1,14 @@
 import express, { type Request, Response, NextFunction } from "express";
+import { toNodeHandler } from "better-auth/node";
+import { auth } from "./auth";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
+import { RateLimiter } from "./inputValidation";
 
 const app = express();
+
+// Trust the first proxy (Railway, etc.) so req.ip reflects the real client IP
+app.set("trust proxy", 1);
 
 // Security headers middleware
 app.use((req, res, next) => {
@@ -23,11 +29,24 @@ app.use((req, res, next) => {
   // Content Security Policy
   res.setHeader(
     'Content-Security-Policy',
-    "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: https:; connect-src 'self' https://api.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com;"
   );
   
   next();
 });
+
+// Rate limiter for auth endpoints (30 req/min per IP)
+const authLimiter = new RateLimiter(30, 60000);
+const authRateLimitMiddleware = (req: Request, res: Response, next: NextFunction) => {
+  const ip = req.ip ?? req.socket.remoteAddress ?? "unknown";
+  if (!authLimiter.isAllowed(ip)) {
+    return res.status(429).json({ message: "Too many requests. Please try again later." });
+  }
+  return next();
+};
+
+// better-auth handler — must be mounted before express.json() to handle its own body parsing
+app.all("/api/auth/*", authRateLimitMiddleware, toNodeHandler(auth));
 
 app.use(express.json({ limit: '10mb' })); // Limit request size
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
@@ -82,18 +101,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  // ALWAYS serve the app on port 5000
-  // this serves both the API and the client.
-  // It is the only port that is not firewalled.
-  const port = 5000;
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    },
-  );
+  const port = parseInt(process.env.PORT || "3001", 10);
+  server.listen(port, () => {
+    log(`serving on port ${port}`);
+  });
 })();

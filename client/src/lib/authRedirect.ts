@@ -6,7 +6,7 @@ export const handleAuthRedirect = (showToast: (options: any) => void) => {
   });
 
   setTimeout(() => {
-    window.location.href = "/api/login";
+    window.location.href = "/login";
   }, 500);
 };
 
@@ -21,6 +21,6 @@ export const handleUnauthorizedError = (
   });
 
   setTimeout(() => {
-    window.location.href = "/api/login";
+    window.location.href = "/login";
   }, 500);
 };

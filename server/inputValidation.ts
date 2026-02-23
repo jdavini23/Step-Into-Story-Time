@@ -1,6 +1,6 @@
 import { z } from "zod";
 import DOMPurify from "isomorphic-dompurify";
-import { randomBytes } from "crypto";
+import { randomBytes, timingSafeEqual } from "crypto";
 
 // HTML sanitization configuration
 const sanitizeConfig = {
@@ -148,32 +148,63 @@ export function validateInput<T>(schema: z.ZodSchema<T>) {
   };
 }
 
+// In-memory CSRF token store keyed by user ID (replaces session-based storage)
+const CSRF_TTL_MS = 60 * 60 * 1000; // 1 hour
+interface CsrfEntry { token: string; expiresAt: number; }
+const csrfTokenStore = new Map<string, CsrfEntry>();
+
+// Purge expired entries periodically to prevent unbounded growth
+setInterval(() => {
+  const now = Date.now();
+  csrfTokenStore.forEach((entry, userId) => {
+    if (entry.expiresAt <= now) csrfTokenStore.delete(userId);
+  });
+}, 15 * 60 * 1000); // run every 15 minutes
+
+export function storeCsrfToken(userId: string, token: string): void {
+  csrfTokenStore.set(userId, { token, expiresAt: Date.now() + CSRF_TTL_MS });
+}
+
 // CSRF protection helper
 export function validateCSRFToken(req: any, res: any, next: any) {
   const token = req.headers['x-csrf-token'] || req.body._csrf;
-  const sessionToken = req.session?.csrfToken;
+  const userId = req.user?.claims?.sub;
 
   if (!token) {
-    return res.status(403).json({ 
+    return res.status(403).json({
       message: "CSRF token required",
       code: "CSRF_TOKEN_MISSING"
     });
   }
 
-  if (!sessionToken) {
-    return res.status(403).json({ 
+  if (!userId) {
+    return res.status(403).json({
       message: "Invalid session - CSRF token not found",
       code: "CSRF_SESSION_INVALID"
     });
   }
 
-  if (token !== sessionToken) {
-    return res.status(403).json({ 
+  const entry = csrfTokenStore.get(userId);
+  if (!entry || entry.expiresAt <= Date.now()) {
+    csrfTokenStore.delete(userId);
+    return res.status(403).json({
       message: "Invalid CSRF token",
       code: "CSRF_TOKEN_INVALID"
     });
   }
 
+  // Timing-safe comparison to prevent timing attacks
+  const incoming = Buffer.from(String(token));
+  const stored = Buffer.from(entry.token);
+  if (incoming.length !== stored.length || !timingSafeEqual(incoming, stored)) {
+    return res.status(403).json({
+      message: "Invalid CSRF token",
+      code: "CSRF_TOKEN_INVALID"
+    });
+  }
+
+  // Delete after successful validation to prevent replay attacks
+  csrfTokenStore.delete(userId);
   next();
 }
 
