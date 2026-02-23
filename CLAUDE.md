@@ -9,12 +9,12 @@ AI-powered personalized bedtime story generator for children ages 2-8. Parents c
 | Frontend | React 18, TypeScript, Wouter (routing), TanStack Query (server state), Tailwind CSS + shadcn/ui, Vite, Framer Motion |
 | Backend | Node.js, Express.js, TypeScript, ESM modules |
 | Database | PostgreSQL (Neon serverless), Drizzle ORM |
-| AI | Google Gemini 2.5 Flash via `@google/genai` (Replit AI Integrations) |
-| Auth | Replit Auth (OpenID Connect), express-session with PostgreSQL store |
+| AI | Google Gemini 2.5 Flash via `@google/genai` |
+| Auth | better-auth (email/password + Google OAuth), PostgreSQL session store |
 | Payments | Stripe (checkout, subscriptions, webhooks) |
 | Validation | Zod + drizzle-zod (shared client/server schemas) |
 | PDF | jspdf for story export |
-| Deployment | Replit (autoscale), port 5000 internal / 80 external |
+| Deployment | Railway, port from `$PORT` env var |
 
 ## Project Structure
 
@@ -60,7 +60,8 @@ server/
     index.ts         # Route registration + rate limiters
   openai.ts          # ⚠️ MISLEADING NAME: Actually uses Google Gemini, not OpenAI
   storage.ts         # IStorage interface + DatabaseStorage implementation
-  replitAuth.ts      # Replit Auth setup (OpenID Connect)
+  auth.ts            # better-auth setup (Google OAuth + email/password)
+  authMiddleware.ts  # Express middleware: isAuthenticated
   tierManager.ts     # Subscription tier logic + usage tracking
   tierMiddleware.ts  # Express middleware for tier-based access control
   pdfGenerator.ts    # PDF story export
@@ -101,7 +102,7 @@ npm run db:push  # Push schema changes to database (drizzle-kit)
 - All table definitions live in `shared/schema.ts` using Drizzle ORM
 - Insert schemas auto-generated via `createInsertSchema` from drizzle-zod
 - Schema changes: edit `shared/schema.ts` → run `npm run db:push`
-- **Do NOT drop** the `sessions` or `users` tables — they are mandatory for Replit Auth
+- **Do NOT drop** the `users` table — required by better-auth for user identity
 
 ### Server Patterns
 - Routes follow `registerXRoutes(app, ...limiters)` pattern in `server/routes/`
@@ -126,12 +127,18 @@ npm run db:push  # Push schema changes to database (drizzle-kit)
 
 ### Environment Variables
 ```
-DATABASE_URL                    # PostgreSQL connection string (Neon)
-SESSION_SECRET                  # Express session encryption
-AI_INTEGRATIONS_GEMINI_API_KEY  # Gemini API key (Replit AI Integrations)
-AI_INTEGRATIONS_GEMINI_BASE_URL # Gemini base URL (Replit AI Integrations)
-STRIPE_SECRET_KEY               # Stripe payment processing
-REPLIT_DOMAINS                  # Allowed authentication domains
+DATABASE_URL                # PostgreSQL connection string (Neon)
+BETTER_AUTH_SECRET          # better-auth session signing secret (32+ chars)
+BETTER_AUTH_BASE_URL        # App base URL (e.g. https://your-app.railway.app)
+TRUSTED_ORIGINS             # Allowed CORS origins (same as BETTER_AUTH_BASE_URL)
+GOOGLE_CLIENT_ID            # Google OAuth client ID
+GOOGLE_CLIENT_SECRET        # Google OAuth client secret
+GEMINI_API_KEY              # Google Gemini API key
+STRIPE_SECRET_KEY           # Stripe payment processing
+STRIPE_WEBHOOK_SECRET       # Stripe webhook signing secret
+VITE_STRIPE_PUBLIC_KEY      # Stripe publishable key (client-side)
+NODE_ENV                    # production | development
+PORT                        # Server port (Railway sets this automatically)
 ```
 
 ---

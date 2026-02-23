@@ -1,1 +1,0 @@
-export { registerChatRoutes } from "./routes";
