@@ -1,6 +1,6 @@
 import type { Express } from "express";
 import { GoogleGenAI } from "@google/genai";
-import { chatStorage } from "./storage";
+import { storage } from "../../storage";
 import { isAuthenticated } from "../../authMiddleware";
 
 if (!process.env.GEMINI_API_KEY) {
@@ -16,7 +16,7 @@ export function registerChatRoutes(app: Express): void {
   app.get("/api/conversations", isAuthenticated, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const conversations = await chatStorage.getAllConversations(userId);
+      const conversations = await storage.getAllConversations(userId);
       res.json(conversations);
     } catch (error) {
       console.error("Error fetching conversations:", error);
@@ -29,11 +29,11 @@ export function registerChatRoutes(app: Express): void {
     try {
       const userId = req.user.claims.sub;
       const id = parseInt(req.params.id);
-      const conversation = await chatStorage.getConversation(id, userId);
+      const conversation = await storage.getConversation(id, userId);
       if (!conversation) {
         return res.status(404).json({ error: "Conversation not found" });
       }
-      const messages = await chatStorage.getMessagesByConversation(id);
+      const messages = await storage.getMessagesByConversation(id);
       res.json({ ...conversation, messages });
     } catch (error) {
       console.error("Error fetching conversation:", error);
@@ -46,7 +46,7 @@ export function registerChatRoutes(app: Express): void {
     try {
       const userId = req.user.claims.sub;
       const { title } = req.body;
-      const conversation = await chatStorage.createConversation(title || "New Chat", userId);
+      const conversation = await storage.createConversation(title || "New Chat", userId);
       res.status(201).json(conversation);
     } catch (error) {
       console.error("Error creating conversation:", error);
@@ -60,11 +60,11 @@ export function registerChatRoutes(app: Express): void {
       const userId = req.user.claims.sub;
       const id = parseInt(req.params.id);
       // deleteConversation checks ownership internally; returns silently if not found
-      const conversation = await chatStorage.getConversation(id, userId);
+      const conversation = await storage.getConversation(id, userId);
       if (!conversation) {
         return res.status(403).json({ error: "Forbidden" });
       }
-      await chatStorage.deleteConversation(id, userId);
+      await storage.deleteConversation(id, userId);
       res.status(204).send();
     } catch (error) {
       console.error("Error deleting conversation:", error);
@@ -80,16 +80,16 @@ export function registerChatRoutes(app: Express): void {
       const { content } = req.body;
 
       // Verify conversation belongs to the authenticated user
-      const conversation = await chatStorage.getConversation(conversationId, userId);
+      const conversation = await storage.getConversation(conversationId, userId);
       if (!conversation) {
         return res.status(403).json({ error: "Forbidden" });
       }
 
       // Save user message
-      await chatStorage.createMessage(conversationId, "user", content);
+      await storage.createMessage(conversationId, "user", content);
 
       // Get conversation history for context
-      const messages = await chatStorage.getMessagesByConversation(conversationId);
+      const messages = await storage.getMessagesByConversation(conversationId);
       const chatMessages = messages.map((m) => ({
         role: m.role as "user" | "model",
         parts: [{ text: m.content }],
@@ -117,7 +117,7 @@ export function registerChatRoutes(app: Express): void {
       }
 
       // Save assistant message
-      await chatStorage.createMessage(conversationId, "assistant", fullResponse);
+      await storage.createMessage(conversationId, "assistant", fullResponse);
 
       res.write(`data: ${JSON.stringify({ done: true })}\n\n`);
       res.end();
