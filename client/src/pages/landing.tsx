@@ -57,7 +57,7 @@ export default function Landing() {
     <>
       <SchemaMarkup schema={organizationSchema} />
       <SchemaMarkup schema={softwareApplicationSchema} />
-      <main className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 overflow-hidden">
+      <main className="min-h-screen bg-gradient-to-br from-story-cream via-story-mist to-story-moonlight overflow-hidden">
       {/* Hero Section */}
       <section aria-label="Hero section">
         <HeroSection />

@@ -12,31 +12,31 @@ export default function HowItWorksSection() {
 
   const steps = [
     {
-      icon: "👶",
       title: "Tell us about your child",
       description: "Name, age, and what they love — we'll take it from there.",
+      color: "bg-story-gold",
     },
     {
-      icon: "🎭",
       title: "Choose a story style",
       description: "Pick a tone: adventurous, calming, silly, or educational.",
+      color: "bg-story-sunset",
     },
     {
-      icon: "✨",
       title: "Get your story",
       description:
         "In under 2 minutes, your personalized story is ready to read, save, or share.",
+      color: "bg-story-forest",
     },
   ];
 
   return (
-    <div className="bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50 py-20">
+    <div className="bg-gradient-to-br from-story-cream via-story-mist to-story-moonlight py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
+          <h3 className="font-serif text-3xl md:text-4xl font-bold text-story-bark mb-4">
             How It Works
           </h3>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-story-bark/70 max-w-3xl mx-auto">
             Bedtime magic in 3 easy steps — no stress, just smiles.
           </p>
         </div>
@@ -45,16 +45,8 @@ export default function HowItWorksSection() {
           {steps.map((step, index) => (
             <div key={index} className="text-center group cursor-pointer">
               <div
-                className={`w-20 h-20 bg-gradient-to-r ${
-                  index === 0
-                    ? "from-purple-600 to-blue-500"
-                    : index === 1
-                      ? "from-blue-500 to-yellow-500"
-                      : "from-yellow-500 to-purple-600"
-                } rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-500 group-hover:scale-110 group-hover:shadow-xl ${
-                  currentStep === index
-                    ? "animate-pulse scale-110 shadow-xl"
-                    : ""
+                className={`w-20 h-20 ${step.color} rounded-full flex items-center justify-center mx-auto mb-6 transition-all duration-500 ${
+                  currentStep === index ? "shadow-xl ring-4 ring-white" : ""
                 }`}
               >
                 <span className="text-3xl font-bold text-white">
@@ -62,30 +54,24 @@ export default function HowItWorksSection() {
                 </span>
               </div>
               <h4
-                className={`text-xl font-semibold text-gray-700 mb-4 group-hover:text-purple-600 transition-colors ${
-                  currentStep === index ? "text-purple-600" : ""
+                className={`font-serif text-xl font-semibold text-story-bark mb-4 transition-colors ${
+                  currentStep === index ? "text-story-gold" : ""
                 }`}
               >
                 {step.title}
               </h4>
               <p
-                className={`text-gray-600 group-hover:text-gray-700 transition-colors ${
-                  currentStep === index ? "text-gray-700" : ""
+                className={`text-story-bark/70 transition-colors ${
+                  currentStep === index ? "text-story-bark" : ""
                 }`}
               >
                 {step.description}
               </p>
 
               {/* Progress indicator */}
-              <div className="mt-4 h-1 bg-gray-200 rounded-full overflow-hidden mx-auto max-w-32">
+              <div className="mt-4 h-1 bg-story-mist rounded-full overflow-hidden mx-auto max-w-32">
                 <div
-                  className={`h-full bg-gradient-to-r ${
-                    index === 0
-                      ? "from-purple-600 to-blue-500"
-                      : index === 1
-                        ? "from-blue-500 to-yellow-500"
-                        : "from-yellow-500 to-purple-600"
-                  } rounded-full transition-all duration-1000 ${
+                  className={`h-full bg-gradient-to-r from-story-gold to-story-sunset rounded-full transition-all duration-1000 ${
                     currentStep === index ? "w-full" : "w-0"
                   }`}
                 ></div>

@@ -8,6 +8,7 @@ export default function TestimonialsSection() {
       author: "Sarah M.",
       role: "Mom of 2",
       emoji: "👩",
+      bgColor: "bg-story-cream",
     },
     {
       rating: 5,
@@ -15,6 +16,7 @@ export default function TestimonialsSection() {
       author: "Michael R.",
       role: "Father of 1",
       emoji: "👨",
+      bgColor: "bg-story-moonlight",
     },
     {
       rating: 5,
@@ -22,6 +24,7 @@ export default function TestimonialsSection() {
       author: "Jennifer L.",
       role: "Teacher & Mom",
       emoji: "👩",
+      bgColor: "bg-story-mist",
     },
   ];
 
@@ -29,10 +32,10 @@ export default function TestimonialsSection() {
     <div className="bg-white py-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-16">
-          <h3 className="text-3xl md:text-4xl font-bold text-gray-700 mb-4">
+          <h3 className="font-serif text-3xl md:text-4xl font-bold text-story-bark mb-4">
             What Parents Are Saying
           </h3>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-story-bark/70 max-w-3xl mx-auto">
             Join thousands of families creating magical bedtime memories.
           </p>
         </div>
@@ -42,7 +45,7 @@ export default function TestimonialsSection() {
             <Card key={index} className="shadow-lg">
               <CardContent className="p-8">
                 <div className="flex items-center mb-4">
-                  <div className="flex text-yellow-400">
+                  <div className="flex text-story-gold">
                     {"★★★★★".split("").map((star, i) => (
                       <span key={i} className="text-xl">
                         {star}
@@ -50,24 +53,18 @@ export default function TestimonialsSection() {
                     ))}
                   </div>
                 </div>
-                <p className="text-gray-600 mb-6">"{testimonial.text}"</p>
+                <p className="text-story-bark/80 mb-6">"{testimonial.text}"</p>
                 <div className="flex items-center">
                   <div
-                    className={`w-12 h-12 ${
-                      index === 0
-                        ? "bg-purple-100"
-                        : index === 1
-                          ? "bg-blue-100"
-                          : "bg-yellow-100"
-                    } rounded-full flex items-center justify-center mr-4`}
+                    className={`w-12 h-12 ${testimonial.bgColor} rounded-full flex items-center justify-center mr-4`}
                   >
                     <span className="text-lg">{testimonial.emoji}</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-700">
+                    <p className="font-semibold text-story-bark">
                       {testimonial.author}
                     </p>
-                    <p className="text-sm text-gray-500">{testimonial.role}</p>
+                    <p className="text-sm text-story-bark/60">{testimonial.role}</p>
                   </div>
                 </div>
               </CardContent>
