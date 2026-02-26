@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { isUnauthorizedError } from "@/lib/authUtils";
 import { getQueryFn } from "@/lib/queryClient";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import type { Story } from "@shared/schema";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
 
@@ -16,7 +16,7 @@ import { EmptyState } from "@/components/dashboard/empty-state";
 import { FloatingActionButton } from "@/components/dashboard/floating-action-button";
 import { PremiumFeatureShowcase } from "@/components/dashboard/premium-feature-showcase";
 import LoadingOverlay from "@/components/loading-overlay";
-import { DebugPanel } from "@/components/debug-panel";
+const DebugPanel = lazy(() => import("@/components/debug-panel").then(m => ({ default: m.DebugPanel })));
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { AlertTriangle, Calendar, Sparkles, X, Crown } from "lucide-react";
@@ -72,9 +72,8 @@ export default function Dashboard() {
   const { dismissedNotifications, dismissNotification, isDismissed } =
     useNotificationPreferences();
 
-  // Consolidated useEffect for all side effects
+  // Handle unauthorized user redirect
   useEffect(() => {
-    // Handle unauthorized user
     if (!isLoading && !user) {
       toast({
         title: "Session Required",
@@ -84,10 +83,11 @@ export default function Dashboard() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
-      return;
     }
+  }, [isLoading, user, toast]);
 
-    // Handle API errors
+  // Handle API auth errors
+  useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
       toast({
         title: "Session Expired",
@@ -97,22 +97,100 @@ export default function Dashboard() {
       setTimeout(() => {
         window.location.href = "/api/login";
       }, 500);
-      return;
-    } else if (error) {
-      // Error handling is done in the EnhancedErrorState component below
+    }
+  }, [error, toast]);
+
+  const displayedStories = showFavorites ? favoriteStories : stories;
+
+  // Single consolidated notification system
+  const activeNotification = useMemo(() => {
+    if (!tierInfo) return null;
+
+    const currentStoryCount = stories.length;
+    const maxStorageStories = tierInfo.limits.maxStoriesInLibrary;
+    const weeklyUsage = tierInfo.weeklyUsage;
+    const maxWeeklyStories = tierInfo.limits.storiesPerWeek;
+    const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription;
+
+    // Storage limits (highest priority) - skip for unlimited storage
+    const isAtStorageLimit =
+      maxStorageStories !== null && currentStoryCount >= maxStorageStories;
+    const isNearStorageLimit =
+      maxStorageStories !== null &&
+      currentStoryCount >= maxStorageStories * 0.9;
+
+    // Weekly limits - skip for unlimited weekly stories
+    const isAtWeeklyLimit =
+      maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories;
+    const isNearWeeklyLimit =
+      maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories * 0.8;
+
+    // Priority: Critical storage > Critical weekly > Warning storage > Warning weekly > Promotional
+    if (isAtStorageLimit && !isDismissed("storage-limit")) {
+      return {
+        id: "storage-limit",
+        type: "critical" as const,
+        title: "Story Library Full",
+        message: `You've reached your limit of ${maxStorageStories} stories. Delete older stories or upgrade to Premium.`,
+        actionText: "Upgrade Now",
+        actionHref: "/pricing",
+        progress: { current: currentStoryCount, max: maxStorageStories },
+      };
     }
 
-    // Debug logging removed - use DebugPanel component instead if needed
-  }, [
-    user,
-    isLoading,
-    error,
-    showActionToast,
-    stories,
-    favoriteStories,
-    showFavorites,
-    tierInfo,
-  ]);
+    if (isAtWeeklyLimit && !isDismissed("weekly-limit")) {
+      return {
+        id: "weekly-limit",
+        type: "critical" as const,
+        title: "Weekly Story Limit Reached",
+        message: `You've created ${maxWeeklyStories} stories this week. Premium users get unlimited stories.`,
+        actionText: "Upgrade Now",
+        actionHref: "/pricing",
+        progress: { current: weeklyUsage, max: maxWeeklyStories },
+      };
+    }
+
+    if (isNearStorageLimit && !isDismissed("storage-warning")) {
+      return {
+        id: "storage-warning",
+        type: "warning" as const,
+        title: "Library Almost Full",
+        message: `${currentStoryCount} of ${maxStorageStories} stories used. Premium users get unlimited storage.`,
+        actionText: "Upgrade",
+        actionHref: "/pricing",
+        progress: { current: currentStoryCount, max: maxStorageStories },
+      };
+    }
+
+    if (isNearWeeklyLimit && !isDismissed("weekly-warning")) {
+      return {
+        id: "weekly-warning",
+        type: "warning" as const,
+        title: "Weekly Usage High",
+        message: `${weeklyUsage} of ${maxWeeklyStories} weekly stories used. Premium users get unlimited stories.`,
+        actionText: "Upgrade",
+        actionHref: "/pricing",
+        progress: { current: weeklyUsage, max: maxWeeklyStories },
+      };
+    }
+
+    if (
+      !hasActiveSubscription &&
+      tierInfo.tier === "free" &&
+      !isDismissed("premium-offer")
+    ) {
+      return {
+        id: "premium-offer",
+        type: "info" as const,
+        title: "Unlock Premium Features",
+        message: "Get unlimited stories, PDF downloads, and priority support.",
+        actionText: "View Plans",
+        actionHref: "/pricing",
+      };
+    }
+
+    return null;
+  }, [stories.length, tierInfo, subscriptionStatus?.hasActiveSubscription, isDismissed, dismissedNotifications]);
 
   if (isLoading) {
     return (
@@ -148,95 +226,6 @@ export default function Dashboard() {
       </div>
     );
   }
-
-  const displayedStories = showFavorites ? favoriteStories : stories;
-
-  // Single consolidated notification system
-  const getActiveNotification = () => {
-    if (!tierInfo) return null;
-
-    const currentStoryCount = stories.length;
-    const maxStorageStories = tierInfo.limits.maxStoriesInLibrary;
-    const weeklyUsage = tierInfo.weeklyUsage;
-    const maxWeeklyStories = tierInfo.limits.storiesPerWeek;
-    const hasActiveSubscription = subscriptionStatus?.hasActiveSubscription;
-
-    // Storage limits (highest priority) - skip for unlimited storage
-    const isAtStorageLimit =
-      maxStorageStories !== null && currentStoryCount >= maxStorageStories;
-    const isNearStorageLimit =
-      maxStorageStories !== null &&
-      currentStoryCount >= maxStorageStories * 0.9;
-
-    // Weekly limits - skip for unlimited weekly stories
-    const isAtWeeklyLimit =
-      maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories;
-    const isNearWeeklyLimit =
-      maxWeeklyStories !== null && weeklyUsage >= maxWeeklyStories * 0.8;
-
-    // Priority: Critical storage > Critical weekly > Warning storage > Warning weekly > Promotional
-    if (isAtStorageLimit && !isDismissed("storage-limit")) {
-      return {
-        id: "storage-limit",
-        type: "critical" as const,
-        title: "Story Library Full",
-        message: `You've reached your limit of ${maxStorageStories} stories. Delete older stories or upgrade to Premium.`,
-        action: { text: "Upgrade Now", onClick: () => setLocation("/pricing") },
-        progress: { current: currentStoryCount, max: maxStorageStories },
-      };
-    }
-
-    if (isAtWeeklyLimit && !isDismissed("weekly-limit")) {
-      return {
-        id: "weekly-limit",
-        type: "critical" as const,
-        title: "Weekly Story Limit Reached",
-        message: `You've created ${maxWeeklyStories} stories this week. Premium users get unlimited stories.`,
-        action: { text: "Upgrade Now", onClick: () => setLocation("/pricing") },
-        progress: { current: weeklyUsage, max: maxWeeklyStories },
-      };
-    }
-
-    if (isNearStorageLimit && !isDismissed("storage-warning")) {
-      return {
-        id: "storage-warning",
-        type: "warning" as const,
-        title: "Library Almost Full",
-        message: `${currentStoryCount} of ${maxStorageStories} stories used. Premium users get unlimited storage.`,
-        action: { text: "Upgrade", onClick: () => setLocation("/pricing") },
-        progress: { current: currentStoryCount, max: maxStorageStories },
-      };
-    }
-
-    if (isNearWeeklyLimit && !isDismissed("weekly-warning")) {
-      return {
-        id: "weekly-warning",
-        type: "warning" as const,
-        title: "Weekly Usage High",
-        message: `${weeklyUsage} of ${maxWeeklyStories} weekly stories used. Premium users get unlimited stories.`,
-        action: { text: "Upgrade", onClick: () => setLocation("/pricing") },
-        progress: { current: weeklyUsage, max: maxWeeklyStories },
-      };
-    }
-
-    if (
-      !hasActiveSubscription &&
-      tierInfo.tier === "free" &&
-      !isDismissed("premium-offer")
-    ) {
-      return {
-        id: "premium-offer",
-        type: "info" as const,
-        title: "Unlock Premium Features",
-        message: "Get unlimited stories, PDF downloads, and priority support.",
-        action: { text: "View Plans", onClick: () => setLocation("/pricing") },
-      };
-    }
-
-    return null;
-  };
-
-  const activeNotification = getActiveNotification();
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8 lg:py-12">
@@ -334,12 +323,12 @@ export default function Dashboard() {
                           </div>
                         )}
                         <Button
-                          onClick={activeNotification.action.onClick}
+                          onClick={() => setLocation(activeNotification.actionHref)}
                           size="sm"
                           className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 text-xs px-3 py-1 h-7"
                         >
                           <Crown className="w-3 h-3 mr-1" />
-                          {activeNotification.action.text}
+                          {activeNotification.actionText}
                         </Button>
                       </div>
                     </div>
@@ -428,7 +417,11 @@ export default function Dashboard() {
       <FloatingActionButton />
 
       {/* Debug Panel - only show in development */}
-      {import.meta.env.DEV && <DebugPanel />}
+      {import.meta.env.DEV && (
+        <Suspense fallback={null}>
+          <DebugPanel />
+        </Suspense>
+      )}
     </div>
   );
 }

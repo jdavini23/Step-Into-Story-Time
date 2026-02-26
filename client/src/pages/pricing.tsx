@@ -80,6 +80,153 @@ function FeatureModal({ feature }: { feature: ComparisonFeature }) {
   );
 }
 
+const COMPARISON_FEATURES: ComparisonFeature[] = [
+  {
+    name: "Stories per week",
+    free: "3",
+    premium: "Unlimited",
+    family: "Unlimited",
+    description: "How many new personalized stories you can generate each week. Free users get 3 magical stories weekly, while premium users can create as many as their imagination desires.",
+    benefits: [
+      "Perfect for establishing bedtime routines",
+      "Fresh content to keep children engaged",
+      "No limits on creativity with premium plans"
+    ],
+  },
+  {
+    name: "Child profiles",
+    free: "1",
+    premium: "1",
+    family: "Up to 5",
+    description: "Create individual profiles for each child with their unique preferences, interests, and characteristics for truly personalized storytelling.",
+    benefits: [
+      "Tailored stories for each child's age and interests",
+      "Track individual reading progress",
+      "Family plan perfect for multi-child households"
+    ],
+  },
+  {
+    name: "Story personalization",
+    free: "Basic",
+    premium: "Full",
+    family: "Advanced",
+    description: "The level of customization available for your stories. From simple name insertion to complex personality traits and family dynamics.",
+    benefits: [
+      "Basic: Child's name and one trait",
+      "Full: Multiple traits, interests, family members",
+      "Advanced: Complex relationships and custom scenarios"
+    ],
+  },
+  {
+    name: "Story themes",
+    free: "3 popular",
+    premium: "All genres",
+    family: "All genres + Custom",
+    description: "Access to different story categories and themes. From classic bedtime stories to educational adventures and fantasy quests.",
+    benefits: [
+      "Popular themes include bedtime, adventure, and friendship",
+      "Premium unlocks fantasy, educational, holiday themes and more",
+      "Family plan includes custom theme creation"
+    ],
+  },
+  {
+    name: "Story lengths",
+    free: "Short only",
+    premium: "Short, Medium, Long",
+    family: "All + Custom",
+    description: "Choose the perfect story length for your bedtime routine. Short for quick reads, long for extended storytelling sessions.",
+    benefits: [
+      "Short: 2-3 minutes (perfect for toddlers)",
+      "Medium: 5-7 minutes (ideal for most children)",
+      "Long: 10-15 minutes (for extended bedtime routines)"
+    ],
+  },
+  {
+    name: "AI illustrations",
+    free: "None",
+    premium: "1 per story",
+    family: "3 per story",
+    description: "Beautiful, AI-generated illustrations that bring your stories to life. Each image is created specifically for your child's unique story.",
+    benefits: [
+      "Enhances visual storytelling experience",
+      "Helps children engage with the narrative",
+      "Professional-quality artwork for every story"
+    ],
+  },
+  {
+    name: "Audio narration",
+    free: "None",
+    premium: "None",
+    family: "AI voice",
+    description: "Professional-quality AI voice narration that reads stories aloud with perfect pronunciation and engaging storytelling voice.",
+    benefits: [
+      "Perfect for car rides or when parents need a break",
+      "Helps children with reading comprehension",
+      "Consistent, soothing bedtime voice"
+    ],
+  },
+  {
+    name: "Story library",
+    free: "Last 3",
+    premium: "Unlimited",
+    family: "Unlimited + Sharing",
+    description: "Save and organize all your favorite stories. Build a personal library of memories that grows with your child.",
+    benefits: [
+      "Never lose a beloved story",
+      "Track your child's favorites",
+      "Family sharing for siblings and relatives"
+    ],
+  },
+  {
+    name: "PDF downloads",
+    free: "None",
+    premium: "Yes",
+    family: "Yes + Enhanced",
+    description: "Download beautifully formatted PDF versions of stories for printing, sharing, or offline reading.",
+    benefits: [
+      "Create physical story books",
+      "Share with grandparents and family",
+      "Offline reading anywhere"
+    ],
+  },
+  {
+    name: "Magic Letters",
+    free: "None",
+    premium: "None",
+    family: "Yes",
+    description: "Interactive letters from story characters that appear in your child's inbox, creating magical moments beyond the story itself.",
+    benefits: [
+      "Extends the story experience",
+      "Encourages reading and writing",
+      "Creates lasting magical memories"
+    ],
+  },
+  {
+    name: "Custom characters",
+    free: "None",
+    premium: "None",
+    family: "Yes",
+    description: "Design and create unique characters that can appear across multiple stories, building a rich fictional world for your child.",
+    benefits: [
+      "Consistent character development",
+      "Build ongoing story arcs",
+      "Create family-specific characters"
+    ],
+  },
+  {
+    name: "Support",
+    free: "Community",
+    premium: "Premium",
+    family: "Priority",
+    description: "Different levels of customer support to help you get the most out of Step Into Storytime.",
+    benefits: [
+      "Community: Access to user forums and FAQs",
+      "Premium: Direct email support within 24 hours",
+      "Priority: Phone and chat support with immediate response"
+    ],
+  },
+];
+
 export default function Pricing() {
   const { user, isAuthenticated } = useAuth();
 
@@ -213,152 +360,7 @@ export default function Pricing() {
     },
   ];
 
-  const comparisonFeatures = [
-    {
-      name: "Stories per week",
-      free: "3",
-      premium: "Unlimited",
-      family: "Unlimited",
-      description: "How many new personalized stories you can generate each week. Free users get 3 magical stories weekly, while premium users can create as many as their imagination desires.",
-      benefits: [
-        "Perfect for establishing bedtime routines",
-        "Fresh content to keep children engaged",
-        "No limits on creativity with premium plans"
-      ],
-    },
-    { 
-      name: "Child profiles", 
-      free: "1", 
-      premium: "1", 
-      family: "Up to 5",
-      description: "Create individual profiles for each child with their unique preferences, interests, and characteristics for truly personalized storytelling.",
-      benefits: [
-        "Tailored stories for each child's age and interests",
-        "Track individual reading progress",
-        "Family plan perfect for multi-child households"
-      ],
-    },
-    {
-      name: "Story personalization",
-      free: "Basic",
-      premium: "Full",
-      family: "Advanced",
-      description: "The level of customization available for your stories. From simple name insertion to complex personality traits and family dynamics.",
-      benefits: [
-        "Basic: Child's name and one trait",
-        "Full: Multiple traits, interests, family members",
-        "Advanced: Complex relationships and custom scenarios"
-      ],
-    },
-    {
-      name: "Story themes",
-      free: "3 popular",
-      premium: "All genres",
-      family: "All genres + Custom",
-      description: "Access to different story categories and themes. From classic bedtime stories to educational adventures and fantasy quests.",
-      benefits: [
-        "Popular themes include bedtime, adventure, and friendship",
-        "Premium unlocks fantasy, educational, holiday themes and more",
-        "Family plan includes custom theme creation"
-      ],
-    },
-    {
-      name: "Story lengths",
-      free: "Short only",
-      premium: "Short, Medium, Long",
-      family: "All + Custom",
-      description: "Choose the perfect story length for your bedtime routine. Short for quick reads, long for extended storytelling sessions.",
-      benefits: [
-        "Short: 2-3 minutes (perfect for toddlers)",
-        "Medium: 5-7 minutes (ideal for most children)",
-        "Long: 10-15 minutes (for extended bedtime routines)"
-      ],
-    },
-    {
-      name: "AI illustrations",
-      free: "None",
-      premium: "1 per story",
-      family: "3 per story",
-      description: "Beautiful, AI-generated illustrations that bring your stories to life. Each image is created specifically for your child's unique story.",
-      benefits: [
-        "Enhances visual storytelling experience",
-        "Helps children engage with the narrative",
-        "Professional-quality artwork for every story"
-      ],
-    },
-    {
-      name: "Audio narration",
-      free: "None",
-      premium: "None",
-      family: "AI voice",
-      description: "Professional-quality AI voice narration that reads stories aloud with perfect pronunciation and engaging storytelling voice.",
-      benefits: [
-        "Perfect for car rides or when parents need a break",
-        "Helps children with reading comprehension",
-        "Consistent, soothing bedtime voice"
-      ],
-    },
-    {
-      name: "Story library",
-      free: "Last 3",
-      premium: "Unlimited",
-      family: "Unlimited + Sharing",
-      description: "Save and organize all your favorite stories. Build a personal library of memories that grows with your child.",
-      benefits: [
-        "Never lose a beloved story",
-        "Track your child's favorites",
-        "Family sharing for siblings and relatives"
-      ],
-    },
-    {
-      name: "PDF downloads",
-      free: "None",
-      premium: "Yes",
-      family: "Yes + Enhanced",
-      description: "Download beautifully formatted PDF versions of stories for printing, sharing, or offline reading.",
-      benefits: [
-        "Create physical story books",
-        "Share with grandparents and family",
-        "Offline reading anywhere"
-      ],
-    },
-    { 
-      name: "Magic Letters", 
-      free: "None", 
-      premium: "None", 
-      family: "Yes",
-      description: "Interactive letters from story characters that appear in your child's inbox, creating magical moments beyond the story itself.",
-      benefits: [
-        "Extends the story experience",
-        "Encourages reading and writing",
-        "Creates lasting magical memories"
-      ],
-    },
-    { 
-      name: "Custom characters", 
-      free: "None", 
-      premium: "None", 
-      family: "Yes",
-      description: "Design and create unique characters that can appear across multiple stories, building a rich fictional world for your child.",
-      benefits: [
-        "Consistent character development",
-        "Build ongoing story arcs",
-        "Create family-specific characters"
-      ],
-    },
-    {
-      name: "Support",
-      free: "Community",
-      premium: "Premium",
-      family: "Priority",
-      description: "Different levels of customer support to help you get the most out of Step Into Storytime.",
-      benefits: [
-        "Community: Access to user forums and FAQs",
-        "Premium: Direct email support within 24 hours",
-        "Priority: Phone and chat support with immediate response"
-      ],
-    },
-  ];
+  const comparisonFeatures = COMPARISON_FEATURES;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50">

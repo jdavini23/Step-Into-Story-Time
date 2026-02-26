@@ -1,22 +1,19 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 
 const STORAGE_KEY = "dismissed_notifications";
 
 export function useNotificationPreferences() {
   const [dismissedNotifications, setDismissedNotifications] = useState<
     string[]
-  >([]);
-
-  useEffect(() => {
+  >(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) {
-        setDismissedNotifications(JSON.parse(stored));
-      }
+      return stored ? JSON.parse(stored) : [];
     } catch (error) {
       console.warn("Failed to load notification preferences:", error);
+      return [];
     }
-  }, []);
+  });
 
   const dismissNotification = (id: string) => {
     const updated = [...dismissedNotifications, id];

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useTierInfo } from "@/hooks/useTierInfo";
 import { useLocation } from "wouter";
@@ -106,17 +106,10 @@ export default function StoryWizard() {
     "Creating your magical story...",
   );
 
+  const loadingTimersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
   const generateStoryMutation = useMutation({
     mutationFn: async (data: InsertStory) => {
-      setLoadingMessage("Crafting your story idea...");
-
-      setTimeout(() => {
-        setLoadingMessage("Writing your magical adventure...");
-      }, 2000);
-
-      setTimeout(() => {
-        setLoadingMessage("Adding finishing touches...");
-      }, 6000);
 
       if (!isAuthenticated) {
         const response = await fetch("/api/stories/generate-preview", {
@@ -185,6 +178,23 @@ export default function StoryWizard() {
       });
     },
   });
+
+  // Loading message progression with cleanup
+  useEffect(() => {
+    if (generateStoryMutation.isPending) {
+      setLoadingMessage("Crafting your story idea...");
+      const t1 = setTimeout(() => setLoadingMessage("Writing your magical adventure..."), 2000);
+      const t2 = setTimeout(() => setLoadingMessage("Adding finishing touches..."), 6000);
+      loadingTimersRef.current = [t1, t2];
+    } else {
+      loadingTimersRef.current.forEach(clearTimeout);
+      loadingTimersRef.current = [];
+    }
+    return () => {
+      loadingTimersRef.current.forEach(clearTimeout);
+      loadingTimersRef.current = [];
+    };
+  }, [generateStoryMutation.isPending]);
 
   const updateFormData = (field: keyof InsertStory, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));

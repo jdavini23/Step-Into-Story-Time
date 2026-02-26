@@ -73,17 +73,24 @@ export default function StoryReader() {
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
 
-  // Reading progress tracking
+  // Reading progress tracking with passive listener and rAF throttle
   useEffect(() => {
+    let ticking = false;
     const handleScroll = () => {
-      const scrollTop = window.scrollY;
-      const docHeight =
-        document.documentElement.scrollHeight - window.innerHeight;
-      const progress = (scrollTop / docHeight) * 100;
-      setReadingProgress(Math.min(100, Math.max(0, progress)));
+      if (!ticking) {
+        ticking = true;
+        requestAnimationFrame(() => {
+          const scrollTop = window.scrollY;
+          const docHeight =
+            document.documentElement.scrollHeight - window.innerHeight;
+          const progress = (scrollTop / docHeight) * 100;
+          setReadingProgress(Math.min(100, Math.max(0, progress)));
+          ticking = false;
+        });
+      }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 

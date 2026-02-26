@@ -1,3 +1,4 @@
+import { useMemo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { PlusCircle, Heart, Calendar, TrendingUp } from "lucide-react";
@@ -18,6 +19,15 @@ export function QuickActionsGrid({
   onToggleFavorites,
 }: QuickActionsGridProps) {
   const [, setLocation] = useLocation();
+
+  const thisWeekCount = useMemo(() => {
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    return stories.filter((story) => {
+      if (!story.createdAt) return false;
+      return new Date(story.createdAt) > weekAgo;
+    }).length;
+  }, [stories]);
 
   const quickActions = [
     {
@@ -42,13 +52,7 @@ export function QuickActionsGrid({
       description: "Stories created recently",
       icon: Calendar,
       color: "from-blue-500 to-cyan-500",
-      count: stories.filter((story) => {
-        if (!story.createdAt) return false;
-        const storyDate = new Date(story.createdAt);
-        const weekAgo = new Date();
-        weekAgo.setDate(weekAgo.getDate() - 7);
-        return storyDate > weekAgo;
-      }).length,
+      count: thisWeekCount,
     },
     {
       title: "Story Library",
