@@ -190,7 +190,7 @@ export function StoryActionsMenu({
           <Download className="mr-2 h-4 w-4" />
           Download PDF
           {!tierInfo?.limits.canDownloadPdf && (
-            <Crown className="ml-auto h-3 w-3 text-purple-600" />
+            <Crown className="ml-auto h-3 w-3 text-story-gold" />
           )}
         </DropdownMenuItem>
 

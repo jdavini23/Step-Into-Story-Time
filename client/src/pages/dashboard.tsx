@@ -203,7 +203,7 @@ export default function Dashboard() {
 
   if (storiesLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 py-6 sm:py-8 lg:py-12">
+      <div className="min-h-screen bg-story-cream py-6 sm:py-8 lg:py-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <DashboardHeader user={user as any} />
 
@@ -228,7 +228,7 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-6 sm:py-8 lg:py-12">
+    <div className="min-h-screen bg-story-cream dark:bg-gray-900 py-6 sm:py-8 lg:py-12">
       <FocusManagement />
       <div id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <DashboardHeader user={user as any} />
@@ -325,7 +325,7 @@ export default function Dashboard() {
                         <Button
                           onClick={() => setLocation(activeNotification.actionHref)}
                           size="sm"
-                          className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 text-xs px-3 py-1 h-7"
+                          className="bg-story-gold text-story-night hover:bg-story-sunset text-xs px-3 py-1 h-7"
                         >
                           <Crown className="w-3 h-3 mr-1" />
                           {activeNotification.actionText}

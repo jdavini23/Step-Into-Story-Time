@@ -66,16 +66,16 @@ export function PremiumFeatureShowcase({
   ];
 
   return (
-    <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-950 dark:to-blue-950 dark:border-purple-800 mb-6">
+    <Card className="border-2 border-story-mist bg-gradient-to-r from-story-cream to-story-mist dark:from-story-bark/20 dark:to-story-bark/30 dark:border-story-bark/50 mb-6">
       <CardContent className="p-6">
         <div className="text-center mb-6">
           <div className="flex items-center justify-center mb-2">
-            <Crown className="w-6 h-6 text-purple-600 mr-2" />
-            <h3 className="text-xl font-bold text-purple-800 dark:text-purple-200">
+            <Crown className="w-6 h-6 text-story-gold mr-2" />
+            <h3 className="text-xl font-serif font-bold text-story-bark dark:text-story-cream">
               Unlock Premium Features
             </h3>
           </div>
-          <p className="text-purple-700 dark:text-purple-300 text-sm">
+          <p className="text-story-bark/80 dark:text-story-cream/80 text-sm">
             Discover what you're missing with our premium storytelling features
           </p>
         </div>
@@ -84,24 +84,24 @@ export function PremiumFeatureShowcase({
           {premiumFeatures.map((feature, index) => (
             <div
               key={index}
-              className="flex items-start space-x-3 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg"
+              className="flex items-start space-x-3 p-3 bg-white/50 dark:bg-story-bark/50 rounded-lg"
             >
-              <div className="flex-shrink-0 text-purple-600 dark:text-purple-400">
+              <div className="flex-shrink-0 text-story-gold dark:text-story-sunset">
                 {feature.icon}
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center space-x-2 mb-1">
-                  <h4 className="font-medium text-gray-900 dark:text-gray-100 text-sm">
+                  <h4 className="font-medium text-story-bark dark:text-story-cream text-sm">
                     {feature.title}
                   </h4>
                   <Badge
                     variant="secondary"
-                    className="text-xs bg-purple-100 text-purple-700 dark:bg-purple-900 dark:text-purple-300"
+                    className="text-xs bg-story-mist text-story-bark dark:bg-story-bark/70 dark:text-story-cream"
                   >
                     {feature.tier}
                   </Badge>
                 </div>
-                <p className="text-xs text-gray-600 dark:text-gray-400">
+                <p className="text-xs text-story-bark/70 dark:text-story-cream/70">
                   {feature.description}
                 </p>
               </div>
@@ -112,7 +112,7 @@ export function PremiumFeatureShowcase({
         <div className="text-center">
           <Button
             onClick={() => setLocation("/pricing")}
-            className="bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:opacity-90 px-6 py-2"
+            className="bg-gradient-to-r from-story-gold to-story-sunset text-white hover:opacity-90 px-6 py-2"
           >
             <Crown className="w-4 h-4 mr-2" />
             View Pricing Plans

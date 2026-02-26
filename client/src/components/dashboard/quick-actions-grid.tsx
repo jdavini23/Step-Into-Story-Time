@@ -34,7 +34,7 @@ export function QuickActionsGrid({
       title: "Create New Story",
       description: "Start crafting a magical tale",
       icon: PlusCircle,
-      color: "from-purple-500 to-pink-500",
+      color: "bg-story-gold",
       onClick: () => setLocation("/story-wizard"),
     },
     {
@@ -43,7 +43,7 @@ export function QuickActionsGrid({
         ? "View all your stories"
         : "Your beloved stories",
       icon: Heart,
-      color: "from-red-500 to-pink-500",
+      color: "bg-story-sunset",
       count: showFavorites ? stories.length : favoriteStories.length,
       onClick: onToggleFavorites,
     },
@@ -51,39 +51,39 @@ export function QuickActionsGrid({
       title: "This Week",
       description: "Stories created recently",
       icon: Calendar,
-      color: "from-blue-500 to-cyan-500",
+      color: "bg-story-moonlight",
       count: thisWeekCount,
     },
     {
       title: "Story Library",
       description: "Total stories created",
       icon: TrendingUp,
-      color: "from-green-500 to-emerald-500",
+      color: "bg-story-forest",
       count: stories.length,
     },
   ];
 
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-      {quickActions.map((action, index) => (
+      {quickActions.map((action) => (
         <Card
           key={action.title}
-          className={`relative overflow-hidden transition-all duration-200 hover:shadow-lg group ${
-            action.onClick ? "cursor-pointer hover:scale-105" : ""
+          className={`relative overflow-hidden transition-shadow duration-200 hover:shadow-lg group ${
+            action.onClick ? "cursor-pointer" : ""
           }`}
           onClick={action.onClick}
         >
           <CardContent className="p-6">
             <div
-              className={`w-12 h-12 rounded-lg bg-gradient-to-br ${action.color} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-200`}
+              className={`w-12 h-12 rounded-lg ${action.color} flex items-center justify-center mb-4`}
             >
               <action.icon className="w-6 h-6 text-white" />
             </div>
-            <h3 className="font-semibold text-gray-900 mb-1">{action.title}</h3>
-            <p className="text-gray-600 text-sm mb-2">{action.description}</p>
+            <h3 className="font-semibold text-story-bark mb-1">{action.title}</h3>
+            <p className="text-story-bark/60 text-sm mb-2">{action.description}</p>
             {action.count !== undefined && (
               <div className="flex items-center justify-between">
-                <span className="text-2xl font-bold text-gray-900">
+                <span className="text-2xl font-bold text-story-bark">
                   {action.count}
                 </span>
               </div>
