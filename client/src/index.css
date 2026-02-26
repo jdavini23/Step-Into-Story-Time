@@ -3,48 +3,48 @@
 @tailwind utilities;
 
 :root {
-  --background: 60 9% 98%; /* #FEFCE8 - story-cream */
-  --foreground: 220 13% 26%; /* #374151 - story-charcoal */
-  --muted: 210 14% 89%; /* #E5E7EB */
-  --muted-foreground: 215 16% 46%; /* #6B7280 */
-  --popover: 0 0% 100%; /* #FFFFFF */
-  --popover-foreground: 220 13% 26%; /* #374151 */
+  --background: 34 47% 97%; /* #FDF8F0 - story-cream */
+  --foreground: 22 16% 37%; /* #6B5B4E - story-bark */
+  --muted: 200 18% 82%; /* #C4D7E0 - story-moonlight */
+  --muted-foreground: 22 10% 45%; /* #7A6E63 */
+  --popover: 34 47% 97%; /* #FDF8F0 */
+  --popover-foreground: 22 16% 37%; /* #6B5B4E */
   --card: 0 0% 100%; /* #FFFFFF */
-  --card-foreground: 220 13% 26%; /* #374151 */
-  --border: 214 13% 92%; /* #E5E7EB */
-  --input: 214 13% 92%; /* #E5E7EB */
-  --primary: 264 83% 57%; /* #7C3AED - story-purple */
-  --primary-foreground: 210 40% 98%; /* #F8FAFC */
-  --secondary: 210 14% 89%; /* #E5E7EB */
-  --secondary-foreground: 222 47% 11%; /* #1F2937 */
-  --accent: 210 14% 89%; /* #E5E7EB */
-  --accent-foreground: 222 47% 11%; /* #1F2937 */
+  --card-foreground: 22 16% 37%; /* #6B5B4E */
+  --border: 257 23% 92%; /* #E8E4EF - story-mist */
+  --input: 257 23% 92%; /* #E8E4EF */
+  --primary: 40 57% 55%; /* #D4A843 - story-gold */
+  --primary-foreground: 215 44% 17%; /* #1E293B - story-night */
+  --secondary: 257 23% 92%; /* #E8E4EF - story-mist */
+  --secondary-foreground: 215 44% 17%; /* #1E293B */
+  --accent: 136 13% 55%; /* #7C9A82 - story-forest */
+  --accent-foreground: 215 44% 17%; /* #1E293B */
   --destructive: 0 84% 60%; /* #EF4444 */
-  --destructive-foreground: 210 40% 98%; /* #F8FAFC */
-  --ring: 264 83% 57%; /* #7C3AED */
+  --destructive-foreground: 34 47% 97%; /* #FDF8F0 */
+  --ring: 40 57% 55%; /* #D4A843 - story-gold */
   --radius: 0.75rem; /* 12px */
 }
 
 .dark {
-  --background: 224 71% 4%; /* #0F172A */
-  --foreground: 213 31% 91%; /* #E2E8F0 */
-  --muted: 223 47% 11%; /* #1E293B */
-  --muted-foreground: 215 20% 65%; /* #94A3B8 */
-  --popover: 224 71% 4%; /* #0F172A */
-  --popover-foreground: 213 31% 91%; /* #E2E8F0 */
-  --card: 224 71% 4%; /* #0F172A */
-  --card-foreground: 213 31% 91%; /* #E2E8F0 */
-  --border: 223 47% 11%; /* #1E293B */
-  --input: 223 47% 11%; /* #1E293B */
-  --primary: 264 83% 57%; /* #7C3AED */
-  --primary-foreground: 210 40% 98%; /* #F8FAFC */
-  --secondary: 223 47% 11%; /* #1E293B */
-  --secondary-foreground: 213 31% 91%; /* #E2E8F0 */
-  --accent: 223 47% 11%; /* #1E293B */
-  --accent-foreground: 213 31% 91%; /* #E2E8F0 */
+  --background: 215 44% 17%; /* #1E293B - story-night */
+  --foreground: 34 47% 97%; /* #FDF8F0 - story-cream */
+  --muted: 215 30% 22%; /* #2D3A4A */
+  --muted-foreground: 200 18% 72%; /* #A8C0CC */
+  --popover: 215 44% 17%; /* #1E293B */
+  --popover-foreground: 34 47% 97%; /* #FDF8F0 */
+  --card: 215 40% 20%; /* #253344 */
+  --card-foreground: 34 47% 97%; /* #FDF8F0 */
+  --border: 215 30% 26%; /* #344050 */
+  --input: 215 30% 26%; /* #344050 */
+  --primary: 40 57% 55%; /* #D4A843 - story-gold */
+  --primary-foreground: 215 44% 17%; /* #1E293B */
+  --secondary: 215 30% 22%; /* #2D3A4A */
+  --secondary-foreground: 34 47% 97%; /* #FDF8F0 */
+  --accent: 136 13% 55%; /* #7C9A82 - story-forest */
+  --accent-foreground: 34 47% 97%; /* #FDF8F0 */
   --destructive: 0 63% 31%; /* #991B1B */
-  --destructive-foreground: 213 31% 91%; /* #E2E8F0 */
-  --ring: 264 83% 57%; /* #7C3AED */
+  --destructive-foreground: 34 47% 97%; /* #FDF8F0 */
+  --ring: 40 57% 55%; /* #D4A843 - story-gold */
 }
 
 @layer base {
@@ -90,13 +90,13 @@
   }
 
   .story-gradient {
-    background: linear-gradient(135deg, #7c3aed 0%, #3b82f6 50%, #f59e0b 100%);
+    background: linear-gradient(135deg, #D4A843 0%, #C9806B 50%, #7C9A82 100%);
   }
 
   .story-shadow {
     box-shadow:
-      0 10px 25px -5px rgba(124, 58, 237, 0.1),
-      0 4px 6px -2px rgba(124, 58, 237, 0.05);
+      0 10px 25px -5px rgba(107, 91, 78, 0.1),
+      0 4px 6px -2px rgba(107, 91, 78, 0.05);
   }
 
   .line-clamp-1 {
@@ -111,21 +111,6 @@
     display: -webkit-box;
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
-  }
-
-  /* Custom animations for magical feel */
-  @keyframes float {
-    0%,
-    100% {
-      transform: translateY(0px);
-    }
-    50% {
-      transform: translateY(-10px);
-    }
-  }
-
-  .animate-float {
-    animation: float 3s ease-in-out infinite;
   }
 
   /* Prose styling for story content */

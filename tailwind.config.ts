@@ -24,7 +24,19 @@ export default {
         "safe-left": "env(safe-area-inset-left)",
         "safe-right": "env(safe-area-inset-right)",
       },
+      fontFamily: {
+        sans: ["Inter", "system-ui", "sans-serif"],
+        serif: ["Crimson Text", "Georgia", "serif"],
+      },
       colors: {
+        "story-moonlight": "#C4D7E0",
+        "story-night": "#1E293B",
+        "story-forest": "#7C9A82",
+        "story-gold": "#D4A843",
+        "story-sunset": "#C9806B",
+        "story-cream": "#FDF8F0",
+        "story-bark": "#6B5B4E",
+        "story-mist": "#E8E4EF",
         background: "hsl(var(--background))",
         foreground: "hsl(var(--foreground))",
         card: {
