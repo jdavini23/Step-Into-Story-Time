@@ -260,7 +260,7 @@ export default function Subscribe() {
 
   if (authLoading || isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-story-cream to-story-mist flex items-center justify-center">
         <div
           className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
           aria-label="Loading"
@@ -304,15 +304,15 @@ export default function Subscribe() {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-story-cream to-story-mist py-12 px-4">
       <div className="max-w-4xl mx-auto">
         <div className="text-center mb-12">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl font-bold font-serif text-story-bark mb-4">
             {selectedTier === "family"
               ? "Upgrade to Storytime Pro"
               : "Upgrade to Storytime Plus"}
           </h1>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl text-story-bark/70">
             {selectedTier === "family"
               ? "The ultimate storytelling experience for families with multiple children"
               : "Unlock unlimited personalized bedtime stories for your little one"}
@@ -320,7 +320,7 @@ export default function Subscribe() {
           {billingPeriod === "yearly" && (
             <div className="mt-4">
               <Badge className="bg-green-100 text-green-800 text-sm px-3 py-1">
-                💰 {pricing.yearly.savings} with yearly billing
+                {pricing.yearly.savings} with yearly billing
               </Badge>
             </div>
           )}
@@ -330,7 +330,7 @@ export default function Subscribe() {
           {/* Features Card */}
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Premium Features</CardTitle>
+              <CardTitle className="text-2xl font-serif text-story-bark">Premium Features</CardTitle>
               <CardDescription>
                 Everything you need for magical bedtime stories
               </CardDescription>
@@ -340,16 +340,16 @@ export default function Subscribe() {
                 {features.map((feature, index) => (
                   <div key={index} className="flex items-start space-x-3">
                     <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                    <span className="text-gray-700">{feature}</span>
+                    <span className="text-story-bark/70">{feature}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-6 p-4 bg-purple-50 rounded-lg">
+              <div className="mt-6 p-4 bg-story-cream rounded-lg">
                 <div className="text-center">
-                  <div className="text-3xl font-bold text-purple-600">
+                  <div className="text-3xl font-bold text-story-gold">
                     {currentPricing.price}
                   </div>
-                  <div className="text-sm text-gray-600">
+                  <div className="text-sm text-story-bark/70">
                     per {currentPricing.period}
                   </div>
                   {billingPeriod === "yearly" && (
@@ -357,7 +357,7 @@ export default function Subscribe() {
                       {pricing.yearly.savings}
                     </div>
                   )}
-                  <div className="text-xs text-gray-500 mt-1">
+                  <div className="text-xs text-story-bark/60 mt-1">
                     Cancel anytime
                   </div>
                 </div>
@@ -368,7 +368,7 @@ export default function Subscribe() {
           {/* Payment Form */}
           <Card>
             <CardHeader>
-              <CardTitle>Complete Your Subscription</CardTitle>
+              <CardTitle className="font-serif text-story-bark">Complete Your Subscription</CardTitle>
               <CardDescription>
                 Enter your payment details to start your premium subscription
               </CardDescription>
@@ -377,7 +377,7 @@ export default function Subscribe() {
               {isLoading ? (
                 <div className="text-center py-8">
                   <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full mx-auto mb-4" />
-                  <p className="text-gray-600">
+                  <p className="text-story-bark/70">
                     Setting up your subscription...
                   </p>
                 </div>
@@ -389,7 +389,7 @@ export default function Subscribe() {
                     appearance: {
                       theme: "stripe",
                       variables: {
-                        colorPrimary: "#8b5cf6",
+                        colorPrimary: "#c4914d",
                       },
                     },
                   }}
@@ -403,12 +403,12 @@ export default function Subscribe() {
                 <div className="text-center py-8">
                   <div className="mb-4">
                     <div className="w-12 h-12 mx-auto mb-4 bg-red-100 rounded-full flex items-center justify-center">
-                      <span className="text-red-600 text-xl">⚠️</span>
+                      <span className="text-red-600 text-xl">⚠</span>
                     </div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    <h3 className="text-lg font-semibold text-story-bark mb-2">
                       Payment Setup Failed
                     </h3>
-                    <p className="text-gray-600 mb-4">
+                    <p className="text-story-bark/70 mb-4">
                       We encountered an issue setting up your subscription payment. This might be temporary.
                     </p>
                   </div>

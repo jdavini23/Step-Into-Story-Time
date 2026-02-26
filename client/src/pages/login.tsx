@@ -88,24 +88,24 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-yellow-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-story-cream flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         {/* Logo */}
         <div className="flex justify-center mb-8">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-xl flex items-center justify-center">
+            <div className="w-12 h-12 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-xl flex items-center justify-center">
               <BookOpen className="w-7 h-7 text-white" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-gray-700">Step Into Storytime</h1>
-              <p className="text-sm text-gray-500">Magical bedtime stories</p>
+              <h1 className="text-2xl font-bold font-serif text-story-bark">Step Into Storytime</h1>
+              <p className="text-sm text-story-bark/60">Magical bedtime stories</p>
             </div>
           </div>
         </div>
 
-        <Card className="shadow-lg border-purple-100">
+        <Card className="shadow-lg border-story-mist">
           <CardHeader className="text-center">
-            <CardTitle className="text-xl">
+            <CardTitle className="text-xl font-serif text-story-bark">
               {mode === "signin" ? "Welcome back" : "Create your account"}
             </CardTitle>
             <CardDescription>
@@ -119,7 +119,7 @@ export default function Login() {
             <Button
               onClick={handleGoogleSignIn}
               variant="outline"
-              className="w-full flex items-center gap-3 h-11 border-gray-300 hover:bg-gray-50"
+              className="w-full flex items-center gap-3 h-11 border-story-mist hover:bg-story-cream"
               type="button"
             >
               <svg className="w-5 h-5" viewBox="0 0 24 24">
@@ -133,10 +133,10 @@ export default function Login() {
 
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
-                <span className="w-full border-t border-gray-200" />
+                <span className="w-full border-t border-story-mist" />
               </div>
               <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">or</span>
+                <span className="bg-white px-2 text-story-bark/60">or</span>
               </div>
             </div>
 
@@ -182,7 +182,7 @@ export default function Login() {
               </div>
               <Button
                 type="submit"
-                className="w-full bg-purple-600 hover:bg-purple-700 text-white h-11"
+                className="w-full bg-story-gold hover:bg-story-sunset text-white h-11"
                 disabled={isLoading}
               >
                 {isLoading ? "Please wait..." : mode === "signin" ? "Sign In" : "Create Account"}
@@ -190,7 +190,7 @@ export default function Login() {
             </form>
 
             {/* Toggle mode */}
-            <p className="text-center text-sm text-gray-600">
+            <p className="text-center text-sm text-story-bark/70">
               {mode === "signin" ? "Don't have an account?" : "Already have an account?"}{" "}
               <button
                 type="button"
@@ -198,7 +198,7 @@ export default function Login() {
                   setMode(mode === "signin" ? "signup" : "signin");
                   form.reset();
                 }}
-                className="text-purple-600 hover:text-purple-700 font-medium underline"
+                className="text-story-gold hover:text-story-sunset font-medium underline"
               >
                 {mode === "signin" ? "Sign up" : "Sign in"}
               </button>

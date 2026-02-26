@@ -35,11 +35,11 @@ function FeatureModal({ feature }: { feature: ComparisonFeature }) {
   return (
     <DialogContent className="max-w-2xl">
       <DialogHeader>
-        <DialogTitle className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-          <Info className="h-6 w-6 text-purple-600" />
+        <DialogTitle className="text-2xl font-bold font-serif text-story-bark flex items-center gap-2">
+          <Info className="h-6 w-6 text-story-gold" />
           {feature.name}
         </DialogTitle>
-        <DialogDescription className="text-lg text-gray-600 mt-2">
+        <DialogDescription className="text-lg text-story-bark/70 mt-2">
           {feature.description}
         </DialogDescription>
       </DialogHeader>
@@ -47,29 +47,29 @@ function FeatureModal({ feature }: { feature: ComparisonFeature }) {
       <div className="mt-6 space-y-6">
         {/* Plan Comparison */}
         <div className="grid grid-cols-3 gap-4">
-          <div className="text-center p-4 bg-blue-50 rounded-xl">
-            <h4 className="font-semibold text-blue-900 mb-2">Starter Magic</h4>
-            <p className="text-2xl font-bold text-blue-600">{feature.free}</p>
+          <div className="text-center p-4 bg-story-moonlight/20 rounded-xl">
+            <h4 className="font-semibold text-story-bark mb-2">Starter Magic</h4>
+            <p className="text-2xl font-bold text-story-moonlight">{feature.free}</p>
           </div>
-          <div className="text-center p-4 bg-purple-50 rounded-xl">
-            <h4 className="font-semibold text-purple-900 mb-2">Storytime Plus</h4>
-            <p className="text-2xl font-bold text-purple-600">{feature.premium}</p>
+          <div className="text-center p-4 bg-story-cream rounded-xl">
+            <h4 className="font-semibold text-story-bark mb-2">Storytime Plus</h4>
+            <p className="text-2xl font-bold text-story-gold">{feature.premium}</p>
           </div>
-          <div className="text-center p-4 bg-emerald-50 rounded-xl">
-            <h4 className="font-semibold text-emerald-900 mb-2">Storytime Pro</h4>
-            <p className="text-2xl font-bold text-emerald-600">{feature.family}</p>
+          <div className="text-center p-4 bg-story-forest/10 rounded-xl">
+            <h4 className="font-semibold text-story-bark mb-2">Storytime Pro</h4>
+            <p className="text-2xl font-bold text-story-forest">{feature.family}</p>
           </div>
         </div>
 
         {/* Benefits */}
         {feature.benefits && (
           <div>
-            <h4 className="font-semibold text-gray-900 mb-3">Key Benefits:</h4>
+            <h4 className="font-semibold text-story-bark mb-3">Key Benefits:</h4>
             <ul className="space-y-2">
               {feature.benefits.map((benefit, index) => (
                 <li key={index} className="flex items-start space-x-3">
                   <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                  <span className="text-gray-700">{benefit}</span>
+                  <span className="text-story-bark/70">{benefit}</span>
                 </li>
               ))}
             </ul>
@@ -281,7 +281,7 @@ export default function Pricing() {
       period: "forever",
       description: "Get started with magical bedtime stories",
       icon: <Sparkles className="h-6 w-6" />,
-      color: "from-blue-500 to-purple-500",
+      color: "from-story-moonlight to-story-mist",
       popular: false,
       comingSoon: false,
       features: [
@@ -310,7 +310,7 @@ export default function Pricing() {
       yearlyPeriod: "per year",
       description: "Unlock the full magic of personalized storytelling",
       icon: <Heart className="h-6 w-6" />,
-      color: "from-purple-500 to-pink-500",
+      color: "from-story-gold to-story-sunset",
       popular: true,
       comingSoon: false,
       features: [
@@ -338,7 +338,7 @@ export default function Pricing() {
       yearlyPeriod: "per year",
       description: "Perfect for families with multiple children",
       icon: <Users className="h-6 w-6" />,
-      color: "from-emerald-500 to-blue-500",
+      color: "from-story-forest to-story-moonlight",
       popular: false,
       comingSoon: true,
       features: [
@@ -363,32 +363,32 @@ export default function Pricing() {
   const comparisonFeatures = COMPARISON_FEATURES;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-yellow-50">
+    <div className="min-h-screen bg-gradient-to-br from-story-cream via-story-mist to-story-moonlight">
       {/* Hero Section */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-8">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold font-serif text-story-bark mb-4">
             Choose Your
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 ml-3">
+            <span className="text-transparent bg-clip-text bg-gradient-to-r from-story-gold via-story-sunset to-story-forest ml-3">
               Storytelling
             </span>
             <br />
             Adventure
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto mb-8">
+          <p className="text-xl text-story-bark/70 max-w-3xl mx-auto mb-8">
             From first bedtime stories to family traditions, we have the perfect
             plan to create magical moments for your family.
           </p>
 
           {/* Billing Period Toggle */}
           <div className="flex items-center justify-center mb-8">
-            <div className="bg-gray-100 p-1 rounded-lg flex">
+            <div className="bg-story-mist p-1 rounded-lg flex">
               <button
                 onClick={() => setBillingPeriod("monthly")}
                 className={`px-6 py-2 rounded-md text-sm font-medium transition-all ${
                   billingPeriod === "monthly"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-white text-story-bark shadow-sm"
+                    : "text-story-bark/60 hover:text-story-bark"
                 }`}
               >
                 Monthly
@@ -397,8 +397,8 @@ export default function Pricing() {
                 onClick={() => setBillingPeriod("yearly")}
                 className={`px-6 py-2 rounded-md text-sm font-medium transition-all relative ${
                   billingPeriod === "yearly"
-                    ? "bg-white text-gray-900 shadow-sm"
-                    : "text-gray-600 hover:text-gray-900"
+                    ? "bg-white text-story-bark shadow-sm"
+                    : "text-story-bark/60 hover:text-story-bark"
                 }`}
               >
                 Yearly
@@ -418,14 +418,14 @@ export default function Pricing() {
               className={`relative overflow-hidden transition-all duration-300 ${
                 tier.comingSoon
                   ? "opacity-75 cursor-not-allowed"
-                  : "hover:scale-105"
+                  : ""
               } ${
-                tier.popular ? "ring-2 ring-purple-500 shadow-2xl" : "shadow-xl"
+                tier.popular ? "ring-2 ring-story-gold shadow-2xl" : "shadow-xl"
               }`}
             >
               {tier.popular && (
                 <div className="absolute top-0 left-0 right-0">
-                  <div className="bg-gradient-to-r from-purple-600 to-pink-600 text-white text-center py-2 text-sm font-semibold">
+                  <div className="bg-gradient-to-r from-story-gold to-story-sunset text-white text-center py-2 text-sm font-semibold">
                     <Star className="inline h-4 w-4 mr-1" />
                     Most Popular
                   </div>
@@ -433,7 +433,7 @@ export default function Pricing() {
               )}
               {tier.comingSoon && (
                 <div className="absolute top-0 left-0 right-0">
-                  <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white text-center py-2 text-sm font-semibold">
+                  <div className="bg-gradient-to-r from-story-bark/60 to-story-bark/70 text-white text-center py-2 text-sm font-semibold">
                     <Sparkles className="inline h-4 w-4 mr-1" />
                     Coming Soon
                   </div>
@@ -447,16 +447,16 @@ export default function Pricing() {
                   {tier.icon}
                 </div>
 
-                <CardTitle className="text-2xl font-bold text-gray-900">
+                <CardTitle className="text-2xl font-bold font-serif text-story-bark">
                   {tier.name}
                 </CardTitle>
-                <CardDescription className="text-gray-600">
+                <CardDescription className="text-story-bark/70">
                   {tier.subtitle}
                 </CardDescription>
 
                 <div className="mt-4">
                   <div className="flex items-baseline">
-                    <span className="text-4xl font-bold text-gray-900">
+                    <span className="text-4xl font-bold text-story-bark">
                       {tier.id === "free"
                         ? tier.price
                         : billingPeriod === "yearly" && tier.yearlyPrice
@@ -464,12 +464,12 @@ export default function Pricing() {
                           : tier.price}
                     </span>
                     {tier.period && tier.id !== "free" && (
-                      <span className="text-gray-600 ml-2">
+                      <span className="text-story-bark/70 ml-2">
                         /{billingPeriod === "yearly" ? "year" : "month"}
                       </span>
                     )}
                     {tier.id === "free" && tier.period && (
-                      <span className="text-gray-600 ml-2">/{tier.period}</span>
+                      <span className="text-story-bark/70 ml-2">/{tier.period}</span>
                     )}
                   </div>
                   {billingPeriod === "yearly" && tier.yearlyPrice && (
@@ -483,7 +483,7 @@ export default function Pricing() {
                     </div>
                   )}
                   {billingPeriod === "monthly" && tier.yearlyPrice && (
-                    <div className="mt-1 text-sm text-gray-500">
+                    <div className="mt-1 text-sm text-story-bark/60">
                       {tier.yearlyPrice}/year available
                     </div>
                   )}
@@ -491,7 +491,7 @@ export default function Pricing() {
               </CardHeader>
 
               <CardContent className="pb-8">
-                <p className="text-gray-600 mb-6">{tier.description}</p>
+                <p className="text-story-bark/70 mb-6">{tier.description}</p>
 
                 <ul className="space-y-3 mb-8">
                   {tier.features.map((feature, featureIndex) => (
@@ -500,7 +500,7 @@ export default function Pricing() {
                       className="flex items-start space-x-3"
                     >
                       <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 flex-shrink-0" />
-                      <span className="text-gray-700 text-sm">{feature}</span>
+                      <span className="text-story-bark/70 text-sm">{feature}</span>
                     </li>
                   ))}
                 </ul>
@@ -511,7 +511,7 @@ export default function Pricing() {
                   disabled={tier.comingSoon}
                   className={`w-full py-3 ${
                     tier.popular
-                      ? "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white"
+                      ? "bg-gradient-to-r from-story-gold to-story-sunset hover:from-story-gold hover:to-story-gold text-white"
                       : ""
                   } ${tier.comingSoon ? "opacity-50 cursor-not-allowed" : ""}`}
                 >
@@ -528,57 +528,57 @@ export default function Pricing() {
 
         {/* Feature Comparison Table */}
         <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-16">
-          <div className="px-8 py-6 bg-gradient-to-r from-purple-600 to-blue-600 text-white">
-            <h3 className="text-2xl font-bold text-center">
+          <div className="px-8 py-6 bg-gradient-to-r from-story-gold to-story-forest text-white">
+            <h3 className="text-2xl font-bold font-serif text-center">
               Compare All Features
             </h3>
-            <p className="text-center text-purple-100 mt-2">
+            <p className="text-center text-white/80 mt-2">
               See what's included in each plan
             </p>
           </div>
 
           <div className="overflow-x-auto">
             <table className="w-full">
-              <thead className="bg-gray-50">
+              <thead className="bg-story-cream">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-left text-sm font-semibold text-story-bark">
                     Features
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-story-bark">
                     Starter Magic
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-story-bark">
                     Storytime Plus
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-gray-900">
+                  <th className="px-6 py-4 text-center text-sm font-semibold text-story-bark">
                     Storytime Pro
                   </th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-gray-200">
+              <tbody className="divide-y divide-story-mist">
                 {comparisonFeatures.map((feature, index) => (
-                  <tr key={index} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                  <tr key={index} className="hover:bg-story-cream">
+                    <td className="px-6 py-4 text-sm font-medium text-story-bark">
                       <Dialog>
                         <DialogTrigger asChild>
                           <button
-                            className="flex items-center gap-2 text-left hover:text-purple-600 transition-colors group"
+                            className="flex items-center gap-2 text-left hover:text-story-gold transition-colors group"
                             onClick={() => setSelectedFeature(feature)}
                           >
                             <span className="group-hover:underline">{feature.name}</span>
-                            <Info className="h-4 w-4 text-gray-400 group-hover:text-purple-600 transition-colors" />
+                            <Info className="h-4 w-4 text-story-bark/40 group-hover:text-story-gold transition-colors" />
                           </button>
                         </DialogTrigger>
                         <FeatureModal feature={feature} />
                       </Dialog>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                    <td className="px-6 py-4 text-sm text-story-bark/70 text-center">
                       {feature.free}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                    <td className="px-6 py-4 text-sm text-story-bark/70 text-center">
                       {feature.premium}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 text-center">
+                    <td className="px-6 py-4 text-sm text-story-bark/70 text-center">
                       {feature.family}
                     </td>
                   </tr>
@@ -590,42 +590,42 @@ export default function Pricing() {
 
         {/* FAQ Section */}
         <div className="text-center mb-16">
-          <h3 className="text-3xl font-bold text-gray-900 mb-8">
+          <h3 className="text-3xl font-bold font-serif text-story-bark mb-8">
             Frequently Asked Questions
           </h3>
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto text-left">
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-semibold text-story-bark mb-3">
                 Can I change plans anytime?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-story-bark/70">
                 Yes! You can upgrade or downgrade your plan at any time. Changes
                 take effect immediately.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-semibold text-story-bark mb-3">
                 What happens to my stories if I downgrade?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-story-bark/70">
                 Your stories are always saved. You just won't be able to create
                 new ones beyond your plan limits.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-semibold text-story-bark mb-3">
                 Is there a family discount?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-story-bark/70">
                 The Storytime Pro plan is designed for families with multiple
                 children and offers the best value per child.
               </p>
             </div>
             <div className="bg-white p-6 rounded-xl shadow-lg">
-              <h4 className="font-semibold text-gray-900 mb-3">
+              <h4 className="font-semibold text-story-bark mb-3">
                 Do you offer yearly pricing?
               </h4>
-              <p className="text-gray-600">
+              <p className="text-story-bark/70">
                 Yes! Save 30% when you pay annually. The yearly option is
                 available for both paid plans.
               </p>
@@ -634,22 +634,22 @@ export default function Pricing() {
         </div>
 
         {/* Final CTA */}
-        <div className="text-center bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-2xl p-8 text-white">
-          <h3 className="text-2xl font-bold mb-4">Ready to Create Magic?</h3>
-          <p className="text-lg mb-6 text-purple-100">
+        <div className="text-center bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-2xl p-8 text-white">
+          <h3 className="text-2xl font-bold font-serif mb-4">Ready to Create Magic?</h3>
+          <p className="text-lg mb-6 text-white/90">
             Join thousands of families creating unforgettable bedtime memories
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button
               variant="secondary"
               onClick={() => handlePlanClick("free")}
-              className="bg-white text-purple-600 hover:bg-gray-100 font-semibold"
+              className="bg-white text-story-gold hover:bg-story-cream font-semibold"
             >
               Start Free Today
             </Button>
             <Button
               onClick={() => handlePlanClick("premium")}
-              className="bg-white text-purple-600 hover:bg-gray-100 border-2 border-white font-semibold shadow-lg"
+              className="bg-white text-story-gold hover:bg-story-cream border-2 border-white font-semibold shadow-lg"
             >
               Upgrade to Plus
             </Button>

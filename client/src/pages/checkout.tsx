@@ -92,7 +92,7 @@ export default function Checkout() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-story-cream to-story-mist flex items-center justify-center">
         <div
           className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full"
           aria-label="Loading"
@@ -102,31 +102,31 @@ export default function Checkout() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 to-pink-50 py-12 px-4">
+    <div className="min-h-screen bg-gradient-to-br from-story-cream to-story-mist py-12 px-4">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-4">
+          <h1 className="text-3xl font-bold font-serif text-story-bark mb-4">
             Complete Your Purchase
           </h1>
-          <p className="text-lg text-gray-600">
+          <p className="text-lg text-story-bark/70">
             One-time payment for premium story generation
           </p>
         </div>
 
         <Card>
           <CardHeader>
-            <CardTitle>Payment Details</CardTitle>
+            <CardTitle className="font-serif text-story-bark">Payment Details</CardTitle>
             <CardDescription>
               Secure payment processing powered by Stripe
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div className="mb-6 p-4 bg-story-cream rounded-lg">
               <div className="flex justify-between items-center">
-                <span className="text-gray-700">Premium Story Pack</span>
-                <span className="font-semibold text-lg">${amount}</span>
+                <span className="text-story-bark/70">Premium Story Pack</span>
+                <span className="font-semibold text-lg text-story-bark">${amount}</span>
               </div>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-sm text-story-bark/60 mt-1">
                 Generate 5 personalized bedtime stories
               </p>
             </div>
@@ -137,7 +137,7 @@ export default function Checkout() {
               </Elements>
             ) : (
               <div className="text-center py-8">
-                <p className="text-gray-600">
+                <p className="text-story-bark/70">
                   Unable to load payment form. Please try again later.
                 </p>
               </div>

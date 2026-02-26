@@ -74,29 +74,29 @@ const CHARACTER_AGES = [
   { value: "timeless", label: "Timeless" },
 ];
 
-function CharacterCard({ character, onEdit, onDelete }: { 
-  character: CustomCharacter, 
+function CharacterCard({ character, onEdit, onDelete }: {
+  character: CustomCharacter,
   onEdit: (character: CustomCharacter) => void,
-  onDelete: (id: number) => void 
+  onDelete: (id: number) => void
 }) {
   const roleInfo = CHARACTER_ROLES.find(r => r.value === character.role);
-  
+
   return (
     <Card className="hover:shadow-lg transition-shadow group">
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-xl">
+            <div className="w-12 h-12 bg-gradient-to-r from-story-gold to-story-sunset rounded-full flex items-center justify-center text-white text-xl">
               {roleInfo?.icon || "👤"}
             </div>
             <div>
-              <CardTitle className="text-lg">{character.name}</CardTitle>
+              <CardTitle className="text-lg font-serif text-story-bark">{character.name}</CardTitle>
               <div className="flex items-center space-x-2 mt-1">
                 <Badge variant="secondary" className="text-xs">
                   {roleInfo?.label || character.role}
                 </Badge>
                 {character.species !== "human" && (
-                  <Badge variant="outline" className="text-xs">
+                  <Badge variant="outline" className="text-xs border-story-mist">
                     {CHARACTER_SPECIES.find(s => s.value === character.species)?.label || character.species}
                   </Badge>
                 )}
@@ -124,8 +124,8 @@ function CharacterCard({ character, onEdit, onDelete }: {
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="text-sm text-gray-600 mb-3">{character.description}</p>
-        <div className="space-y-2 text-xs text-gray-500">
+        <p className="text-sm text-story-bark/70 mb-3">{character.description}</p>
+        <div className="space-y-2 text-xs text-story-bark/60">
           <div><strong>Appearance:</strong> {character.appearance}</div>
           <div><strong>Personality:</strong> {character.personality}</div>
           {character.specialAbilities && (
@@ -492,35 +492,35 @@ export default function CharactersPage() {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Custom Characters</h1>
+          <h1 className="text-3xl font-bold font-serif text-story-bark">Custom Characters</h1>
         </div>
 
         <Card className="max-w-2xl mx-auto">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-story-gold to-story-sunset rounded-full flex items-center justify-center mx-auto mb-4">
               <Crown className="h-8 w-8 text-white" />
             </div>
-            <CardTitle className="text-2xl">Upgrade to Storytime Pro</CardTitle>
+            <CardTitle className="text-2xl font-serif text-story-bark">Upgrade to Storytime Pro</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-gray-600">
-              Custom characters are exclusively available with the Storytime Pro plan. 
+            <p className="text-story-bark/70">
+              Custom characters are exclusively available with the Storytime Pro plan.
               Create unique characters that can appear across multiple stories!
             </p>
-            <div className="bg-purple-50 p-4 rounded-lg space-y-2">
-              <div className="flex items-center justify-center space-x-2 text-purple-700">
+            <div className="bg-story-cream p-4 rounded-lg space-y-2">
+              <div className="flex items-center justify-center space-x-2 text-story-gold">
                 <Sparkles className="h-4 w-4" />
                 <span className="font-medium">What you'll get:</span>
               </div>
-              <ul className="text-sm text-purple-600 space-y-1">
-                <li>• Create unlimited custom characters</li>
-                <li>• Consistent character development across stories</li>
-                <li>• Build ongoing story arcs with your characters</li>
-                <li>• Family-specific characters that grow with your child</li>
+              <ul className="text-sm text-story-bark/70 space-y-1">
+                <li>Create unlimited custom characters</li>
+                <li>Consistent character development across stories</li>
+                <li>Build ongoing story arcs with your characters</li>
+                <li>Family-specific characters that grow with your child</li>
               </ul>
             </div>
             <Link href="/pricing">
-              <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
+              <Button className="bg-gradient-to-r from-story-gold to-story-sunset hover:from-story-gold hover:to-story-gold">
                 <Crown className="h-4 w-4 mr-2" />
                 Upgrade to Pro
               </Button>
@@ -541,24 +541,24 @@ export default function CharactersPage() {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Custom Characters</h1>
+          <h1 className="text-3xl font-bold font-serif text-story-bark">Custom Characters</h1>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
                 <div className="flex items-center space-x-3">
-                  <div className="w-12 h-12 bg-gray-200 rounded-full"></div>
+                  <div className="w-12 h-12 bg-story-mist rounded-full"></div>
                   <div>
-                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
+                    <div className="h-4 bg-story-mist rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-story-mist rounded w-16"></div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-story-mist rounded"></div>
+                  <div className="h-3 bg-story-mist rounded w-3/4"></div>
                 </div>
               </CardContent>
             </Card>
@@ -578,7 +578,7 @@ export default function CharactersPage() {
               Back to Dashboard
             </Button>
           </Link>
-          <h1 className="text-3xl font-bold">Custom Characters</h1>
+          <h1 className="text-3xl font-bold font-serif text-story-bark">Custom Characters</h1>
         </div>
         <Card className="max-w-lg mx-auto">
           <CardContent className="text-center py-8">
@@ -603,20 +603,20 @@ export default function CharactersPage() {
             </Button>
           </Link>
           <div>
-            <h1 className="text-3xl font-bold">Custom Characters</h1>
-            <p className="text-gray-600">Create unique characters for your stories</p>
+            <h1 className="text-3xl font-bold font-serif text-story-bark">Custom Characters</h1>
+            <p className="text-story-bark/70">Create unique characters for your stories</p>
           </div>
         </div>
         <Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
           <DialogTrigger asChild>
-            <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
+            <Button className="bg-gradient-to-r from-story-gold to-story-sunset hover:from-story-gold hover:to-story-gold">
               <Plus className="h-4 w-4 mr-2" />
               Create Character
             </Button>
           </DialogTrigger>
           <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
             <DialogHeader>
-              <DialogTitle>Create New Character</DialogTitle>
+              <DialogTitle className="font-serif text-story-bark">Create New Character</DialogTitle>
             </DialogHeader>
             <CharacterForm onSuccess={handleFormSuccess} onCancel={handleFormCancel} />
           </DialogContent>
@@ -626,16 +626,16 @@ export default function CharactersPage() {
       {characters && characters.length === 0 ? (
         <Card className="max-w-2xl mx-auto">
           <CardContent className="text-center py-12">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-story-gold to-story-sunset rounded-full flex items-center justify-center mx-auto mb-6">
               <Users className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No Characters Yet</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-semibold font-serif text-story-bark mb-2">No Characters Yet</h3>
+            <p className="text-story-bark/70 mb-6">
               Create your first custom character to bring unique personalities to your stories!
             </p>
-            <Button 
+            <Button
               onClick={() => setShowCreateDialog(true)}
-              className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600"
+              className="bg-gradient-to-r from-story-gold to-story-sunset hover:from-story-gold hover:to-story-gold"
             >
               <Plus className="h-4 w-4 mr-2" />
               Create Your First Character
@@ -659,13 +659,13 @@ export default function CharactersPage() {
       <Dialog open={!!editingCharacter} onOpenChange={(open) => !open && setEditingCharacter(null)}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle>Edit Character</DialogTitle>
+            <DialogTitle className="font-serif text-story-bark">Edit Character</DialogTitle>
           </DialogHeader>
           {editingCharacter && (
-            <CharacterForm 
-              character={editingCharacter} 
-              onSuccess={handleFormSuccess} 
-              onCancel={handleFormCancel} 
+            <CharacterForm
+              character={editingCharacter}
+              onSuccess={handleFormSuccess}
+              onCancel={handleFormCancel}
             />
           )}
         </DialogContent>

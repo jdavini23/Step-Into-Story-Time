@@ -59,10 +59,10 @@ export function StoryActions({
         </Button>
       </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+      <div className="mt-4 pt-4 border-t border-story-mist">
         <Button
           onClick={onCreateAnother}
-          className="w-full bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
+          className="w-full bg-gradient-to-r from-story-gold via-story-sunset to-story-forest text-white px-6 py-3 rounded-xl font-semibold hover:opacity-90 transition-all"
         >
           <Plus className="w-5 h-5 mr-2" />
           Create Another Story
