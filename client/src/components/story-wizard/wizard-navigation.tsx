@@ -19,7 +19,7 @@ export function WizardNavigation({
   onSubmit,
 }: WizardNavigationProps) {
   return (
-    <div className="flex justify-between pt-8 border-t border-gray-200">
+    <div className="flex justify-between pt-8 border-t border-story-mist">
       <Button
         variant="outline"
         onClick={onPrevious}
@@ -34,7 +34,7 @@ export function WizardNavigation({
         <Button
           onClick={onNext}
           disabled={!canProceed}
-          className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="flex items-center space-x-2 bg-gradient-to-r from-story-gold to-story-sunset hover:bg-story-sunset"
         >
           <span>Next</span>
           <ArrowRight className="h-4 w-4" />
@@ -43,7 +43,7 @@ export function WizardNavigation({
         <Button
           onClick={onSubmit}
           disabled={!canProceed}
-          className="flex items-center space-x-2 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+          className="flex items-center space-x-2 bg-gradient-to-r from-story-gold to-story-sunset hover:bg-story-sunset"
         >
           <Sparkles className="h-4 w-4" />
           <span>Create Story</span>

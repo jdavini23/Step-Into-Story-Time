@@ -27,10 +27,10 @@ export function TemplateSelectionStep({
   return (
     <div className="space-y-6">
       <div>
-        <Label className="block text-sm font-medium text-gray-700 mb-4">
+        <Label className="block text-sm font-medium text-story-bark mb-4">
           Choose a Story Template
         </Label>
-        <p className="text-sm text-gray-500 mb-6">
+        <p className="text-sm text-story-bark/60 mb-6">
           Select a story structure that will guide the creation of your tale. You can always customize the details later.
         </p>
         
@@ -50,7 +50,7 @@ export function TemplateSelectionStep({
             {/* Option for no template */}
             <Card className={`cursor-pointer transition-all duration-200 ${
               formData.storyTemplate === "" || !formData.storyTemplate
-                ? "ring-2 ring-purple-500 bg-purple-50"
+                ? "ring-2 ring-story-gold bg-story-cream"
                 : "hover:shadow-md"
             }`}>
               <CardContent className="p-4">
@@ -60,7 +60,7 @@ export function TemplateSelectionStep({
                     <Label htmlFor="no-template" className="font-medium cursor-pointer flex items-center">
                       🎲 Surprise Me
                     </Label>
-                    <p className="text-sm text-gray-500 mt-1">
+                    <p className="text-sm text-story-bark/60 mt-1">
                       Let our AI create a completely original story structure
                     </p>
                   </div>
@@ -69,34 +69,34 @@ export function TemplateSelectionStep({
             </Card>
 
             {templatesToShow.map((template) => (
-              <Card 
+              <Card
                 key={template.id}
                 className={`cursor-pointer transition-all duration-200 ${
                   formData.storyTemplate === template.id
-                    ? "ring-2 ring-purple-500 bg-purple-50"
+                    ? "ring-2 ring-story-gold bg-story-cream"
                     : "hover:shadow-md"
                 }`}
               >
                 <CardContent className="p-4">
                   <div className="flex items-start space-x-3">
-                    <RadioGroupItem 
-                      value={template.id} 
+                    <RadioGroupItem
+                      value={template.id}
                       id={template.id}
                       className="mt-1"
                     />
                     <div className="flex-1">
-                      <Label 
-                        htmlFor={template.id} 
+                      <Label
+                        htmlFor={template.id}
                         className="font-medium cursor-pointer flex items-center"
                       >
                         <span className="mr-2">{template.icon}</span>
                         {template.name}
                       </Label>
-                      <p className="text-sm text-gray-500 mt-1">
+                      <p className="text-sm text-story-bark/60 mt-1">
                         {template.description}
                       </p>
                       {formData.childName && (
-                        <p className="text-xs text-purple-600 mt-2 font-medium">
+                        <p className="text-xs text-story-gold mt-2 font-medium">
                           Example: "{template.example_title.replace('{childName}', formData.childName)}"
                         </p>
                       )}
@@ -110,19 +110,19 @@ export function TemplateSelectionStep({
 
         {/* Show preview of selected template structure */}
         {formData.storyTemplate && formData.storyTemplate !== "" && (
-          <div className="mt-6 p-4 bg-gray-50 rounded-xl">
-            <h4 className="font-medium text-gray-700 mb-2">Story Structure Preview:</h4>
-            <p className="text-sm text-gray-600">
+          <div className="mt-6 p-4 bg-story-cream rounded-xl">
+            <h4 className="font-medium text-story-bark mb-2">Story Structure Preview:</h4>
+            <p className="text-sm text-story-bark/70">
               {STORY_TEMPLATES.find(t => t.id === formData.storyTemplate)?.structure
                 .replace('{childName}', formData.childName || '[Child\'s Name]')}
             </p>
           </div>
         )}
-        
+
         {(!formData.storyTemplate || formData.storyTemplate === "") && (
-          <div className="mt-6 p-4 bg-purple-50 rounded-xl">
-            <h4 className="font-medium text-purple-700 mb-2">Surprise Me Selected</h4>
-            <p className="text-sm text-purple-600">
+          <div className="mt-6 p-4 bg-story-cream rounded-xl">
+            <h4 className="font-medium text-story-bark mb-2">Surprise Me Selected</h4>
+            <p className="text-sm text-story-bark/70">
               Our AI will create a unique story structure tailored specifically to your preferences.
             </p>
           </div>

@@ -39,9 +39,9 @@ export function TierStatusAlert({
 
   if (tierInfo.tier === "premium") {
     return (
-      <Alert className="border-purple-200 bg-purple-50">
-        <Crown className="h-4 w-4 text-purple-600" />
-        <AlertDescription className="text-purple-800">
+      <Alert className="border-story-mist bg-story-cream">
+        <Crown className="h-4 w-4 text-story-gold" />
+        <AlertDescription className="text-story-bark">
           Premium Plan: Unlimited story generation
         </AlertDescription>
       </Alert>
@@ -50,9 +50,9 @@ export function TierStatusAlert({
 
   if (tierInfo.tier === "family") {
     return (
-      <Alert className="border-emerald-200 bg-emerald-50">
-        <Crown className="h-4 w-4 text-emerald-600" />
-        <AlertDescription className="text-emerald-800">
+      <Alert className="border-story-forest/20 bg-story-forest/5">
+        <Crown className="h-4 w-4 text-story-forest" />
+        <AlertDescription className="text-story-bark">
           Family Plan: Ultimate storytelling experience
         </AlertDescription>
       </Alert>

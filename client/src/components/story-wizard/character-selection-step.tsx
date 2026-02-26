@@ -34,16 +34,16 @@ function CharacterCard({ character, isSelected, onToggle }: {
   const roleInfo = CHARACTER_ROLES.find(r => r.value === character.role);
   
   return (
-    <Card 
+    <Card
       className={`cursor-pointer transition-all hover:shadow-md ${
-        isSelected ? 'ring-2 ring-purple-500 bg-purple-50' : ''
+        isSelected ? 'ring-2 ring-story-gold bg-story-cream' : ''
       }`}
       onClick={() => onToggle(character.id.toString())}
     >
       <CardHeader className="pb-3">
         <div className="flex items-start justify-between">
           <div className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center text-white text-lg">
+            <div className="w-10 h-10 bg-gradient-to-r from-story-gold to-story-forest rounded-full flex items-center justify-center text-white text-lg">
               {roleInfo?.icon || "👤"}
             </div>
             <div>
@@ -68,8 +68,8 @@ function CharacterCard({ character, isSelected, onToggle }: {
         </div>
       </CardHeader>
       <CardContent className="pt-0">
-        <p className="text-sm text-gray-600 mb-2">{character.description}</p>
-        <div className="text-xs text-gray-500">
+        <p className="text-sm text-story-bark/70 mb-2">{character.description}</p>
+        <div className="text-xs text-story-bark/60">
           <div><strong>Personality:</strong> {character.personality}</div>
           {character.specialAbilities && (
             <div className="mt-1"><strong>Special Abilities:</strong> {character.specialAbilities}</div>
@@ -102,23 +102,23 @@ export default function CharacterSelectionStep({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Custom Characters</h2>
-          <p className="text-gray-600">Include your unique characters in this story</p>
+          <h2 className="text-2xl font-serif font-bold text-story-bark mb-2">Add Custom Characters</h2>
+          <p className="text-story-bark/70">Include your unique characters in this story</p>
         </div>
 
         <Card className="max-w-lg mx-auto">
           <CardHeader className="text-center">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="w-16 h-16 bg-gradient-to-r from-story-gold to-story-forest rounded-full flex items-center justify-center mx-auto mb-4">
               <Crown className="h-8 w-8 text-white" />
             </div>
-            <CardTitle>Upgrade to Storytime Pro</CardTitle>
+            <CardTitle className="font-serif">Upgrade to Storytime Pro</CardTitle>
           </CardHeader>
           <CardContent className="text-center space-y-4">
-            <p className="text-gray-600">
+            <p className="text-story-bark/70">
               Custom characters are available with the Storytime Pro plan. Create unique characters that can appear across multiple stories!
             </p>
-            <div className="bg-purple-50 p-4 rounded-lg space-y-2">
-              <ul className="text-sm text-purple-600 space-y-1">
+            <div className="bg-story-cream p-4 rounded-lg space-y-2">
+              <ul className="text-sm text-story-bark/70 space-y-1">
                 <li>• Create unlimited custom characters</li>
                 <li>• Consistent character development</li>
                 <li>• Build ongoing story arcs</li>
@@ -127,7 +127,7 @@ export default function CharacterSelectionStep({
             </div>
             <div className="flex space-x-2 justify-center">
               <Link href="/pricing">
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
+                <Button className="bg-gradient-to-r from-story-gold to-story-forest hover:bg-story-sunset">
                   <Crown className="h-4 w-4 mr-2" />
                   Upgrade to Pro
                 </Button>
@@ -146,25 +146,25 @@ export default function CharacterSelectionStep({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Custom Characters</h2>
-          <p className="text-gray-600">Include your unique characters in this story</p>
+          <h2 className="text-2xl font-serif font-bold text-story-bark mb-2">Add Custom Characters</h2>
+          <p className="text-story-bark/70">Include your unique characters in this story</p>
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {[1, 2, 3, 4].map((i) => (
             <Card key={i} className="animate-pulse">
               <CardHeader>
                 <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-gray-200 rounded-full"></div>
+                  <div className="w-10 h-10 bg-story-mist rounded-full"></div>
                   <div>
-                    <div className="h-4 bg-gray-200 rounded w-24 mb-2"></div>
-                    <div className="h-3 bg-gray-200 rounded w-16"></div>
+                    <div className="h-4 bg-story-mist rounded w-24 mb-2"></div>
+                    <div className="h-3 bg-story-mist rounded w-16"></div>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
                 <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 rounded"></div>
-                  <div className="h-3 bg-gray-200 rounded w-3/4"></div>
+                  <div className="h-3 bg-story-mist rounded"></div>
+                  <div className="h-3 bg-story-mist rounded w-3/4"></div>
                 </div>
               </CardContent>
             </Card>
@@ -178,8 +178,8 @@ export default function CharacterSelectionStep({
     return (
       <div className="space-y-6">
         <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Custom Characters</h2>
-          <p className="text-gray-600">Include your unique characters in this story</p>
+          <h2 className="text-2xl font-serif font-bold text-story-bark mb-2">Add Custom Characters</h2>
+          <p className="text-story-bark/70">Include your unique characters in this story</p>
         </div>
         <Card className="max-w-lg mx-auto">
           <CardContent className="text-center py-8">
@@ -196,10 +196,10 @@ export default function CharacterSelectionStep({
   return (
     <div className="space-y-6">
       <div className="text-center">
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Add Custom Characters</h2>
-        <p className="text-gray-600">
-          {characters && characters.length > 0 
-            ? "Select characters to include in your story" 
+        <h2 className="text-2xl font-serif font-bold text-story-bark mb-2">Add Custom Characters</h2>
+        <p className="text-story-bark/70">
+          {characters && characters.length > 0
+            ? "Select characters to include in your story"
             : "Create your first custom character"}
         </p>
       </div>
@@ -207,16 +207,16 @@ export default function CharacterSelectionStep({
       {characters && characters.length === 0 ? (
         <Card className="max-w-lg mx-auto">
           <CardContent className="text-center py-8">
-            <div className="w-16 h-16 bg-gradient-to-r from-purple-500 to-blue-500 rounded-full flex items-center justify-center mx-auto mb-6">
+            <div className="w-16 h-16 bg-gradient-to-r from-story-gold to-story-forest rounded-full flex items-center justify-center mx-auto mb-6">
               <Users className="h-8 w-8 text-white" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">No Characters Yet</h3>
-            <p className="text-gray-600 mb-6">
+            <h3 className="text-xl font-serif font-semibold mb-2">No Characters Yet</h3>
+            <p className="text-story-bark/70 mb-6">
               Create your first custom character to bring unique personalities to your stories!
             </p>
             <div className="flex space-x-2 justify-center">
               <Link href="/characters">
-                <Button className="bg-gradient-to-r from-purple-600 to-blue-500 hover:from-purple-700 hover:to-blue-600">
+                <Button className="bg-gradient-to-r from-story-gold to-story-forest hover:bg-story-sunset">
                   <Plus className="h-4 w-4 mr-2" />
                   Create Character
                 </Button>
@@ -241,7 +241,7 @@ export default function CharacterSelectionStep({
           </div>
 
           <div className="flex justify-between items-center">
-            <div className="text-sm text-gray-600">
+            <div className="text-sm text-story-bark/70">
               {selectedCharacters.length > 0 && (
                 <span>{selectedCharacters.length} character{selectedCharacters.length !== 1 ? 's' : ''} selected</span>
               )}

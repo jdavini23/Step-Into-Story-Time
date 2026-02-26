@@ -19,7 +19,7 @@ export function StoryStyleStep({
   return (
     <div className="space-y-6">
       <div>
-        <Label className="block text-sm font-medium text-gray-700 mb-4">
+        <Label className="block text-sm font-medium text-story-bark mb-4">
           Story Tone *
         </Label>
         <RadioGroup
@@ -27,7 +27,7 @@ export function StoryStyleStep({
           onValueChange={(value) => updateFormData("tone", value)}
         >
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+            <div className="flex items-center space-x-2 p-4 border border-story-mist rounded-xl hover:border-story-gold transition-colors">
               <RadioGroupItem value="adventurous" id="adventurous" />
               <div>
                 <Label
@@ -36,23 +36,23 @@ export function StoryStyleStep({
                 >
                   🗺️ Adventurous
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-story-bark/60">
                   Exciting quests and discoveries
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+            <div className="flex items-center space-x-2 p-4 border border-story-mist rounded-xl hover:border-story-gold transition-colors">
               <RadioGroupItem value="silly" id="silly" />
               <div>
                 <Label htmlFor="silly" className="font-medium cursor-pointer">
                   😄 Silly
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-story-bark/60">
                   Fun and giggly adventures
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
+            <div className="flex items-center space-x-3 p-4 sm:p-5 border border-story-mist rounded-xl hover:border-story-gold transition-colors touch-manipulation">
               <RadioGroupItem
                 value="calming"
                 id="calming"
@@ -65,12 +65,12 @@ export function StoryStyleStep({
                 >
                   🌙 Calming
                 </Label>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-story-bark/60 mt-1">
                   Peaceful and soothing tales
                 </p>
               </div>
             </div>
-            <div className="flex items-center space-x-3 p-4 sm:p-5 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors touch-manipulation">
+            <div className="flex items-center space-x-3 p-4 sm:p-5 border border-story-mist rounded-xl hover:border-story-gold transition-colors touch-manipulation">
               <RadioGroupItem
                 value="educational"
                 id="educational"
@@ -83,7 +83,7 @@ export function StoryStyleStep({
                 >
                   📚 Educational
                 </Label>
-                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                <p className="text-xs sm:text-sm text-story-bark/60 mt-1">
                   Learning through storytelling
                 </p>
               </div>
@@ -94,7 +94,7 @@ export function StoryStyleStep({
 
       <div>
         <div className="flex items-center justify-between mb-4">
-          <Label className="text-sm font-medium text-gray-700">
+          <Label className="text-sm font-medium text-story-bark">
             Story Length *
           </Label>
           {tierInfo?.tier === "free" && (
@@ -109,13 +109,13 @@ export function StoryStyleStep({
           onValueChange={(value) => updateFormData("length", value)}
         >
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="flex items-center space-x-2 p-4 border border-gray-200 rounded-xl hover:border-purple-300 transition-colors">
+            <div className="flex items-center space-x-2 p-4 border border-story-mist rounded-xl hover:border-story-gold transition-colors">
               <RadioGroupItem value="short" id="short" />
               <div>
                 <Label htmlFor="short" className="font-medium cursor-pointer">
                   ⏱️ Short
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-story-bark/60">
                   2-3 minutes reading time
                 </p>
               </div>
@@ -123,8 +123,8 @@ export function StoryStyleStep({
             <div
               className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
                 tierInfo?.tier === "free"
-                  ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
-                  : "border-gray-200 hover:border-purple-300"
+                  ? "border-story-mist bg-story-cream opacity-50 cursor-not-allowed"
+                  : "border-story-mist hover:border-story-gold"
               }`}
             >
               <RadioGroupItem
@@ -137,13 +137,13 @@ export function StoryStyleStep({
                   htmlFor="medium"
                   className={`font-medium ${
                     tierInfo?.tier === "free"
-                      ? "text-gray-400 cursor-not-allowed"
+                      ? "text-story-bark/40 cursor-not-allowed"
                       : "cursor-pointer"
                   }`}
                 >
                   📖 Medium
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-story-bark/60">
                   5-7 minutes reading time
                 </p>
               </div>
@@ -151,8 +151,8 @@ export function StoryStyleStep({
             <div
               className={`flex items-center space-x-2 p-4 border rounded-xl transition-colors ${
                 tierInfo?.tier === "free"
-                  ? "border-gray-100 bg-gray-50 opacity-50 cursor-not-allowed"
-                  : "border-gray-200 hover:border-purple-300"
+                  ? "border-story-mist bg-story-cream opacity-50 cursor-not-allowed"
+                  : "border-story-mist hover:border-story-gold"
               }`}
             >
               <RadioGroupItem
@@ -165,13 +165,13 @@ export function StoryStyleStep({
                   htmlFor="long"
                   className={`font-medium ${
                     tierInfo?.tier === "free"
-                      ? "text-gray-400 cursor-not-allowed"
+                      ? "text-story-bark/40 cursor-not-allowed"
                       : "cursor-pointer"
                   }`}
                 >
                   📚 Long
                 </Label>
-                <p className="text-sm text-gray-500">
+                <p className="text-sm text-story-bark/60">
                   10-15 minutes reading time
                 </p>
               </div>
@@ -180,14 +180,14 @@ export function StoryStyleStep({
         </RadioGroup>
 
         {tierInfo?.tier === "free" && (
-          <div className="mt-4 p-4 bg-purple-50 border border-purple-200 rounded-xl">
+          <div className="mt-4 p-4 bg-story-cream border border-story-mist rounded-xl">
             <div className="flex items-start space-x-3">
-              <Lock className="h-5 w-5 text-purple-600 mt-0.5 flex-shrink-0" />
+              <Lock className="h-5 w-5 text-story-gold mt-0.5 flex-shrink-0" />
               <div>
-                <p className="text-sm font-medium text-purple-900">
+                <p className="text-sm font-medium text-story-night">
                   Medium and Long Stories
                 </p>
-                <p className="text-sm text-purple-700 mt-1">
+                <p className="text-sm text-story-bark/70 mt-1">
                   Upgrade to Premium to unlock medium (5-7 min) and long (10-15
                   min) story lengths.
                 </p>

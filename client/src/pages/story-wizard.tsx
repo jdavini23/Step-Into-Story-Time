@@ -277,37 +277,37 @@ export default function StoryWizard() {
           <Card className="shadow-2xl mb-8">
             <CardContent className="p-8">
               <div className="text-center mb-8">
-                <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">📖</span>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-800 mb-2">{previewStory.title}</h1>
-                <p className="text-sm text-gray-500">
+                <h1 className="text-3xl font-serif font-bold text-story-bark mb-2">{previewStory.title}</h1>
+                <p className="text-sm text-story-bark/60">
                   A {previewStory.tone} story for {previewStory.childName}
                 </p>
               </div>
-              <div className="prose prose-lg max-w-none text-gray-700 leading-relaxed whitespace-pre-wrap">
+              <div className="prose prose-lg max-w-none text-story-bark/70 leading-relaxed whitespace-pre-wrap">
                 {previewStory.content}
               </div>
             </CardContent>
           </Card>
 
-          <Card className="shadow-xl border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50">
+          <Card className="shadow-xl border-2 border-story-mist bg-story-cream">
             <CardContent className="p-8 text-center">
-              <h2 className="text-2xl font-bold text-purple-900 mb-3">Love this story?</h2>
-              <p className="text-purple-700 mb-6">
+              <h2 className="text-2xl font-serif font-bold text-story-night mb-3">Love this story?</h2>
+              <p className="text-story-bark/70 mb-6">
                 Sign up to save it to your library, create more stories, and build your collection.
               </p>
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
                 <Button
                   size="lg"
-                  className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white px-8"
+                  className="bg-gradient-to-r from-story-gold to-story-sunset hover:bg-story-sunset text-white px-8"
                   onClick={() => { window.location.href = "/api/login?signup=true"; }}
                 >
                   Sign Up to Save
                 </Button>
                 <Button
                   variant="ghost"
-                  className="text-purple-600 hover:text-purple-800"
+                  className="text-story-gold hover:text-story-gold"
                   onClick={() => {
                     setPreviewStory(null);
                     setFormData({

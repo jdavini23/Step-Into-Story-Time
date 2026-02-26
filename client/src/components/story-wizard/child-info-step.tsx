@@ -102,15 +102,15 @@ export function ChildInfoStep({ formData, updateFormData }: ChildInfoStepProps) 
           }}
           className="grid grid-cols-2 gap-6"
         >
-          <div className="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-xl hover:border-purple-300 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 transition-colors">
-            <RadioGroupItem value="boy" id="boy" className="text-purple-600" />
+          <div className="flex items-center space-x-3 p-4 border-2 border-story-mist rounded-xl hover:border-story-gold has-[:checked]:border-story-gold has-[:checked]:bg-story-cream transition-colors">
+            <RadioGroupItem value="boy" id="boy" className="text-story-gold" />
             <Label htmlFor="boy" className="flex items-center space-x-2 cursor-pointer flex-1">
               <span className="text-2xl">👦</span>
               <span className="font-medium">Boy</span>
             </Label>
           </div>
-          <div className="flex items-center space-x-3 p-4 border-2 border-gray-200 rounded-xl hover:border-purple-300 has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50 transition-colors">
-            <RadioGroupItem value="girl" id="girl" className="text-purple-600" />
+          <div className="flex items-center space-x-3 p-4 border-2 border-story-mist rounded-xl hover:border-story-gold has-[:checked]:border-story-gold has-[:checked]:bg-story-cream transition-colors">
+            <RadioGroupItem value="girl" id="girl" className="text-story-gold" />
             <Label htmlFor="girl" className="flex items-center space-x-2 cursor-pointer flex-1">
               <span className="text-2xl">👧</span>
               <span className="font-medium">Girl</span>

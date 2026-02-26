@@ -279,12 +279,12 @@ export default function StoryReader() {
 
   if (isLoading || storyLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-story-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+          <div className="w-16 h-16 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
             <BookOpen className="w-8 h-8 text-white" />
           </div>
-          <p className="text-gray-600">Loading your magical story...</p>
+          <p className="text-story-bark/70">Loading your magical story...</p>
         </div>
       </div>
     );
@@ -311,17 +311,17 @@ export default function StoryReader() {
     }
 
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-story-cream flex items-center justify-center">
         <Card className="w-full max-w-md mx-4">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-6xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">
+              <h2 className="text-2xl font-bold text-story-bark mb-2">
                 {displayTitle}
               </h2>
-              <p className="text-gray-600 mb-2">{displayMessage}</p>
+              <p className="text-story-bark/70 mb-2">{displayMessage}</p>
               {import.meta.env.DEV && (
-                <p className="text-xs text-gray-400 mb-4">
+                <p className="text-xs text-story-bark/60 mb-4">
                   Debug: {errorStatus ? `${errorStatus} - ` : ""}
                   {errorMessage}
                 </p>
@@ -343,15 +343,15 @@ export default function StoryReader() {
 
   if (!story) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-story-cream flex items-center justify-center">
         <Card className="w-full max-w-md mx-4">
           <CardContent className="pt-6">
             <div className="text-center">
               <div className="text-6xl mb-4">📚</div>
-              <h2 className="text-2xl font-bold text-gray-700 mb-2">
+              <h2 className="text-2xl font-bold text-story-bark mb-2">
                 Story Not Found
               </h2>
-              <p className="text-gray-600 mb-6">
+              <p className="text-story-bark/70 mb-6">
                 This story doesn't exist or you don't have permission to view
                 it.
               </p>
@@ -365,18 +365,18 @@ export default function StoryReader() {
 
   const themeClasses = isDarkMode
     ? "bg-gray-900 text-gray-100"
-    : "bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 text-gray-900";
+    : "bg-gradient-to-br from-story-cream via-story-moonlight to-story-mist text-gray-900";
 
   const cardClasses = isDarkMode
     ? "bg-gray-800 border-gray-700 text-gray-100"
-    : "bg-white border-gray-200";
+    : "bg-white border-story-mist";
 
   return (
     <div className={`min-h-screen transition-all duration-300 ${themeClasses}`}>
       {/* Reading Progress Bar */}
       <div className="fixed top-0 left-0 w-full h-1 z-50">
         <div
-          className="h-full bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 transition-all duration-150"
+          className="h-full bg-gradient-to-r from-story-gold via-story-sunset to-story-forest transition-all duration-150"
           style={{ width: `${readingProgress}%` }}
         />
       </div>
@@ -412,14 +412,14 @@ export default function StoryReader() {
 
         {/* Story header */}
         <Card className={`shadow-xl md:shadow-2xl p-6 md:p-8 mb-6 md:mb-8 text-center ${cardClasses}`}>
-          <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
+          <div className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-full flex items-center justify-center mx-auto mb-4 md:mb-6">
             <BookOpen className="w-8 h-8 md:w-10 md:h-10 text-white" />
           </div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2 px-2">{story.title}</h1>
-          <p className="text-gray-600 dark:text-gray-400 mb-4 text-sm md:text-base">
+          <h1 className="text-2xl md:text-3xl font-bold font-serif mb-2 px-2">{story.title}</h1>
+          <p className="text-story-bark/70 dark:text-gray-400 mb-4 text-sm md:text-base">
             A magical bedtime adventure
           </p>
-          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex flex-wrap items-center justify-center gap-3 md:gap-6 text-xs md:text-sm text-story-bark/60 dark:text-gray-400">
             <span className="whitespace-nowrap">
               📅 {new Date(story.createdAt || "").toLocaleDateString()}
             </span>
@@ -438,24 +438,24 @@ export default function StoryReader() {
 
         {/* Story content */}
         <Card className={`shadow-xl md:shadow-2xl p-6 md:p-8 mb-20 md:mb-8 ${cardClasses}`}>
-          <article className="max-w-none leading-relaxed">
+          <article className="max-w-none leading-relaxed font-serif">
             {/* Story illustration placeholder */}
-            <div className="w-full h-48 md:h-64 bg-gradient-to-br from-purple-100 via-blue-100 to-yellow-100 dark:from-purple-900 dark:via-blue-900 dark:to-yellow-900 rounded-xl mb-6 md:mb-8 flex items-center justify-center">
+            <div className="w-full h-48 md:h-64 bg-gradient-to-br from-story-cream via-story-mist to-story-moonlight dark:from-purple-900 dark:via-blue-900 dark:to-yellow-900 rounded-xl mb-6 md:mb-8 flex items-center justify-center">
               <div className="text-center p-4">
                 <span className="text-4xl md:text-6xl mb-2 block">✨</span>
-                <p className="text-sm md:text-base text-gray-600 dark:text-gray-300 font-medium">
+                <p className="text-sm md:text-base text-story-bark/70 dark:text-gray-300 font-medium">
                   Magical Story Illustration
                 </p>
               </div>
             </div>
 
-            <div className={isDarkMode ? "text-gray-100" : "text-gray-700"}>
+            <div className={isDarkMode ? "text-gray-100" : "text-story-bark/70"}>
               {formatStoryContent}
 
               {story.bedtimeMessage && (
-                <div className="bg-yellow-50 dark:bg-yellow-900/30 p-4 md:p-6 rounded-xl mt-6 md:mt-8 border-l-4 border-yellow-400">
+                <div className="bg-story-cream dark:bg-yellow-900/30 p-4 md:p-6 rounded-xl mt-6 md:mt-8 border-l-4 border-story-gold">
                   <p
-                    className="text-base md:text-lg italic text-purple-700 dark:text-purple-300"
+                    className="text-base md:text-lg italic text-story-gold dark:text-purple-300"
                     style={{ fontSize: `${fontSize}px` }}
                   >
                     {story.bedtimeMessage}

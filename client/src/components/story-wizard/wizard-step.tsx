@@ -27,10 +27,10 @@ export function WizardStep({
         {/* Progress indicator */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-4">
-            <span className="text-sm font-medium text-purple-600">
+            <span className="text-sm font-medium text-story-gold">
               Step {currentStep} of {totalSteps}
             </span>
-            <span className="text-sm text-gray-500">Almost there! ✨</span>
+            <span className="text-sm text-story-bark/60">Almost there!</span>
           </div>
           <Progress value={progressPercentage} className="h-2" />
         </div>
@@ -38,11 +38,11 @@ export function WizardStep({
         <Card className="shadow-2xl">
           <CardContent className="p-8">
             <div className="text-center mb-8">
-              <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">{icon}</span>
               </div>
-              <h3 className="text-2xl font-bold text-gray-700 mb-2">{title}</h3>
-              <p className="text-gray-600">{subtitle}</p>
+              <h2 className="text-2xl font-serif font-bold text-story-bark mb-2">{title}</h2>
+              <p className="text-story-bark/70">{subtitle}</p>
             </div>
 
             {children}
