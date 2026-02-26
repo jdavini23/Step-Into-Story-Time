@@ -5,6 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { useAuth } from "@/hooks/useAuth";
 import { lazy, Suspense, type ComponentType } from "react";
+import { BookOpen } from "lucide-react";
 import Header from "@/components/header";
 
 const NotFound = lazy(() => import("@/pages/not-found"));
@@ -29,31 +30,31 @@ function Router() {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-yellow-50 flex items-center justify-center">
+      <div className="min-h-screen bg-story-cream flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
-            <span className="text-2xl">✨</span>
+          <div className="w-16 h-16 bg-story-gold rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+            <BookOpen className="w-6 h-6 text-white" />
           </div>
-          <p className="text-gray-600">Loading your magical world...</p>
+          <p className="text-story-bark">Loading your magical world...</p>
         </div>
       </div>
     );
   }
 
   const suspenseFallback = (
-    <div className="min-h-screen bg-yellow-50 flex items-center justify-center">
+    <div className="min-h-screen bg-story-cream flex items-center justify-center">
       <div className="text-center">
-        <div className="w-16 h-16 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
+        <div className="w-16 h-16 bg-story-gold rounded-full flex items-center justify-center mx-auto mb-4 animate-pulse">
           <span className="text-2xl">✨</span>
         </div>
-        <p className="text-gray-600">Loading your magical world...</p>
+        <p className="text-story-bark">Loading your magical world...</p>
       </div>
     </div>
   );
 
   return (
     <Suspense fallback={suspenseFallback}>
-      <div className="min-h-screen bg-yellow-50">
+      <div className="min-h-screen bg-story-cream">
         <Switch>
           <Route path="/login" component={Login} />
           <Route>

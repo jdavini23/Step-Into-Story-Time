@@ -74,17 +74,17 @@ export default function Header() {
   }, []);
 
   return (
-    <header className="bg-white/80 backdrop-blur-sm border-b border-purple-100 sticky top-0 z-50">
+    <header className="bg-white/80 backdrop-blur-sm border-b border-story-mist sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center py-3 sm:py-4">
           {/* Logo */}
           <Link href="/" aria-label="Go to homepage">
             <div className="flex items-center space-x-2 sm:space-x-3 cursor-pointer group">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-purple-600 via-blue-500 to-yellow-500 rounded-xl flex items-center justify-center transition-transform group-hover:scale-105">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-gradient-to-r from-story-gold via-story-sunset to-story-forest rounded-xl flex items-center justify-center">
                 <BookOpen className="w-4 h-4 sm:w-6 sm:h-6 text-white" />
               </div>
               <div className="hidden sm:block">
-                <h1 className="text-lg sm:text-xl font-bold text-gray-700 group-hover:text-purple-600 transition-colors">
+                <h1 className="text-lg sm:text-xl font-bold text-gray-700 group-hover:text-story-gold transition-colors">
                   Step Into Storytime
                 </h1>
                 <p className="text-xs sm:text-sm text-gray-500">
@@ -92,7 +92,7 @@ export default function Header() {
                 </p>
               </div>
               <div className="block sm:hidden">
-                <h1 className="text-base font-bold text-gray-700 group-hover:text-purple-600 transition-colors">
+                <h1 className="text-base font-bold text-gray-700 group-hover:text-story-gold transition-colors">
                   Storytime
                 </h1>
               </div>
@@ -113,8 +113,8 @@ export default function Header() {
                       variant={location === item.href ? "default" : "ghost"}
                       className={
                         location === item.href
-                          ? "bg-purple-600 text-white hover:bg-purple-700"
-                          : "text-gray-700 hover:text-purple-600"
+                          ? "bg-story-gold text-story-night hover:bg-story-sunset"
+                          : "text-gray-700 hover:text-story-gold"
                       }
                       aria-current={location === item.href ? "page" : undefined}
                     >
@@ -128,7 +128,7 @@ export default function Header() {
                   <DropdownMenuTrigger asChild>
                     <Button
                       variant="ghost"
-                      className="relative h-8 w-8 rounded-full hover:bg-purple-50"
+                      className="relative h-8 w-8 rounded-full hover:bg-story-mist"
                       aria-label={`User menu for ${userDisplayName}`}
                     >
                       <Avatar className="h-8 w-8">
@@ -136,7 +136,7 @@ export default function Header() {
                           src={user?.profileImageUrl || undefined}
                           alt={`${userDisplayName}'s profile picture`}
                         />
-                        <AvatarFallback className="bg-purple-600 text-white text-sm font-medium">
+                        <AvatarFallback className="bg-story-forest text-white text-sm font-medium">
                           {userInitials}
                         </AvatarFallback>
                       </Avatar>
@@ -177,7 +177,7 @@ export default function Header() {
           ) : (
             <Button
               onClick={handleLogin}
-              className="bg-purple-600 hover:bg-purple-700 text-white transition-colors"
+              className="bg-story-gold hover:bg-story-sunset text-story-night transition-colors"
             >
               Sign In
             </Button>
@@ -218,7 +218,7 @@ function MobileMenu({
         <Button
           variant="ghost"
           size="icon"
-          className="md:hidden h-10 w-10 hover:bg-purple-50"
+          className="md:hidden h-10 w-10 hover:bg-story-mist"
           aria-label="Open mobile menu"
         >
           <Menu className="h-5 w-5" />
@@ -238,8 +238,8 @@ function MobileMenu({
                   variant={location === item.href ? "default" : "ghost"}
                   className={`w-full justify-start h-12 text-base transition-colors ${
                     location === item.href
-                      ? "bg-purple-600 text-white hover:bg-purple-700"
-                      : "hover:bg-purple-50"
+                      ? "bg-story-gold text-story-night hover:bg-story-sunset"
+                      : "hover:bg-story-mist"
                   }`}
                   onClick={onCloseMobileMenu}
                   aria-current={location === item.href ? "page" : undefined}
@@ -253,13 +253,13 @@ function MobileMenu({
 
           <div className="pt-4 border-t border-gray-200">
             {user && (
-              <div className="flex items-center space-x-3 mb-4 p-2 rounded-lg bg-gray-50">
+              <div className="flex items-center space-x-3 mb-4 p-2 rounded-lg bg-story-cream">
                 <Avatar className="h-10 w-10">
                   <AvatarImage
                     src={user.profileImageUrl || undefined}
                     alt={`${userDisplayName}'s profile picture`}
                   />
-                  <AvatarFallback className="bg-purple-600 text-white">
+                  <AvatarFallback className="bg-story-forest text-white">
                     {userInitials}
                   </AvatarFallback>
                 </Avatar>
