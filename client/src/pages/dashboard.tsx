@@ -144,7 +144,7 @@ export default function Dashboard() {
     if (params.get('payment') === 'success') {
       setShowPaymentSuccess(true);
       // Clean up URL
-      window.history.replaceState({}, '', '/dashboard');
+      window.history.replaceState({}, '', '/');
     }
   }, []);
 

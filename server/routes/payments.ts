@@ -91,7 +91,7 @@ export function registerPaymentRoutes(app: Express, generalLimiter: RateLimiter)
           customer: customerId,
           line_items: [{ price: priceId, quantity: 1 }],
           mode: "subscription",
-          success_url: `${process.env.BETTER_AUTH_BASE_URL}/dashboard?payment=success`,
+          success_url: `${process.env.BETTER_AUTH_BASE_URL}/?payment=success`,
           cancel_url: `${process.env.BETTER_AUTH_BASE_URL}/pricing`,
           metadata: { userId, tier, billing },
         });
@@ -129,7 +129,7 @@ export function registerPaymentRoutes(app: Express, generalLimiter: RateLimiter)
         // Create Customer Portal Session
         const session = await stripe.billingPortal.sessions.create({
           customer: user.stripeCustomerId,
-          return_url: `${process.env.BETTER_AUTH_BASE_URL}/dashboard`,
+          return_url: `${process.env.BETTER_AUTH_BASE_URL}/`,
         });
 
         console.log(`Portal session created for customer ${user.stripeCustomerId}`);
