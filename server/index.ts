@@ -48,7 +48,17 @@ const authRateLimitMiddleware = (req: Request, res: Response, next: NextFunction
 // better-auth handler — must be mounted before express.json() to handle its own body parsing
 app.all("/api/auth/*", authRateLimitMiddleware, toNodeHandler(auth));
 
-app.use(express.json({ limit: '10mb' })); // Limit request size
+// Stripe webhook needs raw body for signature verification
+// Apply express.raw() only to webhook endpoint
+app.use("/api/stripe/webhook", express.raw({ type: "application/json" }));
+
+// Apply JSON parsing to all other routes (skip webhook)
+app.use((req, res, next) => {
+  if (req.path === "/api/stripe/webhook") {
+    return next();
+  }
+  express.json({ limit: '10mb' })(req, res, next);
+});
 app.use(express.urlencoded({ extended: false, limit: '10mb' }));
 
 app.use((req, res, next) => {
