@@ -6,7 +6,7 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { validateInput, paymentIntentSchema, subscriptionSchema } from "../inputValidation";
+import { validateInput, paymentIntentSchema, subscriptionSchema, validateCSRFToken } from "../inputValidation";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
@@ -34,7 +34,7 @@ export function registerPaymentRoutes(app: Express): void {
   });
 
   // Get or create subscription for premium features
-  app.post("/api/get-or-create-subscription", isAuthenticated, validateInput(subscriptionSchema), async (req: any, res) => {
+  app.post("/api/get-or-create-subscription", isAuthenticated, validateCSRFToken, validateInput(subscriptionSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
       let user = await storage.getUser(userId);
