@@ -149,6 +149,31 @@ export function registerWebhookRoutes(app: Express): void {
           break;
         }
 
+        case "invoice.payment_failed": {
+          const invoice = event.data.object as Stripe.Invoice;
+          const customerId = invoice.customer as string;
+
+          // Find user by Stripe customer ID
+          const userResults = await db
+            .select()
+            .from(users)
+            .where(eq(users.stripeCustomerId, customerId));
+
+          if (userResults.length === 0) {
+            console.warn(`Payment failed webhook: No user found for customer ${customerId}`);
+            return res.status(200).json({ received: true });
+          }
+
+          const user = userResults[0];
+          console.log(`Payment failed for user ${user.id}, subscription status will be updated by subscription.updated webhook`);
+
+          // Note: Don't downgrade immediately - Stripe will retry.
+          // The customer.subscription.updated webhook will handle status changes.
+          // We're just logging the failure here for monitoring.
+
+          return res.status(200).json({ received: true });
+        }
+
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
