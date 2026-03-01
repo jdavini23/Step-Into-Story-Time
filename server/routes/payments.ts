@@ -6,7 +6,7 @@ import { storage } from "../storage";
 import { db } from "../db";
 import { users } from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { validateInput, paymentIntentSchema, subscriptionSchema, validateCSRFToken } from "../inputValidation";
+import { validateInput, paymentIntentSchema, subscriptionSchema, validateCSRFToken, RateLimiter } from "../inputValidation";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
@@ -16,7 +16,7 @@ const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: "2025-05-28.basil",
 });
 
-export function registerPaymentRoutes(app: Express): void {
+export function registerPaymentRoutes(app: Express, generalLimiter: RateLimiter): void {
   // Create payment intent for one-time payments
   app.post("/api/create-payment-intent", isAuthenticated, validateInput(paymentIntentSchema), async (req: any, res) => {
     try {
@@ -37,6 +37,14 @@ export function registerPaymentRoutes(app: Express): void {
   app.post("/api/get-or-create-subscription", isAuthenticated, validateCSRFToken, validateInput(subscriptionSchema), async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
+
+      // Rate limiting for subscription creation
+      if (!generalLimiter.isAllowed(`subscription_${userId}`)) {
+        return res.status(429).json({
+          message: "Too many subscription requests. Please wait a moment."
+        });
+      }
+
       let user = await storage.getUser(userId);
       const { tier, billing } = req.validatedBody;
 
