@@ -188,11 +188,18 @@ export default function Subscribe() {
         .then((data) => {
           console.log("Subscription response:", data);
           console.log("Client secret:", data.clientSecret);
-          
+
           if (data.error) {
             throw new Error(data.error.message || "Subscription creation failed");
           }
-          
+
+          // Handle case where subscription already exists and is active
+          if (data.status === "active" || data.status === "trialing") {
+            console.log("Subscription already active, redirecting to dashboard");
+            window.location.href = "/dashboard?subscription=already-active";
+            return;
+          }
+
           if (data.clientSecret) {
             setClientSecret(data.clientSecret);
           } else {
