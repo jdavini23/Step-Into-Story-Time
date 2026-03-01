@@ -67,7 +67,7 @@ export function registerPaymentRoutes(app: Express): void {
         },
         family: {
           monthly: { amount: 1299, interval: "month" as const },
-          yearly: { amount: 10900, interval: "year" as const }
+          yearly: { amount: 11900, interval: "year" as const }
         }
       };
 

@@ -281,7 +281,7 @@ export default function Subscribe() {
     if (selectedTier === "family") {
       return {
         monthly: { price: "$12.99", period: "month" },
-        yearly: { price: "$109", period: "year", savings: "Save $47/year" },
+        yearly: { price: "$119", period: "year", savings: "Save $37/year" },
       };
     } else {
       return {
