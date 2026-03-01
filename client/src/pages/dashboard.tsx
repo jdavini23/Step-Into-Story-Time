@@ -1,9 +1,9 @@
 import { useAuth } from "@/hooks/useAuth";
 import { useTierInfo } from "@/hooks/useTierInfo";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { isUnauthorizedError } from "@/lib/authUtils";
-import { getQueryFn } from "@/lib/queryClient";
+import { getQueryFn, apiRequest } from "@/lib/queryClient";
 import { useEffect, useState, useMemo, lazy, Suspense } from "react";
 import type { Story } from "@shared/schema";
 import { useNotificationPreferences } from "@/hooks/useNotificationPreferences";
@@ -17,9 +17,10 @@ import { FloatingActionButton } from "@/components/dashboard/floating-action-but
 import { PremiumFeatureShowcase } from "@/components/dashboard/premium-feature-showcase";
 import LoadingOverlay from "@/components/loading-overlay";
 const DebugPanel = lazy(() => import("@/components/debug-panel").then(m => ({ default: m.DebugPanel })));
-import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { AlertTriangle, Calendar, Sparkles, X, Crown } from "lucide-react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertTriangle, Calendar, Sparkles, X, Crown, CheckCircle } from "lucide-react";
 import {
   SkeletonCard,
   SkeletonQuickActions,
@@ -33,6 +34,56 @@ export default function Dashboard() {
   const { data: tierInfo } = useTierInfo();
   const [, setLocation] = useLocation();
   const { showActionToast, toast } = useEnhancedToast();
+
+  // Mutation to create checkout session
+  const createCheckout = useMutation({
+    mutationFn: async ({ tier, billing }: { tier: string; billing: string }) => {
+      const res = await apiRequest("/api/create-checkout-session", "POST", { tier, billing });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create checkout");
+      }
+      const data = await res.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Checkout Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // Mutation to create portal session
+  const createPortal = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("/api/create-portal-session", "POST", {});
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create portal session");
+      }
+      const data = await res.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Portal Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
 
   const {
     data: stories = [],
@@ -87,17 +138,15 @@ export default function Dashboard() {
   }, [isLoading, user, toast]);
 
   // Check for payment success parameter
+  const [showPaymentSuccess, setShowPaymentSuccess] = useState(false);
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     if (params.get('payment') === 'success') {
-      toast({
-        title: "Payment Successful!",
-        description: "Your subscription has been activated. Enjoy your premium features!",
-      });
+      setShowPaymentSuccess(true);
       // Clean up URL
       window.history.replaceState({}, '', '/dashboard');
     }
-  }, [toast]);
+  }, []);
 
   // Handle API auth errors
   useEffect(() => {
@@ -244,7 +293,32 @@ export default function Dashboard() {
     <div className="min-h-screen bg-story-cream dark:bg-gray-900 py-6 sm:py-8 lg:py-12">
       <FocusManagement />
       <div id="main-content" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <DashboardHeader user={user as any} />
+        <div className="flex items-center justify-between mb-6">
+          <DashboardHeader user={user as any} />
+
+          {/* Manage Subscription for Paid Users */}
+          {tierInfo && (tierInfo.tier === "premium" || tierInfo.tier === "family") && (
+            <Button
+              variant="outline"
+              onClick={() => createPortal.mutate()}
+              disabled={createPortal.isPending}
+              className="ml-auto"
+            >
+              {createPortal.isPending ? "Loading..." : "Manage Subscription"}
+            </Button>
+          )}
+        </div>
+
+        {/* Payment Success Alert */}
+        {showPaymentSuccess && (
+          <Alert className="mb-6 border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+            <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+            <AlertTitle className="text-green-800 dark:text-green-200">Payment Successful!</AlertTitle>
+            <AlertDescription className="text-green-700 dark:text-green-300">
+              Your premium features are now unlocked. Enjoy unlimited personalized bedtime stories!
+            </AlertDescription>
+          </Alert>
+        )}
 
         {activeNotification && (
           <Card
@@ -356,6 +430,37 @@ export default function Dashboard() {
                   <X className="h-3 w-3" />
                 </Button>
               </div>
+            </CardContent>
+          </Card>
+        )}
+
+        {/* Upgrade CTA for Free Users */}
+        {tierInfo && tierInfo.tier === "free" && (
+          <Card className="mb-8 border-story-gold/20 bg-gradient-to-br from-story-cream to-story-mist dark:from-gray-800 dark:to-gray-900 dark:border-story-gold/30">
+            <CardHeader>
+              <CardTitle className="font-serif text-2xl text-story-bark dark:text-story-cream">
+                Unlock Unlimited Stories
+              </CardTitle>
+              <CardDescription className="text-story-bark/70 dark:text-story-cream/70">
+                Upgrade to Premium for unlimited personalized bedtime stories
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="flex flex-col sm:flex-row gap-4">
+              <Button
+                onClick={() => createCheckout.mutate({ tier: "premium", billing: "monthly" })}
+                disabled={createCheckout.isPending}
+                className="flex-1"
+              >
+                {createCheckout.isPending ? "Loading..." : "Premium - $6.99/month"}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => createCheckout.mutate({ tier: "family", billing: "monthly" })}
+                disabled={createCheckout.isPending}
+                className="flex-1"
+              >
+                {createCheckout.isPending ? "Loading..." : "Family - $12.99/month"}
+              </Button>
             </CardContent>
           </Card>
         )}
