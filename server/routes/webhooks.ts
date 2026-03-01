@@ -55,17 +55,28 @@ export function registerWebhookRoutes(app: Express): void {
             if (userResults.length > 0) {
               const user = userResults[0];
 
-              // Determine tier based on subscription amount
-              const priceAmount = invoice.amount_paid;
+              // Get tier from subscription metadata (set during creation)
+              const subscriptionData = await stripe.subscriptions.retrieve(
+                invoice.subscription as string
+              );
+              const tierFromMetadata = subscriptionData.items.data[0]?.price?.metadata?.tier;
               let tier: "premium" | "family" = "premium";
 
-              if (priceAmount >= 1299) {
-                // $12.99 or higher = family plan
+              if (tierFromMetadata === "family") {
                 tier = "family";
+              } else if (tierFromMetadata === "premium") {
+                tier = "premium";
+              } else {
+                // Fallback to amount-based detection if metadata missing
+                const priceAmount = invoice.amount_paid;
+                if (priceAmount >= 1299) {
+                  tier = "family";
+                }
+                console.warn(`No tier metadata found for subscription ${invoice.subscription}, using amount-based fallback`);
               }
 
               // Update user subscription tier and status
-              await updateUserSubscription(user.id, tier, subscription.status as any);
+              await updateUserSubscription(user.id, tier, subscriptionData.status as any);
 
               console.log(
                 `Updated user ${user.id} to ${tier} tier with status ${subscription.status}`,
