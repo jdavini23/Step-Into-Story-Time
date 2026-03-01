@@ -24,7 +24,7 @@ const navigation: NavigationItem[] = [
   { name: "My Stories", href: "/", icon: BookOpen },
   { name: "Create Story", href: "/story-wizard", icon: Plus },
   { name: "Characters", href: "/characters", icon: Users },
-  { name: "Go Premium", href: "/subscribe", icon: Crown },
+  { name: "Go Premium", href: "/pricing", icon: Crown },
 ];
 
 export default function Header() {

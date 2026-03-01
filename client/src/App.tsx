@@ -13,7 +13,6 @@ const Landing = lazy(() => import("@/pages/landing"));
 const StoryWizard = lazy(() => import("@/pages/story-wizard"));
 const StoryReader = lazy(() => import("@/pages/story-reader"));
 const Dashboard = lazy(() => import("@/pages/dashboard"));
-const Subscribe = lazy(() => import("@/pages/subscribe"));
 const Pricing = lazy(() => import("@/pages/pricing"));
 const Login = lazy(() => import("@/pages/login"));
 const Characters = lazy(() => import("@/pages/characters"));
@@ -64,7 +63,6 @@ function Router() {
               <Route path="/characters">{() => <ProtectedRoute component={Characters} />}</Route>
               <Route path="/story-wizard">{() => <ProtectedRoute component={StoryWizard} />}</Route>
               <Route path="/story/:id">{() => <ProtectedRoute component={StoryReader} />}</Route>
-              <Route path="/subscribe">{() => <ProtectedRoute component={Subscribe} />}</Route>
               {!isAuthenticated ? (
                 <Route path="/" component={Landing} />
               ) : (
