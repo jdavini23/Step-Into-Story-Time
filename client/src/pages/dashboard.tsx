@@ -86,6 +86,19 @@ export default function Dashboard() {
     }
   }, [isLoading, user, toast]);
 
+  // Check for payment success parameter
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('payment') === 'success') {
+      toast({
+        title: "Payment Successful!",
+        description: "Your subscription has been activated. Enjoy your premium features!",
+      });
+      // Clean up URL
+      window.history.replaceState({}, '', '/dashboard');
+    }
+  }, [toast]);
+
   // Handle API auth errors
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
