@@ -6,7 +6,7 @@ import {
 } from "@stripe/react-stripe-js";
 import { loadStripe } from "@stripe/stripe-js";
 import { useEffect, useState } from "react";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/useAuth";
 import { Button } from "@/components/ui/button";
@@ -66,6 +66,7 @@ const SubscribeForm = ({
       confirmParams: {
         return_url: `${window.location.origin}/dashboard?payment=success`,
       },
+      redirect: "if_required", // Only redirect if required by payment method
     });
 
     if (error) {
@@ -108,14 +109,25 @@ const SubscribeForm = ({
         description: errorMessage,
         variant: "destructive",
       });
-    } else {
-      // Payment succeeded
-      toast({
-        title: "Payment Successful",
-        description:
-          "Welcome to Premium! You now have unlimited story generation.",
-      });
+      setIsLoading(false);
+      return;
     }
+
+    // Payment successful - invalidate tier cache and sync status
+    await queryClient.invalidateQueries({ queryKey: ["/api/user/tier-info"] });
+
+    // Force sync with Stripe to update tier immediately
+    try {
+      await fetch("/api/subscription-status", {
+        method: "GET",
+        credentials: "include",
+      });
+    } catch (syncError) {
+      console.warn("Tier sync failed, webhook will handle:", syncError);
+    }
+
+    // Navigate to dashboard
+    window.location.href = `/dashboard?payment=success`;
     setIsLoading(false);
   };
 
