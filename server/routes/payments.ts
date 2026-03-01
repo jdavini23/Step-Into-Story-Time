@@ -150,9 +150,9 @@ export function registerPaymentRoutes(app: Express, generalLimiter: RateLimiter)
       }
 
       // Create or get product
-      const productName = tier === "family" ? "Storytime Pro" : "Storytime Plus";
+      const productName = tier === "family" ? "Family" : "Premium";
       let product;
-      
+
       try {
         const products = await stripe.products.list({ limit: 100 });
         product = products.data.find(p => p.name === productName);
