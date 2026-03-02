@@ -41,6 +41,12 @@ export default function Dashboard() {
       const res = await apiRequest("/api/create-checkout-session", "POST", { tier, billing });
       if (!res.ok) {
         const error = await res.json();
+        // If user already has active subscription, redirect to portal
+        if (error.usePortal) {
+          const portalError: any = new Error(error.error || "Failed to create checkout");
+          portalError.usePortal = true;
+          throw portalError;
+        }
         throw new Error(error.error || "Failed to create checkout");
       }
       const data = await res.json();
@@ -51,12 +57,17 @@ export default function Dashboard() {
         window.location.href = data.url;
       }
     },
-    onError: (error: Error) => {
-      toast({
-        title: "Checkout Error",
-        description: error.message,
-        variant: "destructive",
-      });
+    onError: (error: any) => {
+      if (error.usePortal) {
+        // Automatically redirect to Customer Portal
+        createPortal.mutate();
+      } else {
+        toast({
+          title: "Checkout Error",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
     },
   });
 

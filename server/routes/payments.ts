@@ -69,6 +69,23 @@ export function registerPaymentRoutes(app: Express, generalLimiter: RateLimiter)
           console.log(`Created Stripe customer ${customerId} for user ${userId}`);
         }
 
+        // Check for existing active subscriptions
+        if (customerId) {
+          const subscriptions = await stripe.subscriptions.list({
+            customer: customerId,
+            status: "active",
+            limit: 1,
+          });
+
+          if (subscriptions.data.length > 0) {
+            console.log(`User ${userId} already has active subscription, redirecting to portal`);
+            return res.status(400).json({
+              error: "You already have an active subscription. Use 'Manage Subscription' to change your plan.",
+              usePortal: true,
+            });
+          }
+        }
+
         // Map tier + billing to Price ID from environment
         const priceIdMap: Record<string, string> = {
           premium_monthly: process.env.STRIPE_PRICE_PREMIUM_MONTHLY!,
