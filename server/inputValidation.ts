@@ -221,3 +221,8 @@ export const subscriptionSchema = z.object({
   tier: z.enum(['premium', 'family']),
   billing: z.enum(['monthly', 'yearly']),
 });
+
+export const checkoutSessionSchema = z.object({
+  tier: z.enum(["premium", "family"]),
+  billing: z.enum(["monthly", "yearly"]),
+});

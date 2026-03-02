@@ -20,6 +20,9 @@ import { Link } from "wouter";
 import { useAuth } from "@/hooks/useAuth";
 import { useState } from "react";
 import { useSEO } from "@/hooks/useSEO";
+import { useMutation } from "@tanstack/react-query";
+import { apiRequest } from "@/lib/queryClient";
+import { useEnhancedToast } from "@/components/enhanced-toast-system";
 
 interface ComparisonFeature {
   name: string;
@@ -229,6 +232,7 @@ const COMPARISON_FEATURES: ComparisonFeature[] = [
 
 export default function Pricing() {
   const { user, isAuthenticated } = useAuth();
+  const { toast } = useEnhancedToast();
 
   useSEO({
     title: "Pricing Plans - Affordable Bedtime Story Magic | Step Into Storytime",
@@ -244,32 +248,56 @@ export default function Pricing() {
   );
   const [selectedFeature, setSelectedFeature] = useState<ComparisonFeature | null>(null);
 
+  // Mutation to create checkout session
+  const createCheckout = useMutation({
+    mutationFn: async ({ tier, billing }: { tier: string; billing: string }) => {
+      const res = await apiRequest("/api/create-checkout-session", "POST", { tier, billing });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.error || "Failed to create checkout");
+      }
+      const data = await res.json();
+      return data;
+    },
+    onSuccess: (data) => {
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    },
+    onError: (error: Error) => {
+      toast({
+        title: "Checkout Error",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const handlePlanClick = (tier: string) => {
     // Don't allow clicking on coming soon tiers
     if (tier === "family") {
       return;
     }
 
-    // Always redirect to login for non-authenticated users, regardless of what isAuthenticated says
-    // This ensures we don't hit any authorization issues
-    if (!isAuthenticated || !user) {
-      // Store the intended destination and redirect to login with signup flag
-      const returnUrl =
-        tier === "free"
-          ? "/"
-          : `/subscribe?tier=${tier}&billing=${billingPeriod}`;
-
-      console.log("Redirecting non-authenticated user to login with returnUrl:", returnUrl);
-      window.location.href = `/api/login?signup=true&returnTo=${encodeURIComponent(returnUrl)}`;
+    // Handle free tier
+    if (tier === "free") {
+      if (!isAuthenticated || !user) {
+        window.location.href = "/api/login?signup=true";
+      } else {
+        window.location.href = "/dashboard";
+      }
       return;
     }
 
-    // User is authenticated, proceed to subscription
-    if (tier === "free") {
-      window.location.href = "/";
-    } else {
-      window.location.href = `/subscribe?tier=${tier}&billing=${billingPeriod}`;
+    // For paid tiers, check if user is authenticated
+    if (!isAuthenticated || !user) {
+      // Redirect to login
+      window.location.href = "/api/login?signup=true";
+      return;
     }
+
+    // User is authenticated, start checkout
+    createCheckout.mutate({ tier, billing: billingPeriod });
   };
 
   const tiers = [

@@ -1,10 +1,8 @@
-
 import type { Express } from "express";
 import Stripe from "stripe";
 import { db } from "../db";
-import { users } from "../../shared/schema";
+import { users, processedStripeEvents } from "@shared/schema";
 import { eq } from "drizzle-orm";
-import { updateUserSubscription } from "../tierManager";
 
 if (!process.env.STRIPE_SECRET_KEY) {
   throw new Error("Missing required Stripe secret: STRIPE_SECRET_KEY");
@@ -33,114 +31,175 @@ export function registerWebhookRoutes(app: Express): void {
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Check if event already processed (idempotency)
+    try {
+      const existing = await db
+        .select()
+        .from(processedStripeEvents)
+        .where(eq(processedStripeEvents.eventId, event.id))
+        .limit(1);
+
+      if (existing.length > 0) {
+        console.log(`Event ${event.id} already processed at ${existing[0].processedAt}, skipping`);
+        return res.json({ received: true });
+      }
+    } catch (error) {
+      console.error("Error checking processed events:", error);
+      // Continue processing - don't fail on idempotency check
+    }
+
     try {
       switch (event.type) {
+        case "checkout.session.completed": {
+          const session = event.data.object as Stripe.Checkout.Session;
+          const userId = session.metadata?.userId;
+          const tier = session.metadata?.tier;
+
+          if (!userId || !tier) {
+            console.warn(`Missing metadata in checkout.session.completed: userId=${userId}, tier=${tier}`);
+            break;
+          }
+
+          const subscriptionId = session.subscription as string;
+
+          await db
+            .update(users)
+            .set({
+              subscriptionTier: tier,
+              subscriptionStatus: "active",
+              stripeSubscriptionId: subscriptionId,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, userId));
+
+          console.log(`✓ Checkout complete: User ${userId} → ${tier} tier (subscription ${subscriptionId})`);
+          break;
+        }
+
         case "invoice.payment_succeeded": {
           const invoice = event.data.object as any;
+          const subscriptionId = invoice.subscription;
 
-          if (invoice.subscription && typeof invoice.subscription === 'string') {
-            const subscription = await stripe.subscriptions.retrieve(
-              invoice.subscription,
-            );
-            const customer = (await stripe.customers.retrieve(
-              subscription.customer as string,
-            )) as Stripe.Customer;
+          if (!subscriptionId || typeof subscriptionId !== 'string') break;
 
-            // Find user by Stripe customer ID
-            const userResults = await db
-              .select()
-              .from(users)
-              .where(eq(users.stripeCustomerId, customer.id));
+          const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+          const customer = await stripe.customers.retrieve(
+            subscription.customer as string
+          ) as Stripe.Customer;
 
-            if (userResults.length > 0) {
-              const user = userResults[0];
+          // Find user by customer ID
+          const userResults = await db
+            .select()
+            .from(users)
+            .where(eq(users.stripeCustomerId, customer.id))
+            .limit(1);
 
-              // Determine tier based on subscription amount
-              const priceAmount = invoice.amount_paid;
-              let tier: "premium" | "family" = "premium";
-
-              if (priceAmount >= 1299) {
-                // $12.99 or higher = family plan
-                tier = "family";
-              }
-
-              // Update user subscription tier and status
-              await updateUserSubscription(user.id, tier, subscription.status as any);
-
-              console.log(
-                `Updated user ${user.id} to ${tier} tier with status ${subscription.status}`,
-              );
-            }
+          if (userResults.length === 0) {
+            console.warn(`No user found for customer ${customer.id}`);
+            break;
           }
+
+          const user = userResults[0];
+
+          // Get tier from subscription price metadata
+          const priceMetadata = subscription.items.data[0]?.price?.metadata;
+          const tier = priceMetadata?.tier || "premium";
+
+          await db
+            .update(users)
+            .set({
+              subscriptionTier: tier,
+              subscriptionStatus: subscription.status,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          console.log(`✓ Payment succeeded: User ${user.id} → ${tier} tier (status: ${subscription.status})`);
           break;
         }
 
         case "customer.subscription.updated": {
           const subscription = event.data.object as Stripe.Subscription;
-          const customer = (await stripe.customers.retrieve(
-            subscription.customer as string,
-          )) as Stripe.Customer;
+          const customer = await stripe.customers.retrieve(
+            subscription.customer as string
+          ) as Stripe.Customer;
 
-          // Find user by Stripe customer ID
           const userResults = await db
             .select()
             .from(users)
-            .where(eq(users.stripeCustomerId, customer.id));
+            .where(eq(users.stripeCustomerId, customer.id))
+            .limit(1);
 
-          if (userResults.length > 0) {
-            const user = userResults[0];
-
-            // Determine tier based on subscription items
-            let tier: "free" | "premium" | "family" = "free";
-
-            if (
-              subscription.status === "active" ||
-              subscription.status === "trialing"
-            ) {
-              // Check the price to determine tier
-              if (subscription.items.data.length > 0) {
-                const price = subscription.items.data[0].price;
-                if (price.unit_amount && price.unit_amount >= 1299) {
-                  tier = "family";
-                } else if (price.unit_amount && price.unit_amount >= 699) {
-                  tier = "premium";
-                }
-              }
-            }
-
-            await updateUserSubscription(user.id, tier, subscription.status as any);
-            console.log(
-              `Updated user ${user.id} subscription: ${tier} tier, status ${subscription.status}`,
-            );
+          if (userResults.length === 0) {
+            console.warn(`No user found for customer ${customer.id}`);
+            break;
           }
+
+          const user = userResults[0];
+
+          // Determine tier from subscription
+          let tier: string = "free";
+          if (subscription.status === "active" || subscription.status === "trialing") {
+            const priceMetadata = subscription.items.data[0]?.price?.metadata;
+            tier = priceMetadata?.tier || "premium";
+          }
+
+          await db
+            .update(users)
+            .set({
+              subscriptionTier: tier,
+              subscriptionStatus: subscription.status,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          console.log(`✓ Subscription updated: User ${user.id} → ${tier} tier (status: ${subscription.status})`);
           break;
         }
 
         case "customer.subscription.deleted": {
           const subscription = event.data.object as Stripe.Subscription;
-          const customer = (await stripe.customers.retrieve(
-            subscription.customer as string,
-          )) as Stripe.Customer;
+          const customer = await stripe.customers.retrieve(
+            subscription.customer as string
+          ) as Stripe.Customer;
 
-          // Find user by Stripe customer ID
           const userResults = await db
             .select()
             .from(users)
-            .where(eq(users.stripeCustomerId, customer.id));
+            .where(eq(users.stripeCustomerId, customer.id))
+            .limit(1);
 
-          if (userResults.length > 0) {
-            const user = userResults[0];
-            await updateUserSubscription(user.id, "free", "canceled");
-            console.log(
-              `Downgraded user ${user.id} to free tier (subscription canceled)`,
-            );
+          if (userResults.length === 0) {
+            console.warn(`No user found for customer ${customer.id}`);
+            break;
           }
+
+          const user = userResults[0];
+
+          await db
+            .update(users)
+            .set({
+              subscriptionTier: "free",
+              subscriptionStatus: "canceled",
+              stripeSubscriptionId: null,
+              updatedAt: new Date(),
+            })
+            .where(eq(users.id, user.id));
+
+          console.log(`✓ Subscription deleted: User ${user.id} → free tier`);
           break;
         }
 
         default:
           console.log(`Unhandled event type: ${event.type}`);
       }
+
+      // Mark event as processed
+      await db.insert(processedStripeEvents).values({
+        eventId: event.id,
+        eventType: event.type,
+      });
+
     } catch (error) {
       console.error("Error processing webhook:", error);
       return res.status(500).send("Webhook processing failed");

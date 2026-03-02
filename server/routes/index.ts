@@ -25,7 +25,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   registerAuthRoutes(app);
   registerStoryRoutes(app, storyGenerationLimiter, generalLimiter);
   registerFavoriteRoutes(app);
-  registerPaymentRoutes(app);
+  registerPaymentRoutes(app, generalLimiter);
   registerWebhookRoutes(app);
   registerCharacterRoutes(app, generalLimiter);
 

@@ -27,7 +27,7 @@ export function useTierInfo() {
   return useQuery({
     queryKey: ["/api/user/tier-info"],
     queryFn: getQueryFn<TierInfo>({ on401: "returnNull" }),
-    staleTime: 5 * 60 * 1000, // 5 minutes
+    staleTime: 30000, // 30 seconds
     refetchOnWindowFocus: false,
   });
 }
