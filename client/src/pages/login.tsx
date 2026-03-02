@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useQueryClient } from "@tanstack/react-query";
 
 const signInSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -31,6 +32,7 @@ export default function Login() {
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const { isAuthenticated } = useAuth();
+  const queryClient = useQueryClient();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
 
   useEffect(() => {
@@ -69,6 +71,8 @@ export default function Login() {
         if (result.error) {
           toast({ title: "Sign in failed", description: result.error.message, variant: "destructive" });
         } else {
+          // Invalidate auth query to refetch user data
+          await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
           navigate("/");
         }
       } else {
@@ -77,6 +81,8 @@ export default function Login() {
         if (result.error) {
           toast({ title: "Sign up failed", description: result.error.message, variant: "destructive" });
         } else {
+          // Invalidate auth query to refetch user data
+          await queryClient.invalidateQueries({ queryKey: ["/api/me"] });
           navigate("/");
         }
       }
